@@ -89,15 +89,16 @@ Your contributions are valued and will be reviewed promptly.
 
 SCOUT is available under a custom license with the following terms:
 
-- **Non-Commercial Use**: SCOUT can only be used for personal, non-commercial, and non-research purposes unless a commercial or research license is obtained from Digital Hallucinations.
+- **Non-Commercial Use**: SCOUT can only be used for personal and research purposes unless a commercial license is obtained from Digital Hallucinations.
 - **Modification**: Modifications to the SCOUT codebase are encouraged, but the modified code must be submitted as a pull request and accepted by the SCOUT development team before it can be used.
-- **Custom Deployments**: Custom deployments, commercial use, and research use of SCOUT can be arranged by obtaining a license from Digital Hallucinations.
-- **Personal Use**: SCOUT can be used for personal, non-commercial, and non-research purposes under the following restrictions:
+- **Custom Deployments**: Custom deployments and commercial use of SCOUT can be arranged by obtaining a license from Digital Hallucinations.
+- **Personal and Research Use**: SCOUT can be used for personal and research purposes under the following restrictions:
   - The SCOUT application and its components cannot be redistributed or shared publicly.
   - The SCOUT application and its components cannot be used to create derivative works or commercial products without prior approval from Digital Hallucinations.
   - The SCOUT application and its components must be used in accordance with the project's documentation and guidelines.
 
-The full license details and terms will be provided in the project's `LICENSE` file. Users interested in commercial use, research use, or custom deployments should contact the Digital Hallucinations team to discuss licensing options.
+The full license details and terms will be provided in the project's `LICENSE` file. Users interested in commercial use or custom deployments should contact the Digital Hallucinations team to discuss licensing options.
+
 
 ---
 

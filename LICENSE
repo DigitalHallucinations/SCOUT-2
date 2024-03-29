@@ -4,19 +4,19 @@ Copyright (c) 2023 Digital Hallucinations
 
 This is a custom license for the SCOUT project, with the following terms:
 
-1. Non-Commercial and Non-Research Use:
-   - SCOUT can only be used for personal, non-commercial, and non-research purposes unless a commercial or research license is obtained from Digital Hallucinations.
+1. Non-Commercial Use:
+   - SCOUT can only be used for personal and research purposes unless a commercial license is obtained from Digital Hallucinations.
    - The SCOUT application and its components cannot be used to create derivative works or commercial products without prior approval from Digital Hallucinations.
 
 2. Modification:
    - Modifications to the SCOUT codebase are encouraged, but the modified code must be submitted as a pull request and accepted by the SCOUT development team before it can be used.
 
-3. Custom Deployments, Commercial Use, and Research Use:
-   - Custom deployments, commercial use, and research use of SCOUT can be arranged by obtaining a license from Digital Hallucinations.
+3. Custom Deployments and Commercial Use:
+   - Custom deployments and commercial use of SCOUT can be arranged by obtaining a license from Digital Hallucinations.
    - Users interested in these use cases should contact the Digital Hallucinations team to discuss licensing options.
 
-4. Personal Use:
-   - SCOUT can be used for personal, non-commercial, and non-research purposes under the following restrictions:
+4. Personal and Research Use:
+   - SCOUT can be used for personal and research purposes under the following restrictions:
      - The SCOUT application and its components cannot be redistributed or shared publicly.
      - The SCOUT application and its components must be used in accordance with the project's documentation and guidelines.
 
@@ -26,4 +26,4 @@ This is a custom license for the SCOUT project, with the following terms:
 
 By using SCOUT, you agree to the terms and conditions of this custom license. If you do not agree with these terms, you are not permitted to use SCOUT.
 
-For any questions or inquiries, please contact Digital Hallucinations at [contact information].
+For any questions or inquiries, please contact Digital Hallucinations.

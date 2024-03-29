@@ -1,0 +1,11 @@
+{
+    "models": [
+        "microsoft/DialoGPT-large",
+        "microsoft/DialoGPT-medium",
+        "microsoft/DialoGPT-small",
+        "microsoft/DialoGPT-medium-joshua",
+        "microsoft/DialoGPT-small-joshua",
+        "microsoft/DialoGPT-large-joshua"
+    ]
+  }
+  

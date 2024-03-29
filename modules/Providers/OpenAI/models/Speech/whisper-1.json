@@ -1,0 +1,69 @@
+{
+    "model_card": {
+      "name": "whisper-1",
+      "model_information": {
+        "version": "1",
+        "description": "Whisper-1 is part of OpenAI's Whisper series, a state-of-the-art speech recognition system designed to accurately transcribe and translate spoken language into text. The model is trained on a diverse set of languages and dialects, making it highly versatile for various audio processing tasks.",
+        "release_date": "2023"
+      },
+      "specifications": {
+        "capabilities": "Whisper-1 excels in transcribing audio to text with high accuracy across multiple languages and noisy environments. It supports audio translation into English, providing a bridge for understanding non-English content. Additionally, the model can generate detailed transcriptions that include punctuation, capitalization, and speaker diarization.",
+        "limitations": "While Whisper-1 covers a broad spectrum of languages, transcription accuracy can vary depending on the audio quality, speaker accents, and background noise. The model's performance is also subject to the limitations of its training data, potentially affecting its ability to transcribe less common languages or dialects.",
+        "input_format": "Audio files in supported formats (e.g., flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm).",
+        "output_format": "Text, with options for json, text, srt, verbose_json, or vtt formats for transcription outputs.",
+        "parameters": {
+          "file": "The audio file to be processed.",
+          "model": "Set to 'whisper-1' for utilizing this specific model version.",
+          "language": "Optional parameter to specify the language of the audio for improved transcription accuracy. If not specified, the model attempts to auto-detect the language.",
+          "prompt": "Optional text to guide the model's understanding or continuation of audio content.",
+          "response_format": "Specifies the format of the transcript output, such as json, text, srt, verbose_json, or vtt.",
+          "temperature": "Adjusts the randomness of the transcription output. A higher temperature may result in more varied transcriptions."
+        },
+        "pricing": "TTS $0.006 / minute (rounded to the nearest second)"
+      },
+      "performance_metrics": {
+        "efficiency": "Designed for quick processing of audio files, Whisper-1 can deliver transcriptions in real-time or near-real-time depending on the length of the audio.",
+        "accuracy": "Features high transcription accuracy, including the ability to handle various accents, dialects, and audio with background noise."
+      },
+      "ethical_considerations": {
+        "bias": "OpenAI has implemented measures to minimize biases in transcription and translation. However, users should be aware of potential biases and the importance of context in interpreting transcriptions.",
+        "use_cases": "Ideal for a wide range of applications, including content accessibility, media analysis, language learning tools, and cross-lingual communication platforms."
+      },
+      "integration_guide": {
+        "create_transcription": {
+          "endpoint": "https://api.openai.com/v1/audio/transcriptions",
+          "authentication": "Bearer token",
+          "example_request": {
+            "file": "@/path/to/file/audio.mp3",
+            "model": "whisper-1",
+            "language": "en",
+            "response_format": "json"
+          },
+          "example_response": {
+            "text": "Imagine the wildest idea that you've ever had, and you're curious about how it might scale to something that's a 100, a 1,000 times bigger. This is a place where you can get to do that."
+          }
+        },
+        "create_translation": {
+          "endpoint": "https://api.openai.com/v1/audio/translations",
+          "authentication": "Bearer token",
+          "example_request": {
+            "file": "@/path/to/file/german.m4a",
+            "model": "whisper-1",
+            "response_format": "json"
+          },
+          "example_response": {
+            "text": "Hello, my name is Wolfgang and I come from Germany. Where are you heading today?"
+          }
+        }
+      },
+      "versioning_and_updates": {
+        "update_policy": "OpenAI is committed to continually updating the Whisper model series, focusing on expanding language support, enhancing transcription accuracy, and improving usability.",
+        "changelog": "Initial release, with ongoing updates for new features and improvements."
+      },
+      "support_and_community": {
+        "documentation": "Full documentation and API reference are available on OpenAI's official website, providing detailed guidance on integrating and utilizing the Whisper-1 model.",
+        "community": "Developers and researchers can engage with the OpenAI community through forums and discussion groups to share insights, challenges, and best practices related to Whisper-1 and other AI models."
+      }
+    }
+  }
+  

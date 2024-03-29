@@ -1,0 +1,60 @@
+{
+  "model_information": {
+    "name": "text-embedding-ada-002",
+    "version": "ada-002",
+    "description": "A versatile and efficient model for generating numerical representations of text for tasks such as text search, similarity, and code search.",
+    "release_date": "2022-12-15"
+  },
+  "specifications": {
+    "capabilities": "Generates embeddings for various applications including content personalization, recommendation, and search functionalities.",
+    "limitations": "Does not outperform text-similarity-davinci-001 in SentEval linear probing classification benchmarks.",
+    "input_format": "Text or code snippets.",
+    "output_format": "Numerical embeddings in a vector format.",
+    "parameters": {
+      "input": "Example text or code snippet."
+    },
+    "pricing": "Emeddings $0.00010 / 1K tokens"
+  },
+  "performance_metrics": {
+    "accuracy": "Outperforms previous models in text search, code search, and sentence similarity tasks.",
+    "efficiency": "Features a smaller embedding size of 1536 dimensions and longer context length up to 8192 tokens for enhanced performance.",
+    "scalability": "Reduced computational and storage requirements due to smaller embedding size and cost reduction."
+  },
+  "ethical_considerations": {
+    "bias": "Like all models, it may replicate biases present in its training data.",
+    "use_cases": "Optimal for applications requiring understanding of textual or code similarity and search functionalities.",
+    "data_source": "Trained on a diverse set of internet texts and code repositories."
+  },
+  "integration_guide": {
+    "endpoint": "https://api.openai.com/v1/embeddings",
+    "authentication": "Bearer token",
+    "example_request": {
+      "input": "Example text",
+      "model": "text-embedding-ada-002"
+    },
+    "example_response": {
+      "data": [
+        {
+          "embedding": [
+            -0.0108,
+            -0.0107,
+            0.0323
+          ],
+          "index": 0,
+          "object": "embedding"
+        }
+      ],
+      "model": "text-embedding-ada-002",
+      "object": "list"
+    }
+  },
+  "versioning_and_updates": {
+    "update_policy": "Updates will be announced as new improvements are made.",
+    "changelog": "Introduced as a more capable, cost-effective replacement for five previous models with enhanced performance and efficiency."
+  },
+  "support_and_community": {
+    "documentation": "https://openai.com/api/",
+    "community": "https://community.openai.com/",
+    "contact": "support@openai.com"
+  }
+}

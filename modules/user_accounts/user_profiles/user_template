@@ -1,0 +1,22 @@
+{
+    "Username": "",
+    "Full Name": "",
+    "Age": "",
+    "DOB": "",
+    "Interests": {
+        "Content": [
+            "",
+            "",
+            ""
+        ],
+        "obsevations": ""
+    },
+    "Location": {
+        "Content": "",
+        "obsevations": ""
+    },
+    "Occupation": {
+        "Content": "",
+        "obsevations": ""
+    }
+}

@@ -1,0 +1,46 @@
+{
+    "model_information": {
+      "name": "gpt-3.5-turbo-instruct-0914",
+      "version": "0914",
+      "description": "An advanced instruction-following model that combines the efficiency of GPT-3.5 Turbo with enhanced chat optimization for precise and concise instruction execution.",
+      "release_date": "2023"
+    },
+    "specifications": {
+      "capabilities": "Designed for giving specific instructions efficiently, excelling in directly answering questions and completing text tasks swiftly. It is optimized for scenarios that demand accuracy and clarity, providing precise responses.",
+      "limitations": "While it is highly efficient in instruction-based tasks, its conversational abilities are more focused and less broad compared to other models not specifically optimized for instructions.",
+      "input_format": "Text",
+      "output_format": "Text",
+      "parameters": {
+        "context_window": "4K tokens",
+        "training_data_cutoff": "Up to September 2021"
+      },
+      "pricing": "Text input $0.0015 / 1K tokens Text output - $0.0020 / 1K tokens."
+    },
+    "performance_metrics": {
+      "efficiency": "Maintains the same performance level as other GPT-3.5 models within a 4K context window, designed to be cost-effective.",
+      "focus": "Provides more task-oriented and less conversational outputs compared to its predecessors, aiming for direct and efficient instruction following."
+    },
+    "ethical_considerations": {
+      "bias": "As with all AI models, there is a potential for reproducing biases present in the training data.",
+      "use_cases": "Suited for applications requiring precise instruction following, such as customer support, content generation, data analysis, educational tools, and more."
+    },
+    "integration_guide": {
+      "endpoint": "https://api.openai.com/v1/completions",
+      "authentication": "Bearer token",
+      "example_request": {
+        "model": "gpt-3.5-turbo-instruct-0914",
+        "prompt": "Explain the significance of quantum computing in cryptography.",
+        "max_tokens": 1024,
+        "temperature": 0.7
+      }
+    },
+    "versioning_and_updates": {
+      "update_policy": "Updates and improvements are continuously made based on user feedback and advancements in AI research.",
+      "changelog": "Introduced as an enhancement over previous instruction models with a focus on efficiency and precision in instruction execution."
+    },
+    "support_and_community": {
+      "documentation": "For more detailed information, visit OpenAI's official documentation.",
+      "community": "Engage with other developers and users on the OpenAI Community Forum for discussions and support."
+    }
+  }
+  

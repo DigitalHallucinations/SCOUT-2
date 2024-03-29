@@ -1,0 +1,63 @@
+{
+  "model_card": {
+    "name": "text-embedding-3-small",
+      "model_information": {
+        "provider": "OpenAI",
+        "Family": "embedding",
+        "Class": "small",  
+        "version": "3",
+        "modality": "text",
+        "description": "A highly efficient embedding model designed to provide significant upgrades in performance for natural language processing tasks. It marks a substantial improvement over its predecessor, text-embedding-ada-002, particularly in multi-language retrieval and English task benchmarks.",
+        "release_date": "January 25, 2024",
+        "context_window": "unknown",
+        "training_data_cutoff_date": "unknown",
+        "pricing": "$0.00002 per 1K tokens"
+      },
+      "integration_guide": {
+        "endpoint": "https://api.openai.com/v1/embeddings",
+        "authentication": "Bearer token",
+        "example_request": {
+          "input": "Example text",
+          "model": "text-embedding-3-small"
+        },
+        "example_response": {
+          "data": [
+            {
+              "embedding": [
+                "Numeric vector representation"
+              ],
+              "index": 0,
+              "object": "embedding"
+            }
+          ],
+          "model": "text-embedding-3-small",
+          "object": "list"
+        }
+      },
+      "specifications": {
+        "capabilities": "Enhanced performance in multi-language retrieval and English tasks, with a notable improvement in benchmark scores. It is designed for a variety of applications including search, clustering, recommendations, anomaly detection, diversity measurement, and classification.",
+        "limitations": "While it offers improved performance and reduced pricing, specific comparison metrics against other models like text-similarity-davinci-001 on certain benchmarks should be considered for optimal use.",
+        "input_format": "Text",
+        "output_format": "Numerical embeddings",
+        "parameters": {
+          "embedding_size": "Supports customization of embedding dimensions for flexible usage."
+        }
+      },
+      "performance_metrics": {
+        "MIRACL_average": "Increased from 31.4% to 44.0%",
+        "MTEB_average": "Increased from 61.0% to 62.3%"
+      },
+      "ethical_considerations": {
+        "bias": "As with all models, potential to replicate biases present in training data. It's vital to monitor and mitigate these biases in application development.",
+        "use_cases": "Ideal for developers and applications requiring efficient and powerful text embedding capabilities for a variety of NLP tasks."
+      },
+      "versioning_and_updates": {
+        "update_policy": "Future updates will focus on enhancing the model's capabilities, performance, and efficiency. The model's pricing and features are subject to change as newer versions are released.",
+        "changelog": "Introduced major improvements over text-embedding-ada-002, including performance boosts in benchmarks, reduced embedding size, and lower pricing."
+      },
+      "support_and_community": {
+        "documentation": "Detailed documentation and guides available on OpenAI's official website.",
+        "community": "An active community for sharing insights, asking questions, and exploring the potential of text-embedding-3-small."
+      }
+    }
+  }

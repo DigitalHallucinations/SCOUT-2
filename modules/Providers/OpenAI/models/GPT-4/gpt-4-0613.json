@@ -1,0 +1,71 @@
+{
+  "model_card": {
+    "name": "gpt-4-0613",
+    "model_information": {
+      "provider": "OpenAI",
+      "type": "GPT",
+      "modality": "text",
+      "version": "4-0613",
+      "description": "Snapshot of the GPT-4 model from June 13th, 2023, featuring enhanced capabilities including improved function calling support. This version represents a step forward in AI's ability to interact with and execute functions based on user inputs, making it a versatile tool for developers looking to integrate AI into applications requiring dynamic responses and interactions.",
+      "release_date": "2023"
+    },
+    "specifications": {
+      "capabilities": "GPT-4-0613 introduces enhanced natural language understanding and generation, with particular improvements in function calling. This allows the model to more reliably output JSON objects containing arguments to call specific functions, facilitating seamless integration with external tools and APIs.",
+      "limitations": "As with all AI models, gpt-4-0613's accuracy and relevance of responses can vary depending on the input context and complexity. Users may need to fine-tune prompts to achieve desired outcomes in specific scenarios.",
+      "input_format": "Text",
+      "output_format": "Text, with the ability to generate structured JSON outputs for function calling",
+      "parameters": {
+        "context_window": "8192 tokens, allowing for broad context understanding.",
+        "function_calling": "Enhanced to intelligently detect when and which function to call, based on user input."
+      }
+    },
+    "performance_metrics": {
+      "efficiency": "GPT-4-0613 maintains high efficiency in processing requests, with improved function calling capabilities enhancing its utility in practical applications.",
+      "adaptability": "The model demonstrates increased adaptability, especially in scenarios requiring interaction with external systems or data through function calls."
+    },
+    "ethical_considerations": {
+      "bias": "While efforts have been made to reduce bias, the potential for biased outputs remains, necessitating careful monitoring and adjustment by users.",
+      "use_cases": "Ideal for a wide range of applications, from dynamic web applications requiring real-time AI interaction to complex data analysis and automation tasks."
+    },
+    "integration_guide": {
+      "create_chat_completion": {
+        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "authentication": "Bearer token",
+        "example_request": {
+          "model": "gpt-4-0613",
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a helpful assistant capable of calling functions."
+            },
+            {
+              "role": "user",
+              "content": "How can I use function calling in my application?"
+            }
+          ],
+          "temperature": 0.7,
+          "max_tokens": 512,
+          "top_p": 0.95,
+          "function_calling": "true"
+        },
+        "example_response": {
+          "id": "chatcmpl-4567",
+          "choices": [{
+            "message": {
+              "role": "assistant",
+              "content": "You can describe the function you want to call within your prompt. Here's how to structure it..."
+            }
+          }]
+        }
+      }
+    },
+    "versioning_and_updates": {
+      "update_policy": "OpenAI regularly updates its models to enhance capabilities and performance. Users of gpt-4-0613 will be notified in advance of any updates or changes.",
+      "changelog": "Introduction of improved function calling capabilities, providing a new level of interaction and utility."
+    },
+    "support_and_community": {
+      "documentation": "Detailed documentation is available on OpenAI's official website, offering comprehensive guidance on leveraging the model's capabilities.",
+      "community": "Users can engage with OpenAI's community through forums and discussion groups to share experiences, challenges, and solutions related to gpt-4-0613 and other models."
+    }
+  }
+}

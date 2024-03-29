@@ -1,0 +1,102 @@
+[
+    {
+        "name": "get_item",
+        "description": "Get details about an item by its ID",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "item_id": {
+                    "type": "integer",
+                    "description": "ID of the item"
+                }
+            },
+            "required": ["item_id"]
+        }
+    },
+    {
+        "name": "get_user",
+        "description": "Get public information about a user by their username",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "description": "Username of the user"
+                }
+            },
+            "required": ["username"]
+        }
+    },
+    {
+        "name": "get_max_item_id",
+        "description": "Get the ID of the most recently created item",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_top_stories",
+        "description": "Get a list of IDs for the current top stories",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_new_stories",
+        "description": "Get a list of IDs for the newest stories",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_best_stories",
+        "description": "Get a list of IDs for the current best stories",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_ask_stories",
+        "description": "Get a list of IDs for the current Ask HN stories",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_show_stories",
+        "description": "Get a list of IDs for the current Show HN stories",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_job_stories",
+        "description": "Get a list of IDs for the current job stories",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_updates",
+        "description": "Get recent item and profile changes",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    }
+]

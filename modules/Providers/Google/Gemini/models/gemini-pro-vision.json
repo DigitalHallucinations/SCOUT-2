@@ -1,0 +1,151 @@
+{
+    "model_card": {
+      "name": "gemini-pro-vision",
+      "model_information": {
+        "provider": "Google",
+        "family": "Gemnini",
+        "class": "pro",
+        "modality": "text, (image and video with vision models only)",
+        "family version": "1",
+        "description": "Gemini Pro vision is a scalable and general-purpose AI model that is part of Google's Gemini, their 'largest and most capable AI model'. Gemini Pro is designed to handle various types of information across text, code, images, and video, supporting a wide range of tasks such as summarizing texts, answering questions, and generating content. It is optimized for efficiency and flexibility, capable of running on everything from data centers to mobile devices.",
+        "sub-models": "gemini-1.0-pro-vision-latest, gemini-pro-vision",
+        "release_date": "pro: 12-13-2023 - pro-1.0: 2-15-2024"
+      },
+      "integration_guide": {
+        "general_usage": {
+          "endpoint": "Available on Vertex AI",
+          "authentication": "Bearer token or API key as required by the provider",
+          "generation_method": "generateMessage",
+          "example_request": {
+            "model": "gemini-pro-vision, gemini-pro-vision-latest",
+            "contents": [
+              {
+                "role": "string: user",
+                "parts": [
+                  {
+                    "text": "string: system message + messages",
+                    "inlineData": {
+                      "mimeType": "string - Supported types - (image/png, image/jpeg, video/mov, video/mpeg, video/mp4, video/mpg, video/avi, video/wmv, video/mpegps, video/flv)",
+                      "data": "Base64 encoding if not using URI"
+                    },
+                    "fileData": {
+                      "mimeType": "string - Supported types - (image/png, image/jpeg, video/mov, video/mpeg, video/mp4, video/mpg, video/avi, video/wmv, video/mpegps, video/flv)",
+                      "fileUri": " Cloud Storage URI of the image or video in storage bucket of the Google Cloud project that's sending the reques"
+                    },
+                    "video_metadata": {
+                      "start_offset": {
+                        "seconds": "integer",
+                        "nanos": "integer"
+                      },
+                      "end_offset": {
+                        "seconds": "integer",
+                        "nanos": "integer"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "tools": [
+              {
+                "function_declarations": [
+                  {
+                    "name": "string - name of tool",
+                    "description": "string - description of tool",
+                    "parameters": "{} - json description"
+                  }
+                ]
+              }
+            ],
+            "safety_Settings": [
+              {
+                "category": "enum",
+                "threshold": "enum"
+              }
+            ],
+            "generation_config": {
+              "temperature": 0.25,
+              "topP": 0.95,
+              "topK": 40,
+              "candidate_count": "integer",
+              "maxOutput_tokens": "integer",
+              "stop_sequences": ["string"]
+            }
+          },
+          "model_response": {
+            "candidates": [
+              {
+                "content": {
+                  "parts": [
+                    {
+                      "text": "Model response"
+                    }
+                  ]
+                },
+                "finish_reason": "enum (Finish_reason)",
+                "safety_ratings": [
+                  {
+                    "category": "enum (Harm_category)",
+                    "probability": "enum (Harm_probability)",
+                    "blocked": "boolean"
+                  }
+                ],
+                "citation_metadata": {
+                  "citations": [
+                    {
+                      "start_index": "integer",
+                      "end_index": "integer",
+                      "uri": "string",
+                      "title": "string",
+                      "license": "string",
+                      "publication_date": {
+                        "year": "integer",
+                        "month": "integer",
+                        "day": "integer"
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage_metadata": {
+              "prompt_tokenCount": "integer",
+              "candidates_tokenCount": "integer",
+              "total_tokenCount": "integer"
+            }
+          }
+        }
+      },
+      "specifications": {
+        "capabilities": "Gemini Pro vision can perform tasks such as summarization, question answering, classification, sentiment analysis, entity extraction, and content creation across different data types including text, code, images, and video.",
+        "limitations": "Specific limitations were not detailed, but as with any AI model, performance may vary based on task complexity and the nature of the input data.",
+        "input_format": "Text, image, video",
+        "output_format": "Text",
+        "input_token_limit": "30,720",
+        "output_token_limit": "2048",
+        "supported_generation_methods": [
+          "generateMessage"
+        ],
+        "temperature": 0.25,
+        "top_p": 0.95,
+        "top_k": 40
+      },
+      "performance_metrics": {
+        "efficiency": "Gemini Pro is designed for high efficiency, capable of rapid response generation which makes it suitable for real-time applications.",
+        "adaptability": "It is highly adaptable, capable of handling a broad spectrum of tasks across various domains."
+      },
+      "ethical_considerations": {
+        "bias": "While Google has made efforts to mitigate bias, users are encouraged to be vigilant and critically evaluate outputs.",
+        "use_cases": "Gemini Pro is suitable for a wide range of applications, including but not limited to, summarization, content generation, and question answering across various domains."
+      },
+      "versioning_and_updates": {
+        "update_policy": "Google plans to regularly update Gemini Pro, focusing on enhancing its capabilities and performance.",
+        "changelog": "Not specified"
+      },
+      "support_and_community": {
+        "documentation": "Detailed documentation and guides for Gemini Pro are available through Google's official resources, including how to integrate and utilize the model effectively.",
+        "community": "Developers and users can engage with Google's community through forums and discussion groups to share insights and best practices related to Gemini Pro."
+      }
+    }
+  }
+  

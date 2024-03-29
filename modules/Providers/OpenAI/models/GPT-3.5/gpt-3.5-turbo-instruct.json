@@ -1,0 +1,80 @@
+{
+  "model_card": {
+    "name": "gpt-3.5-turbo-instruct",
+      "model_information": {
+        "privder": "OpenAI",
+        "type": "GPT",
+        "modality": "text, image", 
+        "version": "turbo-instruct",
+        "description": "An advanced instruction-following model that combines the efficiency of GPT-3.5 Turbo with enhanced capabilities for executing specific instructions with high accuracy and reduced toxicity.",
+        "release_date": "2023"
+    },
+    "specifications": {
+      "capabilities": "Designed to interpret and execute instructions seamlessly, providing coherent and contextually relevant responses for a broad range of applications. It is a refined version of GPT-3, employing reinforcement learning from human feedback (RLHF) for improved accuracy and safety.",
+      "limitations": "While it excels in instruction-following tasks, its conversational abilities are more focused and may not be as broad as other models not specifically optimized for instructions.",
+      "input_format": "Text",
+      "output_format": "Text",
+      "parameters": {
+        "context_window": "4K tokens",
+        "training_data_cutoff": "September 2021"
+      },
+      "pricing": "text input $0.0005 / 1K tokens and output $0.0020 / 1K tokens"
+    },
+    "performance_metrics": {
+      "efficiency": "Maintains the same performance level as other GPT-3.5 models within a 4K context window, designed to be cost-effective.",
+      "adaptability": "Highly adaptable to a wide range of instruction-following tasks, with enhanced capabilities for direct answers and text completion."
+    },
+    "ethical_considerations": {
+      "bias": "Employs techniques to reduce incorrect or harmful outputs, but like all AI models, may still replicate biases present in its training data.",
+      "use_cases": "Ideal for applications demanding precise execution of instructions, including content generation, data analysis, educational tools, and more."
+    },
+    "integration_guide": {
+      "endpoint": "https://api.openai.com/v1/completions",
+      "authentication": "Bearer token",
+      "example_request": {
+        "model": "gpt-3.5-turbo-instruct",
+        "prompt": "Summarize the ...",
+        "max_tokens": 1024,
+        "temperature": 0.7,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "stop": ["\n"],
+        "n": 1,
+        "stream": false,
+        "logprobs": null,
+        "echo": false,
+        "best_of": 1,
+        "user": "user-id-1234"
+      },
+      "example_response": {
+        "id": "example-id",
+        "object": "text_completion",
+        "created": 1234567890,
+        "model": "gpt-3.5-turbo-instruct",
+        "choices": [
+          {
+            "text": "Imagine if you had ...",
+            "index": 0,
+            "logprobs": null,
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 15,
+          "total_tokens": 25
+        }
+      }
+      
+    },
+    "versioning_and_updates": {
+      "update_policy": "Continuous improvements based on user feedback and advancements in AI research.",
+      "changelog": "Introduced to enhance instruction-following capabilities with a focus on accuracy, efficiency, and reduced toxicity."
+    },
+    "support_and_community": {
+      "documentation": "For more detailed information, visit OpenAI's official documentation.",
+      "community": "Engage with other developers and users on the OpenAI Community Forum for support and discussions."
+    }
+  }
+}  

@@ -1,0 +1,112 @@
+[
+    {
+        "name": "get_everything",
+        "description": "Get news articles and blog posts based on a wide range of parameters",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "q": {
+                    "type": "string",
+                    "description": "Keywords or phrases to search for"
+                },
+                "searchIn": {
+                    "type": "string",
+                    "description": "Search within the title, body, or both"
+                },
+                "sources": {
+                    "type": "string",
+                    "description": "A comma-separated string of identifiers for the news sources or blogs you want headlines from"
+                },
+                "domains": {
+                    "type": "string",
+                    "description": "A comma-separated string of domains to restrict the search to"
+                },
+                "excludeDomains": {
+                    "type": "string",
+                    "description": "A comma-separated string of domains to exclude from the search"
+                },
+                "from": {
+                    "type": "string",
+                    "description": "A date and optional time for the oldest article allowed"
+                },
+                "to": {
+                    "type": "string",
+                    "description": "A date and optional time for the newest article allowed"
+                },
+                "language": {
+                    "type": "string",
+                    "description": "The language to restrict articles to"
+                },
+                "sortBy": {
+                    "type": "string",
+                    "description": "The order to sort the articles in"
+                },
+                "pageSize": {
+                    "type": "number",
+                    "description": "The number of results to return per page"
+                },
+                "page": {
+                    "type": "number",
+                    "description": "The page number to return"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "get_top_headlines",
+        "description": "Get top headlines from a specific country, category, source, or based on a keyword",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string",
+                    "description": "The country to restrict articles to"
+                },
+                "category": {
+                    "type": "string",
+                    "description": "The category to restrict articles to"
+                },
+                "sources": {
+                    "type": "string",
+                    "description": "A comma-separated string of identifiers for the news sources or blogs you want headlines from"
+                },
+                "q": {
+                    "type": "string",
+                    "description": "Keywords or phrases to search for in the article title and body"
+                },
+                "pageSize": {
+                    "type": "number",
+                    "description": "The number of results to return per page"
+                },
+                "page": {
+                    "type": "number",
+                    "description": "The page number to return"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "get_sources",
+        "description": "Get details about all the sources or just the ones that match the specified criteria",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "description": "Find sources that are classified as a specific category"
+                },
+                "language": {
+                    "type": "string",
+                    "description": "Find sources that write in a specific language"
+                },
+                "country": {
+                    "type": "string",
+                    "description": "Find sources from a specific country"
+                }
+            },
+            "required": []
+        }
+    }
+]

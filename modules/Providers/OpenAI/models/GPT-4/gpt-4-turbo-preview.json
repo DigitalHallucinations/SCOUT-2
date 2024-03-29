@@ -1,0 +1,97 @@
+{
+"model_card": {
+  "name": "gpt-4-turbo-preview",
+    "model_information": {
+      "privder": "OpenAI",
+      "type": "GPT",
+      "modality": "text, image", 
+      "version": "4-turbo-preview",
+      "description": "A preview version of OpenAI's GPT-4 model, offering a sneak peek into the next generation of AI language capabilities. The gpt-4-1106-preview is designed to provide advanced understanding, generation, and reasoning abilities, surpassing its predecessors in terms of linguistic understanding and versatility.",
+      "release_date": "2023"
+    },
+    "specifications": {
+      "capabilities": "Enhanced natural language processing, improved comprehension, and text generation abilities. Introduces breakthroughs in reasoning, context understanding, and nuanced response generation. Equipped with a deeper understanding of context, it can handle more complex instructions and provide more accurate, detailed responses.",
+      "limitations": "As a preview version, it may not represent the final capabilities of GPT-4. Users might experience limitations in certain advanced features or encounter scenarios where the model's responses could be improved.",
+      "input_format": "Text",
+      "output_format": "Text",
+      "parameters": {
+        "context_window": "Increased token limit for broader context understanding",
+        "training_data_cutoff": "Incorporates data up to a more recent cutoff date than previous models"
+      },
+      "pricing": "text input $0.01 per 1K tokens and output $0.03 per 1K tokens"
+    },
+    "performance_metrics": {
+      "efficiency": "While maintaining efficiency, it offers significant advancements in processing complex queries and generating responses.",
+      "adaptability": "Demonstrates a higher degree of adaptability to various text-based tasks, setting a new standard for AI-driven linguistic applications."
+    },
+    "ethical_considerations": {
+      "bias": "Incorporates the latest techniques to mitigate bias and ensure ethical use, yet it is crucial for users to remain vigilant and review outputs.",
+      "use_cases": "Geared towards a broad spectrum of applications, from content creation and summarization to complex problem-solving and conversational AI."
+    },
+    "integration_guide": {
+      "create_chat_completion": {
+        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "authentication": "Bearer token",
+        "example_request": {
+          "model": "gpt-4-turbo-preview",
+          "messages": [
+            {
+              "role": "system",
+              "content": "System Prompt"
+            },
+            {
+              "role": "user",
+              "content": "Text input"
+            }
+          ],
+          "frequency_penalty": 0,
+          "logit_bias": null,
+          "logprobs": false,
+          "max_tokens": 512,
+          "n": 1,
+          "presence_penalty": 0,
+          "response_format": {
+            "type": "json_object"
+          },
+          "seed": null,
+          "stop": null,
+          "stream": false,
+          "temperature": 1,
+          "top_p": 1,
+          "functions": [],
+          "function_call": "none",
+          "user": "user-id-1234"
+        },
+        "example_response": {
+          "id": "chatcmpl-123",
+          "object": "chat.completion",
+          "created": "XXXXXXXX",
+          "model": "gpt-3.5-turbo-0613",
+          "system_fingerprint": "fp_XXXXXXXX",
+          "choices": [{
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "Text output"
+            },
+            "logprobs": null,
+            "finish_reason": "stop"
+          }],
+          "usage": {
+            "prompt_tokens": 9,
+            "completion_tokens": 12,
+            "total_tokens": 21
+          }
+        }
+      }
+    },
+    "versioning_and_updates": {
+      "update_policy": "Ongoing updates are expected to refine its capabilities, enhance performance, and expand its understanding.",
+      "changelog": "Initial release as a preview to showcase the upcoming features and improvements in GPT-4."
+    },
+    "support_and_community": {
+      "documentation": "Access to detailed documentation and guides through OpenAI's official website, tailored for developers to integrate and leverage the model effectively.",
+      "community": "An active community forum for sharing insights, asking questions, and discussing the potential of GPT-4 with peers and experts."
+    }
+  }
+}

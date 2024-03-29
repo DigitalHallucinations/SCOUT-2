@@ -1,0 +1,82 @@
+{
+  "model_card": {
+    "name": "gpt-3.5-turbo-0125",
+      "model_information": {
+        "provider": "OpenAI",
+        "type": "gpt",
+        "modality": "text",
+        "version": "turbo-0125",
+        "description": "The gpt-3.5-turbo-0125 is a highly capable version of the GPT-3.5 Turbo model, specifically enhanced to handle extensive context windows up to 16,000 tokens. This model leverages advancements in AI to offer improved comprehension, generation, and nuanced language understanding for complex and lengthy text inputs, making it ideal for in-depth analysis, comprehensive content creation, and detailed conversational AI applications.",
+        "release_date": "2023",
+        "context_window": "16k",
+        "training_data_cutoff": "Unknown",
+        "pricing": "Text input $0.0015 / 1K tokens Text output - $0.0020 / 1K tokens."
+      },
+      
+      "integration_guide": {
+        "create_chat_completion": {
+          "endpoint": "https://api.openai.com/v1/chat/completions",
+          "authentication": "Bearer token",
+          "example_request": {
+            "model": "gpt-3.5-turbo-16k-0613",
+            "messages": [
+              {
+                "role": "system",
+                "content": "Sytem prompt."
+              },
+              {
+                "role": "user",
+                "content": "Text input."
+                }
+            ],
+            "max_tokens": 1024,
+            "n": 1,
+            "temperature": 0.7,
+            "top_p": 1,
+            "response_format": {
+              "type": "json_object"
+            }
+          },
+          "example_response": {
+            "id": "chatcmpl-456",
+            "object": "chat.completion",
+            "created": 1678652288,
+            "model": "gpt-3.5-turbo-0125",
+            "choices": [{
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Text output"
+              },
+              "finish_reason": "stop"
+            }],
+            "usage": {
+              "prompt_tokens": 15,
+              "completion_tokens": 150,
+              "total_tokens": 165
+            }
+          }
+        }
+      },
+      "specifications": {
+        "capabilities": "unknown",
+        "limitations": "unknown"
+      },
+      "performance_metrics": {
+        "efficiency": "unknown",
+        "adaptability": "unknown"
+      },
+      "ethical_considerations": {
+        "bias": "Employs advanced techniques to reduce bias and improve fairness in model outputs. Continuous monitoring and updates are essential to address emergent biases and ethical concerns.",
+        "use_cases": "Suited for academic research, detailed content generation, comprehensive customer support, and more, where understanding and generating long-form content is crucial."
+      },
+      "versioning_and_updates": {
+        "update_policy": "Committed to regular updates to enhance capabilities, extend training data coverage, and improve performance and reliability.",
+        "changelog": "Initial launch with enhanced context window support, focusing on providing comprehensive language understanding for complex tasks."
+      },
+      "support_and_community": {
+        "documentation": "Comprehensive documentation is available, offering detailed guidelines for integration, usage tips, and best practices.",
+        "community": "Support from a vibrant community of developers and AI enthusiasts, available for collaboration, support, and sharing innovative uses of the model."
+      }
+    }
+  }  

@@ -1,0 +1,66 @@
+{
+  "model_card": {
+    "name": "text-embedding-3-large",
+      "model_information": {
+        "provider": "OpenAI",
+        "Family": "embedding",
+        "Class": "large",
+        "version": "3",
+        "modality": "text",
+        "description": "An advanced and powerful embedding model offering larger dimensions and superior performance over its predecessors. Designed for complex natural language processing tasks, it features an upgrade in embedding dimensions and benchmark performances, especially in multi-language retrieval and English task benchmarks.",
+        "release_date": "January 25, 2024",
+        "context_window": "unknown",
+        "training_data_cutoff_date": "unknown",
+        "pricing": "$0.00013 per 1K tokens"
+      },
+      "integration_guide": {
+        "endpoint": "https://api.openai.com/v1/embeddings",
+        "authentication": "Bearer token",
+        "example_request": {
+          "input": "Example text",
+          "model": "text-embedding-3-large",
+          "parameters": {
+            "dimensions": "Optional parameter to adjust the size of the output embedding for specific needs."
+          }
+        },
+        "example_response": {
+          "data": [
+            {
+              "embedding": [
+                "Detailed numerical vector representation"
+              ],
+              "index": 0,
+              "object": "embedding"
+            }
+          ],
+          "model": "text-embedding-3-large",
+          "object": "list"
+        }
+      },
+      "specifications": {
+        "capabilities": "Provides a detailed and nuanced representation of textual content, outperforming the previous models in multi-language retrieval and English tasks. Its larger dimension size supports more complex and varied NLP applications, including advanced search, clustering, and recommendations.",
+        "limitations": "high computational requirements",
+        "input_format": "Text",
+        "output_format": "Numerical embeddings in high-dimensional vector format",
+        "parameters": {
+          "embedding_size": "up to 3072 dimensions with customization of embedding dimensions."
+      },
+      "performance_metrics": {
+        "MIRACL_average": "Increased from 31.4% to 54.9%",
+        "MTEB_average": "Increased from 61.0% to 64.6%"
+      },
+      "ethical_considerations": {
+        "bias": "Inherits potential biases from its training data. Careful application and bias mitigation strategies are recommended.",
+        "use_cases": "Suited for high-demand NLP tasks requiring depth and detail in embeddings, such as advanced content search, recommendation systems, and complex classification tasks."
+      },
+      "versioning_and_updates": {
+        "update_policy": "Continual updates will be made to enhance the model's performance and efficiency. Changes in pricing and specifications will be communicated to users in advance.",
+        "changelog": "Launched as a next-generation model to provide more detailed embeddings with up to 3072 dimensions, improving upon the capabilities of previous models like text-embedding-ada-002."
+      },
+      "support_and_community": {
+        "documentation": "Comprehensive documentation and integration guides are provided to assist developers in leveraging the model effectively.",
+        "community": "Developers are encouraged to participate in forums and discussions to share their experiences and insights on utilizing text-embedding-3-large for various NLP tasks."
+      }
+    }
+  }
+}

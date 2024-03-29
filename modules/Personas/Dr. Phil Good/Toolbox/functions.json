@@ -1,0 +1,68 @@
+[
+    {
+        "name": "google_search",
+        "description": "A Google search result API. When you need a short and clear answer to a specific question, you can use it. The input should be a search query.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search content."
+                },
+                "k": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Select first k results in the search results as response."
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "search_pubmed",
+        "description": "Searches PubMed for articles related to the given query.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search query."
+                },
+                "max_results": {
+                    "type": "integer",
+                    "description": "The maximum number of results to return."
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "search_pmc",
+        "description": "Searches PMC for a specific article using its PMCID, and downloads the article package to the Workspace directory.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "pmcid": {
+                    "type": "string",
+                    "description": "The PMCID of the article."
+                }
+            },
+            "required": ["pmcid"]
+        }
+    },
+    {
+        "name": "get_current_info",
+        "description": "Get the current time, date, day, month and year, or timestamp based on the format specified.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "format_type": {
+                    "type": "string",
+                    "enum": ["time", "date", "day", "month_year", "timestamp"],
+                    "default": "timestamp"
+                }
+            },
+            "required": []
+        }
+    }
+]

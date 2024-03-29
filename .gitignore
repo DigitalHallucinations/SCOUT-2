@@ -1,0 +1,37 @@
+# Ignore .env file
+.env
+
+# Ignore all .log files
+*.log
+
+# Ignore google credentials
+/assets/SCOUT/GCC.json
+
+# Ignore mp3 mp4 audio/video files in assets
+/assets/SCOUT/tts_mp3/*.mp3
+/assets/SCOUT/avatar_videos/*.mp4
+*output.wav
+
+# Ignore all .db-shm and .db-wal files
+*.db-shm
+*.db-wal
+
+# Ignore all .db files
+*.db
+
+# Ignore all .pyc files
+*.pyc
+
+# Ignore all pychache folders
+__pycache__/
+
+# Ignore all Workspace folders
+/Workspace
+
+# Ignore all .cpython-310.pyc
+*.cpython-310.pyc
+
+# Ignore user_profiles 
+/modules/user_accounts/user_profiles/*.json
+/modules/user_accounts/user_profiles/*.txt
+/modules/user_accounts/user_profiles/*.db

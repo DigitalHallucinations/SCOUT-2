@@ -1,0 +1,82 @@
+{
+  "model_card": {
+    "name": "tts-1-hd",
+    "model_information": {
+      "version": "1-hd",
+      "description": "An earlier iteration of OpenAI's high-definition text-to-speech models, tts-1-hd transforms written text into natural, clear, and expressive speech. This model serves as the foundation for advancements in speech synthesis technology, providing users with a range of voices and language support.",
+      "release_date": "2022"
+    },
+    "specifications": {
+      "capabilities": "Capable of converting text into spoken word with notable clarity and expressiveness. Offers a selection of voices for various applications, from voiceovers to interactive voice response systems. This model marks a significant step towards improving the naturalness and emotional range of synthetic speech.",
+      "limitations": "The range of expressiveness and the naturalness of the speech may be less advanced compared to newer models like tts-1-hd-1106. Performance and voice variety may also be more limited.",
+      "input_format": "Text",
+      "output_format": "Audio",
+      "parameters": {
+        "text": "Text input for conversion into speech.",
+        "voice": "Choose from a set of available voices.",
+        "language": "Select the language for the speech output.",
+        "format": "Specify the audio format (e.g., mp3, aac)."
+      },
+      "pricing": "TTS $0.030 / 1K characters"
+    },
+    "performance_metrics": {
+      "efficiency": "Designed for efficient processing, suitable for applications requiring real-time speech synthesis.",
+      "quality": "Provides high-quality audio output, with a focus on clear articulation and a natural listening experience."
+    },
+    "ethical_considerations": {
+      "bias": "While measures have been taken to reduce bias in synthesized voice outputs, users should remain cautious of potential biases in voice selection and representation.",
+      "use_cases": "Appropriate for a wide array of uses including educational content, audiobooks, virtual assistants, and accessibility features for those requiring speech output."
+    },
+    "integration_guide": {
+    "audio_speech_generation": {
+      "endpoint": "https://api.openai.com/v1/audio/speech",
+      "authentication": "Bearer token",
+      "example_request": {
+        "model": "tts-1-hd",
+        "input": "The quick brown fox jumped over the lazy dog.",
+        "voice": "alloy",
+        "response_format": "mp3",
+        "speed": 1
+      },
+      "example_response": "Audio content in mp3 format"
+    },
+    "audio_transcription": {
+      "endpoint": "https://api.openai.com/v1/audio/transcriptions",
+      "authentication": "Bearer token",
+      "example_request": {
+        "file": "@/path/to/file/audio.mp3",
+        "model": "whisper-1",
+        "language": "en",
+        "prompt": "Optional text to guide the model's style",
+        "response_format": "json",
+        "temperature": 0,
+        "timestamp_granularities": ["word", "segment"]
+      },
+      "example_response": {
+        "text": "Imagine the wildest idea that you've ever had, and you're curious about how it might scale to something that's a 100, a 1,000 times bigger. This is a place where you can get to do that."
+      }
+    },
+    "audio_translation": {
+      "endpoint": "https://api.openai.com/v1/audio/translations",
+      "authentication": "Bearer token",
+      "example_request": {
+        "file": "@/path/to/file/german.m4a",
+        "model": "whisper-1",
+        "prompt": "Optional text in English",
+        "response_format": "json"
+      },
+      "example_response": {
+        "text": "Hello, my name is Wolfgang and I come from Germany. Where are you heading today?"
+      }
+    }
+  },
+    "versioning_and_updates": {
+      "update_policy": "OpenAI commits to continuous improvement of the tts-1-hd model, focusing on expanding language and voice options, enhancing audio quality, and improving synthesis efficiency.",
+      "changelog": "Initial release followed by periodic updates to add new voices and languages, and to refine audio clarity and expressiveness."
+    },
+    "support_and_community": {
+      "documentation": "Comprehensive documentation and integration guides available through OpenAI's official website, facilitating easy model integration.",
+      "community": "An active forum for developers to exchange insights, overcome integration challenges, and explore creative uses of text-to-speech technology."
+    }
+  }
+}  

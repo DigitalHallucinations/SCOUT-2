@@ -1,0 +1,133 @@
+[
+    {
+        "name": "get_current_weather",
+        "description": "Get current and forecast weather data for a location",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number",
+                    "description": "Latitude"
+                },
+                "lon": {
+                    "type": "number",
+                    "description": "Longitude"
+                },
+                "exclude": {
+                    "type": "string",
+                    "description": "Exclude certain parts of the weather data from the API response. It should be a comma-delimited list (without spaces). Available values: current, minutely, hourly, daily, alerts."
+                },
+                "units": {
+                    "type": "string",
+                    "enum": ["standard", "metric", "imperial"],
+                    "default": "imperial",
+                    "description": "Units of measurement"
+                }
+            },
+            "required": ["lat", "lon", "units"]
+        }
+    },
+    {
+        "name": "get_historical_weather",
+        "description": "Get historical weather data for a location",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number",
+                    "description": "Latitude"
+                },
+                "lon": {
+                    "type": "number",
+                    "description": "Longitude"
+                },
+                "dt": {
+                    "type": "number",
+                    "description": "Timestamp (Unix time, UTC time zone)"
+                },
+                "units": {
+                    "type": "string",
+                    "enum": ["standard", "metric", "imperial"],
+                    "default": "imperial",
+                    "description": "Units of measurement"
+                },
+                "lang": {
+                    "type": "string",
+                    "description": "Language for the output"
+                }
+            },
+            "required": ["lat", "lon", "dt", "units"]
+        }
+    },
+    {
+        "name": "get_daily_weather_summary",
+        "description": "Get daily aggregated historical weather data for a location",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number",
+                    "description": "Latitude"
+                },
+                "lon": {
+                    "type": "number",
+                    "description": "Longitude"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Date in the `YYYY-MM-DD` format for which data is requested."
+                },
+                "units": {
+                    "type": "string",
+                    "enum": ["standard", "metric", "imperial"],
+                    "default": "imperial",
+                    "description": "Units of measurement"
+                },
+                "lang": {
+                    "type": "string",
+                    "description": "Language for the output"
+                },
+                "tz": {
+                    "type": "string",
+                    "description": "Timezone in the ±XX:XX format"
+                }
+            },
+            "required": ["lat", "lon", "date"]
+        }
+    },
+    {
+        "name": "get_current_info",
+        "description": "Get the current time, date, day, month and year, or timestamp based on the format specified.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "format_type": {
+                    "type": "string",
+                    "enum": ["time", "date", "day", "month_year", "timestamp"],
+                    "default": "timestamp"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "google_search",
+        "description": "A Google search result API. When you need a short and clear answer to a specific question, you can use it. The input should be a search query.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search content."
+                },
+                "k": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Select first k results in the search results as response."
+                }
+            },
+            "required": ["query"]
+        }
+    }
+       
+      ]

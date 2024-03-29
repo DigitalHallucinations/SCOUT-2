@@ -1,0 +1,53 @@
+{
+  "model_card": {
+    "name": "GPT-4-0125-Preview",
+    "model_information": {
+      "provider": "OpenAI",
+      "type": "GPT",
+      "modality": "Text",
+      "version": "4-0125-preview",
+      "description": "An updated version of the GPT-4 Turbo Preview, enhancing capabilities in code generation and fixing bugs in UTF-8 handling for non-English languages. This version aims to complete tasks more thoroughly compared to its predecessor, the GPT-4-1106-preview.",
+      "release_date": "2024"
+    },
+    "specifications": {
+      "capabilities": "Improved code generation, enhanced handling of non-English languages, and bug fixes in UTF-8 handling. This version aims to generate more output compared to the GPT-4-1106-preview, depending on the task.",
+      "limitations": "As a preview version, it may not fully represent the final capabilities of GPT-4. Users might encounter limitations in advanced features or specific use cases where the model's responses could be enhanced.",
+      "input_format": "Text",
+      "output_format": "Text",
+      "parameters": {
+        "max_request_tokens": "128,000 for input, 4,096 for output",
+        "training_data_cutoff": "Incorporates data up to April 2023"
+      },
+      "pricing": "Same as the GPT-4-1106-preview model"
+    },
+    "performance_metrics": {
+      "efficiency": "Enhances the efficiency in processing complex queries, especially in code generation tasks.",
+      "adaptability": "Shows improvements in handling a broader range of languages and encoding formats, offering a more adaptable solution for global applications."
+    },
+    "ethical_considerations": {
+      "bias": "Continues to implement techniques to mitigate bias and ensure ethical use, but users are encouraged to remain vigilant and review outputs for potential biases.",
+      "use_cases": "Intended for a wide array of applications, including enhanced code generation, content creation, and language translation, especially for non-English languages."
+    },
+    "integration_guide": {
+      "example_usage": {
+        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "authentication": "Bearer token",
+        "parameters": {
+          "model": "gpt-4-0125-preview",
+          "prompt": "Example prompt",
+          "max_tokens": 512,
+          "temperature": 0.7
+        },
+        "response_handling": "Process JSON responses for application integration, focusing on improved output for code generation and multi-language support."
+      }
+    },
+    "versioning_and_updates": {
+      "update_policy": "Deployments set to 'Auto-update to default' and 'Upgrade when expired' will be upgraded starting February 20, 2024, completing within 2 weeks. Deployments set to 'No autoupgrade' will stop working from February 20, 2024.",
+      "changelog": "Introduced as an upgrade to the GPT-4-1106-preview, this version brings improvements in code generation and fixes for UTF-8 handling issues."
+    },
+    "support_and_community": {
+      "documentation": "Detailed documentation and integration guides are available on OpenAI's official website, supporting developers in leveraging the model effectively.",
+      "community": "Users can share insights, ask questions, and discuss the potential of the GPT-4-0125-preview with peers and experts through an active community forum."
+    }
+  }
+}

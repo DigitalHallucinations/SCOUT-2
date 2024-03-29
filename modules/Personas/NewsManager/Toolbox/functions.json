@@ -1,0 +1,65 @@
+[
+    
+    {
+        "name": "get_current_info",
+        "description": "Get the current time, date, day, month and year, or timestamp based on the format specified.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "format_type": {
+                    "type": "string",
+                    "enum": ["time", "date", "day", "month_year", "timestamp"],
+                    "default": "timestamp"
+                }
+            },
+            "required": []
+        }
+    },
+      {
+          "name": "get_top_stories",
+          "description": "Hacker News API. Get a list of IDs for the current top stories",
+          "parameters": {
+              "type": "object",
+              "properties": {},
+              "required": []
+          }
+      },
+      {
+          "name": "get_new_stories",
+          "description": "Hacker News API. Get a list of IDs for the newest stories",
+          "parameters": {
+              "type": "object",
+              "properties": {},
+              "required": []
+          }
+      },
+      {
+          "name": "get_best_stories",
+          "description": "Hacker news API. Get a list of IDs for the current best stories",
+          "parameters": {
+              "type": "object",
+              "properties": {},
+              "required": []
+          }
+      },
+      {
+        "name": "google_search",
+        "description": "A Google search result API. When you need a short and clear answer to a specific question, you can use it. The input should be a search query.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search content."
+                },
+                "k": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Select first k results in the search results as response."
+                }
+            },
+            "required": ["query"]
+        }
+    }
+       
+      ]

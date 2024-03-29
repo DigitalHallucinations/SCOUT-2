@@ -1,0 +1,14 @@
+{
+    "models": [
+        "models/chat-bison-001",
+        "models/text-bison-001",
+        "models/embedding-gecko-001",
+        "gemini-1.0-pro",
+        "gemini-1.0-pro-001",
+        "gemini-1.0-pro-latest",
+        "gemini-1.0-pro-vision-latest",
+        "gemini-pro",
+        "gemini-pro-vision"
+    ]
+  }
+  

@@ -1,0 +1,27 @@
+[
+    
+    {
+        "name": "geocode_location",
+        "description": "Get the latitude and longitude of a location by its name",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "City name, state code (only for the US), and country code divided by comma. Please use ISO 3166 country codes."
+            }
+          },
+          "required": ["location"]
+        }
+      },
+      {
+          "name": "get_current_location",
+          "description": "Get the current location using the IP-API service",
+          "parameters": {
+               "type": "object",
+               "properties": {},
+               "required": []
+            }
+        }
+        
+    ]

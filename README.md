@@ -1,6 +1,6 @@
 # SCOUT: Scalable Cognitive Operations Unified Team
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Custom-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.7%2B-brightgreen.svg)](https://www.python.org/)
 [![Build Status](https://img.shields.io/badge/Build-In%20Progress-yellow.svg)](#)
 [![Discord](https://img.shields.io/discord/1094426948949790770.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/wBWPP6udpK)
@@ -87,7 +87,17 @@ Your contributions are valued and will be reviewed promptly.
 
 ## License
 
-SCOUT is available under the [MIT License](LICENSE).
+SCOUT is available under a custom license with the following terms:
+
+- **Non-Commercial Use**: SCOUT can only be used for personal, non-commercial, and non-research purposes unless a commercial or research license is obtained from Digital Hallucinations.
+- **Modification**: Modifications to the SCOUT codebase are encouraged, but the modified code must be submitted as a pull request and accepted by the SCOUT development team before it can be used.
+- **Custom Deployments**: Custom deployments, commercial use, and research use of SCOUT can be arranged by obtaining a license from Digital Hallucinations.
+- **Personal Use**: SCOUT can be used for personal, non-commercial, and non-research purposes under the following restrictions:
+  - The SCOUT application and its components cannot be redistributed or shared publicly.
+  - The SCOUT application and its components cannot be used to create derivative works or commercial products without prior approval from Digital Hallucinations.
+  - The SCOUT application and its components must be used in accordance with the project's documentation and guidelines.
+
+The full license details and terms will be provided in the project's `LICENSE` file. Users interested in commercial use, research use, or custom deployments should contact the Digital Hallucinations team to discuss licensing options.
 
 ---
 

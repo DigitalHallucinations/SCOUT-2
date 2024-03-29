@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.7%2B-brightgreen.svg)](https://www.python.org/)
 [![Build Status](https://img.shields.io/badge/Build-In%20Progress-yellow.svg)](#)
+[![Discord](https://img.shields.io/discord/CHANNEL_ID.svg?style=flat-square&logo=discord)](DISCORD_INVITE_LINK)
+[![Instagram](https://img.shields.io/badge/Instagram-digital__hallucinations-orange.svg?style=flat-square&logo=instagram)](INSTAGRAM_LINK)
 
 SCOUT is an innovative AI-powered personal assistant that offers intelligent, scalable, and responsive support for a diverse array of tasks. Utilizing state-of-the-art technologies like transformers, multi-agent systems, and cognitive operations, SCOUT aims to deliver a user experience that is both seamless and highly personalized.
 

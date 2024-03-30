@@ -128,8 +128,8 @@ class SignUpComponent(tk.Toplevel):
 
     @staticmethod
     def is_valid_dob(dob):
-        regex = r'^[0-3][0-9]-[0-1][0-9]-[0-9]{4}$'
+        regex = r'^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$'
         if not re.search(regex, dob):
-            messagebox.showerror("Error", "Invalid date of birth format. Please use yyyy-mm-dd")
+            messagebox.showerror("Error", "Invalid date of birth format. Please use dd-mm-yyyy")
             return False
-        return True 
+        return True

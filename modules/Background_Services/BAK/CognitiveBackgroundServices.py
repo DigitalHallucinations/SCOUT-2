@@ -281,9 +281,9 @@ class CognitiveBackgroundServices:
             else:
                 profile[field_name]['Content'] = content
             if observations:
-                profile[field_name]['observations'] = observations
+                profile[field_name]['obsevations'] = observations
         else:
-            profile[field_name] = {"Content": content, "observations": observations}
+            profile[field_name] = {"Content": content, "obsevations": observations}
         
         self.save_profile(profile)
 
@@ -321,7 +321,7 @@ class CognitiveBackgroundServices:
         None
         """
         profile = self.get_profile()
-        profile[field_name] = {"Content": content, "observations": observations}
+        profile[field_name] = {"Content": content, "obsevations": observations}
         self.save_profile(profile)
 
    
@@ -400,7 +400,6 @@ class CognitiveBackgroundServices:
         profile = self.get_profile()
             
         system_message_content = "As the ProfileManager, your job is to update the User Profile using information from the latest conversation. Review the conversation, identify new and relevant Content about the user, and integrate these into the User profile. The following is a conversation between a user and an AI assistant. You must find new entries to add to the user profile. To add entries to a field, use the correct .json appendContentByField output for the specific entry you want to append the data to. Ensure that the observations field provides unique insights that are not already covered by the content. To add a new field to the profile, use the correct .json addfield output and give it a fieldname along with content and observations, but only if such a field does not already exist and the information is not captured elsewhere in the profile. When there is no new data to add to the profile, use the correct .json no update output.\\n\\nPlease make sure that any observations added are concise and offer additional context not evident from the content alone. Avoid redundancy by not repeating information that is already clear from the content fields.\\n\\nExample appendContentByField output:\\n\\n{\\n  \"operation\": \"appendContentByField\",\\n  \"fieldName\": \"Favorite Movies\",\\n  \"content\": \"New Movie Goes Here\",\\n  \"observations\": \"Unique insight or context not evident from the content\"\\n}\\n\\nExample addfield output:\\n\\n{\\n  \"operation\": \"addfield\",\\n  \"fieldName\": \"New Field Name\",\\n  \"content\": \"New Content goes here\",\\n  \"observations\": \"Explanation of why this new field is relevant and not redundant\"\\n}\\n\\nExample no update output:\\n\\n{\\n  \"operation\": \"None\"\\n}\\n\\nAll outputs MUST be structured as described and keep observations short and to the point.\\n\\nIMPORTANT: Return a list of update instructions, even if there is only one update. If there are no updates, return a list with a single 'None' operation."
-            
         profile_string = json.dumps(profile, ensure_ascii=False)
         system_message_content = system_message_content.replace('<<Profile>>', profile_string)
 

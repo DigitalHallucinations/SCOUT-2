@@ -50,22 +50,20 @@ To begin using SCOUT, follow these steps:
    git clone https://github.com/DigitalHallucinations/SCOUT-2.git
    ```
 
-2. Install VLC media player from [here](https://www.videolan.org/vlc/download-windows.html).
+2. Install Microsoft Visual C++ 14.0 or greater via the "Microsoft C++ Build Tools" [here](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
 
-3. Install Microsoft Visual C++ 14.0 or greater via the "Microsoft C++ Build Tools" [here](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
-
-4. Install required Python dependencies:
+3. Install required Python dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-5. Configure `.env_template` with your API keys and rename it to `.env`.
+4. Configure `.env_template` with your API keys and rename it to `.env`.
 
-6. Enter your Google Cloud credentials in `./assets/scout/GCC_template.json` and rename it to `GCC.json`.
+5. Enter your Google Cloud credentials in `./assets/scout/GCC_template.json` and rename it to `GCC.json`.
 
-7. Create a desktop shortcut for `SCOUT.bat` and update paths in `run_app.vbs` and `SCOUT.bat` to match your directory.
+6. Create a desktop shortcut for `SCOUT.bat` and update paths in `run_app.vbs` and `SCOUT.bat` to match your directory.
 
-8. Launch SCOUT using the shortcut, sign up, and enjoy the assistant!
+7. Launch SCOUT using the shortcut, sign up, and enjoy the assistant!
 
 ## Documentation
 

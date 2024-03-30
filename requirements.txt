@@ -17,7 +17,6 @@ tkfontchooser
 textblob
 pytz 
 customtkinter
-python-VLC
 func_timeout
 pyspellchecker
 numpy

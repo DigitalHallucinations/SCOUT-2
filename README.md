@@ -80,7 +80,8 @@ To use SCOUT, you will need to obtain several API keys and configure them in the
    - Generate an API key by going to the [API Keys](https://platform.openai.com/account/api-keys) section in your OpenAI account.
    - Copy the API key and paste it in the `OPENAI_API_KEY` field in the `.env` file.
 
-2. **Google Cloud API Key**:
+2. **Google Cloud Credentials**:
+   _ This is not the same as the Google AI Studio.
    - Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
    - Enable the necessary APIs, such as:
      - Cloud Speech-to-Text
@@ -124,6 +125,7 @@ To use SCOUT, you will need to obtain several API keys and configure them in the
    - Copy the API key and paste it in the `NEWSAPI_API_KEY` field in the `.env` file.
 
 7. **Google AI STUDIO API Key**:
+   - This is separate from the Google Cloud Credentials.
    - Navigate to the [API Keys](https://aistudio.google.com/app/apikey) section in the Google Cloud Console.
    - Generate a new API key and copy it.
    - Paste the API key in the `GOOGLE_API_KEY` field in the `.env` file.

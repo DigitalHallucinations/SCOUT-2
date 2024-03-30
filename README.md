@@ -71,6 +71,80 @@ To begin using SCOUT, follow these steps:
 
 For comprehensive usage details, refer to the [documentation](https://github.com/DigitalHallucinations/SCOUT-2/wiki) (coming soon).
 
+## API Keys Configuration
+
+To use SCOUT, you will need to obtain several API keys and configure them in the `.env` file. Here's where you can find the required API keys:
+
+1. **OpenAI API Key**:
+   - Sign up for an OpenAI account at [openai.com](https://openai.com/).
+   - Generate an API key by going to the [API Keys](https://platform.openai.com/account/api-keys) section in your OpenAI account.
+   - Copy the API key and paste it in the `OPENAI_API_KEY` field in the `.env` file.
+
+2. **Google Cloud API Key**:
+   - Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
+   - Enable the necessary APIs, such as:
+     - Cloud Speech-to-Text
+     - Cloud Text-to-Speech
+     - Cloud Natural Language API
+   - Create a service account and download the JSON credentials file.
+   - In the `./assets/SCOUT/` directory, there is a file called `GCC_template.json`. Open this file and fill in the following fields with the values from the downloaded JSON credentials file:
+     - `"type"`
+     - `"project_id"`
+     - `"private_key_id"`
+     - `"private_key"`
+     - `"client_email"`
+     - `"client_id"`
+     - `"client_x509_cert_url"`
+   - Rename the filled-out `GCC_template.json` file to `GCC.json`.
+   - Update the `GOOGLE_APPLICATION_CREDENTIALS` field in the `.env` file to point to the `GCC.json` file.
+   - In the Google Cloud Console, navigate to the [API Library](https://console.cloud.google.com/apis/library) and enable the following APIs for your project:
+     - Cloud Speech-to-Text API
+     - Cloud Text-to-Speech API
+     - Cloud Natural Language API
+     
+3. **SerpAPI Key**:
+   - Sign up for a SerpAPI account at [serpapi.com](https://serpapi.com/).
+   - Generate an API key in the [API Keys](https://serpapi.com/dashboard) section of your SerpAPI account.
+   - Copy the API key and paste it in the `SERPAPI_KEY` field in the `.env` file.
+
+4. **NCBI API Key**:
+   - Only neccessary for medical personas
+   - Sign up for an NCBI account at [ncbi.nlm.nih.gov](https://www.ncbi.nlm.nih.gov/).
+   - Generate an API key in the [API Key Management](https://www.ncbi.nlm.nih.gov/account/settings/) section of your NCBI account.
+   - Copy the API key and paste it in the `NCBI_API_KEY` field in the `.env` file.
+
+5. **OpenWeatherMap API Key**:
+   - Sign up for an OpenWeatherMap account at [openweathermap.org](https://openweathermap.org/).
+   - Generate an API key in the [API Keys](https://home.openweathermap.org/api_keys) section of your OpenWeatherMap account.
+   - Copy the API key and paste it in the `OPENWEATHERMAP_API_KEY` field in the `.env` file.
+
+6. **NewsAPI.org API Key**:
+   - Sign up for a NewsAPI.org account at [newsapi.org](https://newsapi.org/).
+   - Generate an API key in the [API Keys](https://newsapi.org/account) section of your NewsAPI.org account.
+   - Copy the API key and paste it in the `NEWSAPI_API_KEY` field in the `.env` file.
+
+7. **Google AI STUDIO API Key**:
+   - Navigate to the [API Keys](https://aistudio.google.com/app/apikey) section in the Google Cloud Console.
+   - Generate a new API key and copy it.
+   - Paste the API key in the `GOOGLE_API_KEY` field in the `.env` file.
+
+8. **Hugging Face API Key**:
+   - Sign up for a Hugging Face account at [huggingface.co](https://huggingface.co/).
+   - Generate an API token in the [Settings](https://huggingface.co/settings/tokens) section of your Hugging Face account.
+   - Copy the API token and paste it in the `HF_API_TOKEN` field in the `.env` file.
+
+9. **Mistral API Key**:
+   - Sign up for a Mistral account at [mistral.ai](https://mistral.ai/).
+   - Generate an API key in the [API Keys](https://mistral.ai/dashboard/api-keys) section of your Mistral account.
+   - Copy the API key and paste it in the `Mistral_API_KEY` field in the `.env` file.
+
+10. **Anthropic API Key**:
+    - Sign up for an Anthropic account at [anthropic.com](https://www.anthropic.com/).
+    - Generate an API key in the [API Keys](https://console.anthropic.com/account/api-keys) section of your Anthropic account.
+    - Copy the API key and paste it in the `Anthropic_API_KEY` field in the `.env` file.
+
+After configuring all the necessary API keys, save the `.env` file and proceed with the rest of the setup instructions.
+
 ## Contributing
 
 Contributions are welcome! Please adhere to the [contributing guidelines](CONTRIBUTING.md).

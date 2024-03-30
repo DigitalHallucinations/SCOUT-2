@@ -9,7 +9,7 @@
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
       "Speech_provider": "Google",
-          "voice": ""
+          "voice": "en-US-Journey-D"
     }
   ]
 }

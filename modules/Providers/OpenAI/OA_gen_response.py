@@ -47,11 +47,12 @@ def adjust_logging_level(level):
     logger.setLevel(levels.get(level, logging.WARNING))
 
 # Default model
-MODEL = "gpt-4-1106-preview"
+MODEL = "gpt-4-turbo-preview"
 
 # Model contants
 MODEL_GPT4_0613 = "gpt-4-0613"
 MODEL_GPT4_1106_PREVIEW = "gpt-4-1106-preview"
+MODEL_GPT4_TURBO_PREVIEW = "gpt-4-turbo-preview"
 MODEL_GPT3_5_TURBO_16K_0613 = "gpt-3.5-turbo-16k-0613" 
 MODEL_GPT3_5_TURBO_0613 = "gpt-3.5-turbo-0613"
 MODEL_GPT3_5_TURBO_1106 = "gpt-3.5-turbo-1106"
@@ -64,7 +65,7 @@ MAX_TOKENS_GPT3_5_TURBO_16K = 10000
 MAX_TOKENS_GPT3_5_TURBO_16K_0613 = 10000
 
 # Model that can use tools. This insures models without the abilty to call tools are not sent tools in the rquest body.
-ALLOWED_MODELS = [MODEL_GPT3_5_TURBO_1106, MODEL_GPT4_0613, MODEL_GPT3_5_TURBO_16K_0613, MODEL_GPT3_5_TURBO_0613, MODEL_GPT4_1106_PREVIEW]
+ALLOWED_MODELS = [MODEL_GPT3_5_TURBO_1106, MODEL_GPT4_0613, MODEL_GPT3_5_TURBO_16K_0613, MODEL_GPT3_5_TURBO_0613, MODEL_GPT4_1106_PREVIEW, MODEL_GPT4_TURBO_PREVIEW]
 
 # Update the FUNCTIONS_JSON_PATH_TEMPLATE and the MAPS_PATH_TEMPLATE to use the dynamic path based on the current_persona
 FUNCTIONS_JSON_PATH_TEMPLATE = 'modules/Personas/{}/Toolbox/functions.json'
@@ -162,9 +163,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, f
     logger.info({MODEL})
     logger.info({MAX_TOKENS})
     logger.info({temperature_var})
-    logger.info({messages})
-    logger.info({current_persona["name"]})
-    
+    logger.info({messages})    
     
 
     data = {

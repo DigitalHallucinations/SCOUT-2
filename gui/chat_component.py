@@ -11,7 +11,7 @@ from .custom_entry import CustomEntry
 from modules.Personas.persona_manager import PersonaManager
 from gui.Settings import chist_functions as cf
 from gui.Settings.chat_settings import ChatSettings
-from modules.Avatar.avatar import MediaComponent
+
 from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
 from modules.speech_services.GglCldSvcs.stt import SpeechToText
@@ -268,21 +268,7 @@ class ChatComponent(tk.Frame):
 
         self.chat_log.insert("end", f"{message}\n")
         self.chat_log.configure(state="disabled")
-        self.chat_log.yview("end")
-
-    def toggle_media_component(self):
- 
-        if hasattr(self, 'media_component'):
-            if self.media_component.winfo_viewable():
-                self.media_component.withdraw()
-            else:
-                self.media_component.deiconify()
-        else:
-            self.media_component = MediaComponent(self)
-
-    def show_media_component(self):
-
-        self.master.media_component = MediaComponent(self)        
+        self.chat_log.yview("end")  
 
     def toggle_topmost(self):
   

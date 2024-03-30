@@ -171,12 +171,12 @@ class CognitiveBackgroundServices:
         The response from the OpenAI API containing the generated conversation name.
         """
         payload = { 
-            "model": "gpt-4-1106-preview",
-            #"model": "mistral-large-latest",
+            #"model": "gpt-4-1106-preview",
+            "model": "mistral-large-latest",
             "messages": [{"role": "system", "content": "You are ConversationManager. You accel at examining conversations and finding creative names for them. You pay close attention to details, if a conversation is strictly a story and it has a name use it. The following conversation does not currently have a name. You are to output a conversationally relevant name for this conversation in up to 3 words."}] + conversation_data
         }
-        return await OpenAIAPI().generate_cognitive_background_service(payload)
-        #return await MistralAPI().generate_cognitive_background_service(payload)
+        #return await OpenAIAPI().generate_cognitive_background_service(payload)
+        return await MistralAPI().generate_cognitive_background_service(payload)
     
     async def update_user_profile(self, user, conversation_data):
         """
@@ -404,15 +404,15 @@ class CognitiveBackgroundServices:
         system_message_content = system_message_content.replace('<<Profile>>', profile_string)
 
         payload = {
-            "model": "gpt-4-turbo-preview",
-            #"model": "mistral-large-latest",
+            #"model": "gpt-4-turbo-preview",
+            "model": "mistral-large-latest",
             "messages": [{"role": "system","content": system_message_content}] + conversation_data
         }
             
         #logger.info(f"Payload being sent to API: {json.dumps(payload, indent=2, ensure_ascii=False)}")
         logger.info("Payload being sent to API")
-        return await OpenAIAPI().generate_cognitive_background_service(payload)
-        #return await MistralAPI().generate_cognitive_background_service(payload)
+        #return await OpenAIAPI().generate_cognitive_background_service(payload)
+        return await MistralAPI().generate_cognitive_background_service(payload)
  
     def get_profile(self):
         """

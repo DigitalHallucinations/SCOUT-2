@@ -17,7 +17,6 @@ from modules.Providers.HuggingFace.HF_gen_response import set_hf_model, get_hf_m
 from modules.Providers.Google.GG_gen_response import set_GG_model, get_GG_model
 from modules.Providers.Anthropic.Anthropic_gen_response import set_Anthropic_model, get_Anthropic_model
 
-
 logger = logging.getLogger('chat_settings.py')
 
 log_filename = 'SCOUT.log'
@@ -89,7 +88,7 @@ class ChatSettings(tk.Toplevel):
     def create_widgets(self): 
         """
         Creates the various widgets for the chat settings window, including the providers button, fetch models button, 
-        topmost button, show/hide avatar button, load chat button, voice button, toggle TTS button, temperature spinbox, top_p spinbox, and top_k spinbox.
+        topmost button, load chat button, voice button, toggle TTS button, temperature spinbox, top_p spinbox, and top_k spinbox.
         """
         # Providers Button
         self.load_providers()
@@ -114,9 +113,6 @@ class ChatSettings(tk.Toplevel):
 
         self.topmost_button = tk.Button(self, text="Top", bg="#000000", fg="white", command=self.master.toggle_topmost)
         self.topmost_button.pack()
-
-        self.toggle_Avatar_component_button = tk.Button(self, text="Avatar", bg="#000000", fg="white", command=self.master.toggle_media_component)
-        self.toggle_Avatar_component_button.pack()
 
         self.load_chat_button = tk.Button(self, text="History", bg="#000000", fg="white", command=lambda: cf.load_chat_popup(self.master))
         self.load_chat_button.pack()

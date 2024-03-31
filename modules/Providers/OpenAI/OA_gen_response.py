@@ -268,14 +268,13 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
         conversation_history.add_response(user, conversation_id, function_response, current_time)
         logger.info("Function call response added to responses table.")
 
-        formatted_function_response = f"System Message: The function call was executed successfully with the following results: {message['function_call']['name']}: {function_response} Provide the answer to the users question, a summary or ask for further details?"
+        formatted_function_response = f"System Message: The function call was executed successfully with the following results: {message['function_call']['name']}: {function_response} If needed, you can make another tool call for further proccesing or multi-step requests. Provide the answer to the users question, a summary or ask for further details."
 
         messages = conversation_history.get_history(user, conversation_id)
         for msg in messages:
             if 'timestamp' in msg:
                 del msg['timestamp']
 
-        # Adding the formatted function call response to messages for further processing
         data = create_request_body(current_persona, 
                            messages + [{"role": "user", "content": formatted_function_response}], 
                            temperature_var, 
@@ -289,7 +288,7 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
             new_text = new_message["content"]
 
             if new_text is None:
-                new_prompt = f"System Message: The function call was executed successfully with the following results: {function_response}. Provide the answer to the users question, a summary or ask for further details."
+                new_prompt = f"System Message: The function call was executed successfully with the following results: {function_response} If needed, you can make another tool call for further proccesing or multi-step requests. Provide the answer to the users question, a summary or ask for further details."
                 new_text = await call_model_with_new_prompt(new_prompt, current_persona, temperature_var, top_p_var, function_map)
                 if not new_text:
                     new_text = "Sorry, I couldn't generate a meaningful response. Please try again or provide more context."

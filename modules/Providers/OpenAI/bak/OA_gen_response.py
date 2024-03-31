@@ -290,7 +290,7 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
 
             if new_text is None:
                 new_prompt = f"System Message: The function call was executed successfully with the following results: {function_response}. Provide the answer to the users question, a summary or ask for further details."
-                new_text = await call_model_with_new_prompt(new_prompt, current_persona, temperature_var, top_p_var, function_map)
+                new_text = await call_model_with_new_prompt(new_prompt, current_persona, temperature_var, top_p_var)
                 if not new_text:
                     new_text = "Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
 
@@ -349,8 +349,10 @@ async def generate_response(user, current_persona, message, session_id, conversa
             del msg['timestamp']
 
     data = create_request_body(current_persona, 
-                           messages, temperature_var, 
-                           top_p_var,functions 
+                           messages, 
+                           temperature_var, 
+                           top_p_var, 
+                           functions 
                            if is_model_allowed() else None)
     
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
@@ -381,9 +383,9 @@ async def generate_response(user, current_persona, message, session_id, conversa
     else:
         return "Sorry, I couldn't generate a response. Please try again."
 
-async def call_model_with_new_prompt(prompt, current_persona, temperature_var, top_p_var, function_map):
+async def call_model_with_new_prompt(prompt, current_persona, temperature_var, top_p_var):
     global api
-    data = create_request_body(current_persona, [{"role": "user", "content": prompt}], temperature_var, top_p_var, function_map)    
+    data = create_request_body(current_persona, [{"role": "user", "content": prompt}], temperature_var, top_p_var)    
     response_data = await api.generate_conversation(data)
     
     if response_data and response_data.get("choices"):

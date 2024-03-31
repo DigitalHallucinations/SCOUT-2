@@ -1,19 +1,24 @@
- As a CodeGenius, there are several tools that can be built to enhance my capabilities and make me more effective. Here are a few suggestions:
 
-1. **Code Snippet Generator**: This tool can generate code snippets based on the user's requirements. It can take a description of the functionality needed and generate the corresponding code.
+1. **Systeminfo, filesystem, and environment sensor: Get systeminfo and format for insertion. This should be done at time of application start and injected into persona system prompt.
 
-2. **Code Review Tool**: This tool can analyze the user's code and provide suggestions for improvements, such as identifying potential bugs, performance issues, or violations of coding standards.
+2. **Code Analysis and Linting Tool**: A tool that can analyze code for potential errors, code smells, and style issues. This would allow me to provide more detailed feedback on code quality and suggest improvements.
 
-3. **Automated Testing Tool**: This tool can generate test cases based on the user's code. It can help ensure that the code is working as expected and catch any issues early in the development process.
+3. **Version Control System Integration**: Direct integration with version control systems like Git. This would enable me to perform operations such as cloning repositories, committing changes, and pushing updates directly from the terminal.
 
-4. **Documentation Generator**: This tool can generate documentation based on the user's code. It can help make the code easier to understand and maintain.
+4. **File and Directory Management**: Enhanced capabilities for managing files and directories, such as creating, copying, moving, and deleting files and directories. This would complement the existing terminal command tool by providing more specialized file operations.
 
-5. **Code Formatter**: This tool can automatically format the user's code according to a specified style guide. It can help make the code more readable and consistent.
+5. **Networking Tools**: Tools for performing network operations, such as sending HTTP requests, interacting with APIs, and managing sockets. This would be useful for developing and testing networked applications.
 
-6. **Dependency Analyzer**: This tool can analyze the dependencies in the user's code and provide a visual representation of them. It can help the user understand the structure of their code and identify potential issues.
+6. **Database Interaction Tool**: A tool for interacting with databases, allowing for the execution of SQL queries, database management, and data manipulation directly from the terminal.
 
-7. **Performance Profiler**: This tool can analyze the performance of the user's code and identify any bottlenecks. It can help the user optimize their code for better performance.
+7. **Environment and Dependency Management**: Tools for managing project environments and dependencies, such as creating virtual environments, installing packages, and managing package versions.
 
-8. **Code Completion Tool**: This tool can suggest code completions as the user is typing. It can help speed up the coding process and reduce the chance of typos.
+8. **Automated Testing Tool**: A tool for running and managing tests, including unit tests, integration tests, and end-to-end tests. This would help in ensuring code quality and reliability.
 
-Remember, the effectiveness of these tools will depend on the quality of the NLP module you've built, as well as the specific programming languages and frameworks you're targeting.
+9. **Performance Profiling Tool**: A tool for analyzing and profiling code performance. This could help identify bottlenecks and optimize code for better performance.
+
+10. **Documentation Generation Tool**: (partially complete [DocGenius]) A tool for automatically generating documentation from code comments and annotations. This would help in maintaining up-to-date documentation for projects.
+
+11. **Interactive Development Environment (IDE) Features**: Features commonly found in IDEs, such as code completion, refactoring tools, and debugging capabilities. This would make coding and troubleshooting more efficient.
+
+12. **Jupiter notebook interface: 

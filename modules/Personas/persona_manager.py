@@ -1,7 +1,6 @@
 # gui\Personas\persona_manager.py
 
 import os
-import re
 import json
 import logging
 from logging.handlers import RotatingFileHandler
@@ -13,16 +12,13 @@ log_filename = 'SCOUT.log'
 log_max_size = 10 * 1024 * 1024  # 10 MB
 log_backup_count = 5
 
-# Create rotating file handler for file logging
 rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 rotating_handler.setFormatter(formatter)
 
-# Create stream handler for console logging
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 
-# Attach handlers to the logger
 logger.addHandler(rotating_handler)
 logger.addHandler(stream_handler)
 logger.setLevel(logging.INFO)
@@ -60,7 +56,7 @@ class PersonaManager:
         self.master = master
         self.user = user
         self.chat_component = chat_component
-        self.default_persona_name = "SCOUT"  # Set the default persona name
+        self.default_persona_name = "SCOUT"  
 
         try:
             self.load_personas(self.PERSONAS_FILE_NAME, user)
@@ -109,11 +105,9 @@ class PersonaManager:
         """
         logger.info("Attempting to update persona.")
 
-        # Updating system name and tag
         self.master.system_name = selected_persona_name
         self.master.system_name_tag = selected_persona_name
 
-        # Find and personalize the selected persona
         selected_persona = next((persona for persona in self.master.personas if persona["name"] == selected_persona_name), None)
         if selected_persona:
             personalized_persona = self.personalize_persona(selected_persona)
@@ -122,37 +116,34 @@ class PersonaManager:
         else:
             self.master.show_message("system", f"Persona {selected_persona_name} not found")
  
-        # Generate a new conversation ID due to the change in persona
         if hasattr(self.master, 'database'):
             self.master.database.generate_new_conversation_id()
             logger.info(f"Conversation ID updated due to persona change to {selected_persona_name}")
         else:
             logger.warning("ConversationHistory instance not found in master.")
 
-        # Log the persona change
         logger.info(f"Persona switched to {selected_persona_name} and personalized")
    
     def personalize_persona(self, persona):
         logging.info("Attempting to personalize persona with user content.")
         self.user_name = self.user
-        logging.info(self.user_name)
         user_data_manager = UserDataManager(self.user)
-        self.user_profile = user_data_manager.profile()
-        self.user_emr = user_data_manager.emr()
-        # Example placeholders and corresponding user data
+        self.user_profile = user_data_manager.get_profile_text()
+        self.user_emr = user_data_manager.get_emr()
+        self.system_info = user_data_manager.get_system_info()  
+
         user_data = {
             "<<name>>": self.user_name,
             "<<Profile>>": self.user_profile,
-            "<<emr>": self.user_emr,
+            "<<emr>>": self.user_emr,
+            "<<sysinfo>>": self.system_info,  
         }
- 
-        # Replace each placeholder in the persona content with the user's data
+
         personalized_content = persona["content"]
         for placeholder, data in user_data.items():
             personalized_content = personalized_content.replace(placeholder, data)
 
-        # Update the persona with personalized content
-        personalized_persona = persona.copy()  # Make a copy to avoid altering the original
+        personalized_persona = persona.copy()  
         personalized_persona["content"] = personalized_content
 
         return personalized_persona

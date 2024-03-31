@@ -349,8 +349,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
             del msg['timestamp']
 
     data = create_request_body(current_persona, 
-                           messages, 
-                           temperature_var, 
+                           messages, temperature_var, 
                            top_p_var, 
                            functions 
                            if is_model_allowed() else None)

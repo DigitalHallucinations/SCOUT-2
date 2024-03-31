@@ -47,6 +47,11 @@
                     "type": "integer",
                     "default": 60,
                     "description": "The maximum time (in seconds) to wait for the command to complete."
+                },
+                "encoding": {
+                    "type": "string",
+                    "default": "utf-8",
+                    "description": "The encoding to use for decoding the command's output and error messages."
                 }
             },
             "required": ["command"]

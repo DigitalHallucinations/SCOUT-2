@@ -15,7 +15,7 @@ async def get_current_info(format_type='timestamp'):
     Returns:
     - A string representing the current date or time information based on the format_type.
     """
-    await asyncio.sleep(0)  # Simulate async operation
+    await asyncio.sleep(0)  
     now = datetime.datetime.now(pytz.timezone('America/Chicago'))
     format_options = {
         'time': "%H:%M:%S",

@@ -32,5 +32,24 @@
             },
             "required": []
         }
+    },
+    {
+        "name": "terminal_command",
+        "description": "Execute a terminal command and return the output, error, and status code.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The terminal command to execute."
+                },
+                "timeout": {
+                    "type": "integer",
+                    "default": 60,
+                    "description": "The maximum time (in seconds) to wait for the command to complete."
+                }
+            },
+            "required": ["command"]
+        }
     }
 ]

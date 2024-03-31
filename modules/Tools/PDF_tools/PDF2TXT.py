@@ -9,6 +9,6 @@ def pdf_to_text(pdf_path):
     return text
 
 
-pdf_file_path = 'C:/Users/owner/Desktop/EMR.pdf'
+pdf_file_path = '<<file_path>>'
 output_text = pdf_to_text(pdf_file_path)
 print(output_text)

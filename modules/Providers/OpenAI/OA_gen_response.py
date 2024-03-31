@@ -158,17 +158,15 @@ def load_functions_from_json(current_persona):
     return {}  
 
 def create_request_body(current_persona, messages, temperature_var, top_p_var, functions=None):
-    
     logger.info("Creating request body.")
-    logger.info({MODEL})
-    logger.info({MAX_TOKENS})
-    logger.info({temperature_var})
-    logger.info({messages})    
-    
+    logger.info(f"Model: {MODEL}")
+    logger.info(f"Max Tokens: {MAX_TOKENS}")
+    logger.info(f"Temperature: {temperature_var}")
+    logger.info(f"Messages: {messages}")    
 
     data = {
         "model": MODEL,
-        "messages": [{"role": "system", "content": current_persona["content"]}] + [{"role": "user", "content": f"THIS IS THE CHAT HISTORY BETWEEN YOU AND THE USER: {messages}"}],
+        "messages": [{"role": "system", "content": current_persona["content"]}] + messages,
         "temperature": temperature_var,
         "max_tokens": MAX_TOKENS,
         "top_p": top_p_var
@@ -177,8 +175,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, f
         data["functions"] = functions
         data["function_call"] = "auto"
         
-    #logger.info(f"request body created: {data}")
-    logger.info("request body created.")    
+    logger.info("Request body created.")    
     return data
 
 async def handle_function_call(user, conversation_id, message, conversation_history, function_map):
@@ -277,14 +274,13 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
         for msg in messages:
             if 'timestamp' in msg:
                 del msg['timestamp']
-        messages_formatted = format_message_history(messages, user, current_persona.get("name", "Assistant"))
 
         # Adding the formatted function call response to messages for further processing
         data = create_request_body(current_persona, 
-                                  messages_formatted + ", " + formatted_function_response, 
-                                  temperature_var, 
-                                  top_p_var, 
-                                  None)
+                           messages + [{"role": "user", "content": formatted_function_response}], 
+                           temperature_var, 
+                           top_p_var, 
+                           None)
 
         response_data = await api.generate_conversation(data)
 
@@ -351,16 +347,14 @@ async def generate_response(user, current_persona, message, session_id, conversa
     for msg in messages:
         if 'timestamp' in msg:
             del msg['timestamp']
-    messages_formatted = format_message_history(messages, user, current_persona.get("name", "Assistant"))
-    messages= messages_formatted
 
     data = create_request_body(current_persona, 
-                              messages, 
-                              temperature_var, 
-                              top_p_var, 
-                              functions 
-                              if is_model_allowed() else None)
- 
+                           messages, 
+                           temperature_var, 
+                           top_p_var, 
+                           functions 
+                           if is_model_allowed() else None)
+    
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
 
     logger.info("Data being sent in HTTP request to OpenAI: %s", data) 
@@ -411,39 +405,3 @@ async def text_to_speech(text):
     logger.info("Skipping TTS as the text contains code.")  
     text_without_code = re.sub(r"`[^`]*`", "", text)
     await tts.text_to_speech(text_without_code)
-
-def format_message_history(messages, user_name, assistant_name):
-    """
-    Format the message history for return to the model to reduce token count.
-
-    :param messages: The list of message dictionaries.
-    :param user_name: The name of the user.
-    :param assistant_name: The name of the assistant.
-    :return: A string representing the formatted message history.
-    """
-    formatted_messages = []
-    for message in messages:
-        # Extract role and content from each message
-        role = message['role']
-        content = message['content']
-        # Determine the display name based on the role
-        display_name = user_name if role == "user" else assistant_name
-
-        # Check if the content needs further processing (e.g., it's a nested message)
-        if isinstance(content, str) and content.startswith('['):
-            try:
-                nested_messages = eval(content)
-                if isinstance(nested_messages, list):
-                    for nested_message in nested_messages:
-                        nested_role = nested_message.get('role', 'unknown')
-                        # Use the user_name or assistant_name for nested messages as well
-                        nested_display_name = user_name if nested_role == "user" else assistant_name
-                        nested_content = nested_message.get('content', '')
-                        formatted_messages.append(f"{nested_display_name}: {nested_content}")
-            except:
-                # Fallback in case of eval errors, directly use the resolved display name
-                formatted_messages.append(f"{display_name}: {content}")
-        else:
-            formatted_messages.append(f"{display_name}: {content}")
-    # Join all formatted messages with a comma and space
-    return ', '.join(formatted_messages)

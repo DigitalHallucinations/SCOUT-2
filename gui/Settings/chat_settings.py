@@ -1,5 +1,3 @@
-# gui\Settings\chat_settings.py
-
 import tkinter as tk
 import json
 import asyncio
@@ -60,8 +58,8 @@ class ChatSettings(tk.Toplevel):
         super().__init__(master) 
         self.master = master
         self.user = user
-        self.providers = []  
-        self.current_provider = 'OpenAI'  
+        self.llm_providers = []  
+        self.current_llm_provider = 'OpenAI'  
         self.title("Chat Settings")
         self.configure(bg="#000000") 
         self.load_providers() 
@@ -73,16 +71,16 @@ class ChatSettings(tk.Toplevel):
         Loads the available providers from the `providers.json` file.
         """
         with open('modules/Providers/providers.json') as f:
-            self.providers = json.load(f)
+            self.llm_providers = json.load(f)
 
-    def set_provider(self, provider):
+    def set_provider(self, llm_provider):
         """
         Sets the current provider, logs the selected provider, switches the provider in the master window, 
         and populates the models menu based on the selected provider.
         """
-        self.current_provider = provider
-        logger.info(f"Selected provider: {self.current_provider}")
-        self.master.provider_manager.switch_provider(provider)
+        self.current_llm_provider = llm_provider
+        logger.info(f"Selected provider: {self.current_llm_provider}")
+        self.master.provider_manager.switch_provider(llm_provider)
         self.populate_models_menu()  
 
     def create_widgets(self): 
@@ -92,13 +90,13 @@ class ChatSettings(tk.Toplevel):
         """
         # Providers Button
         self.load_providers()
-        self.providers_button = tk.Menubutton(self, text="Providers", relief="raised", bg="#000000", fg="white")
+        self.providers_button = tk.Menubutton(self, text="LLM Providers", relief="raised", bg="#000000", fg="white")
         self.providers_button.pack()
 
         self.providers_menu = tk.Menu(self.providers_button, tearoff=0)
         self.providers_button.configure(menu=self.providers_menu)
-        for provider in self.providers:
-            self.providers_menu.add_command(label=provider, command=lambda p=provider: self.set_provider(p))
+        for llm_provider in self.llm_providers:
+            self.providers_menu.add_command(label=llm_provider, command=lambda p=llm_provider: self.set_provider(p))
 
         self.fetch_models_button = tk.Menubutton(self, text="Models", relief="raised", bg="#000000", fg="white")
         self.fetch_models_button.pack()
@@ -232,7 +230,7 @@ class ChatSettings(tk.Toplevel):
         For each model, it creates a submenu with options to select the model and fetch model details.
         The model submenus are added as cascading menus to the fetch models menu.
         """
-        logger.info("Populating models menu for provider: %s", self.current_provider)
+        logger.info("Populating models menu for provider: %s", self.current_llm_provider)
         try:
             self.fetch_models_menu.delete(0, 'end')
             self.fetch_models_menu.add_command(label="OpenAI", command=self.fetch_models_openai_wrapper)
@@ -246,12 +244,12 @@ class ChatSettings(tk.Toplevel):
                 'Anthropic': 'modules/Providers/Anthropic/Anthropic_models.json',
             }
 
-            current_models_file = models_files.get(self.current_provider)
+            current_models_file = models_files.get(self.current_llm_provider)
             logger.info("Loading models from file: %s", current_models_file)
 
             with open(current_models_file) as json_file:
                 models = json.load(json_file)['models']
-                logger.info("Loaded %d models for provider: %s", len(models), self.current_provider)
+                logger.info("Loaded %d models for provider: %s", len(models), self.current_llm_provider)
 
             for model in models:
                 logger.info("Adding model to menu: %s", model)
@@ -272,19 +270,19 @@ class ChatSettings(tk.Toplevel):
         logger.info("Checking current model against selected model")
         try:
             current_model = None
-            if self.current_provider == 'Google':
+            if self.current_llm_provider == 'Google':
                 current_model = get_GG_model()
                 logger.info("Current provider: Google")
-            elif self.current_provider == 'Mistral':
+            elif self.current_llm_provider == 'Mistral':
                 current_model = get_Mistral_model()
                 logger.info("Current provider: Mistral")
-            elif self.current_provider == 'HuggingFace':
+            elif self.current_llm_provider == 'HuggingFace':
                 current_model = get_hf_model()
                 logger.info("Current provider: HuggingFace")
-            elif self.current_provider == 'OpenAI':
+            elif self.current_llm_provider == 'OpenAI':
                 current_model = get_OA_model()
                 logger.info("Current provider: OpenAI")
-            elif self.current_provider == 'Anthropic':
+            elif self.current_llm_provider == 'Anthropic':
                 current_model = get_Anthropic_model()
                 logger.info("Current provider: OpenAI")    
 
@@ -316,17 +314,17 @@ class ChatSettings(tk.Toplevel):
         It updates the text of the fetch models button to display the selected model and calls the `check_current_model` method to verify the model selection.
         """
         logger.info(f"Setting model: {model}")
-        if self.current_provider == 'Google':
+        if self.current_llm_provider == 'Google':
             set_GG_model(model)
-        elif self.current_provider == 'Mistral':
+        elif self.current_llm_provider == 'Mistral':
             set_Mistral_model(model)
-        elif self.current_provider == 'HuggingFace':
+        elif self.current_llm_provider == 'HuggingFace':
             set_hf_model(model)
-        elif self.current_provider == 'OpenAI':
+        elif self.current_llm_provider == 'OpenAI':
             set_OA_model(model)
-        elif self.current_provider == 'Anthropic':
+        elif self.current_llm_provider == 'Anthropic':
             set_Anthropic_model(model)    
-        logger.info(f"Model {model} set successfully for {self.current_provider}")
+        logger.info(f"Model {model} set successfully for {self.current_llm_provider}")
         
         logger.info("Updating fetch_models_button text")
         self.fetch_models_button.config(text=model)

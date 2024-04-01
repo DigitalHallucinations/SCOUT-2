@@ -27,3 +27,6 @@ Mistral_API_KEY=
 
 # Anthropic API KEY
 Anthropic_API_KEY=
+
+# Eleven Labs API KEY
+XI_API_KEY=

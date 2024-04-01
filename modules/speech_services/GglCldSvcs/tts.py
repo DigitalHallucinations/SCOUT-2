@@ -13,23 +13,22 @@ import logging
 
 from logging.handlers import RotatingFileHandler
 
+logger = logging.getLogger('Ggl_tts.py')
+
 log_filename = 'SCOUT.log'
 log_max_size = 10 * 1024 * 1024  # 10 MB
 log_backup_count = 5
 
-# Create a rotating file handler with UTF-8 encoding
 rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 rotating_handler.setFormatter(formatter)
 
-# Remove existing handlers if present
 logger = logging.getLogger('')
 for handler in logger.handlers[:]:
     logger.removeHandler(handler)
 
-# Add the rotating file handler to the logger
 logger.addHandler(rotating_handler)
-logger.setLevel(logging.INFO)  # Set the default logging level
+logger.setLevel(logging.INFO)  
 
 def adjust_logging_level(level):
     """Adjust the logging level.

@@ -60,7 +60,6 @@ class ChatComponent(tk.Frame):
         self.logout_callback = logout_callback
         self.user = user 
         self.provider_manager = ProviderManager(self)
-        self.current_provider = self.provider_manager.current_provider
         self.send_message = send_message_module.send_message
         self.persona_manager = PersonaManager(self, self.user)
         self.current_persona = self.persona_manager.current_persona

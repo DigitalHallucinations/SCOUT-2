@@ -1,15 +1,16 @@
 # gui/OpenAI/OA_gen_response.py
 
-import logging
 import json
 import re
 import inspect
 import importlib.util
 import sys
+import logging
+from logging.handlers import RotatingFileHandler
 
 from .openai_api import OpenAIAPI
-from logging.handlers import RotatingFileHandler
 from modules.speech_services.GglCldSvcs import tts
+
 from datetime import datetime
 from modules.chat_history.convo_manager import ConversationManager
 
@@ -300,7 +301,7 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
                 conversation_history.add_message(user, conversation_id, "assistant", new_text, current_time)                    
                 logger.info("Assistant message added to conversation history.")
             try:
-                if tts.get_tts():
+                if tts.get_tts():    
                     if contains_code(new_text):
                         logger.info("Skipping TTS as the text contains code.")
                 else:
@@ -368,11 +369,11 @@ async def generate_response(user, current_persona, message, session_id, conversa
                 text = "Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
 
         try:
-                if tts.get_tts():
-                    if contains_code(text):
-                        logger.info("Skipping TTS as the text contains code.")
-                    else:
-                        await text_to_speech(text)
+            if tts.get_tts():   
+                if contains_code(text):
+                    logger.info("Skipping TTS as the text contains code.")
+                else:
+                    await text_to_speech(text)
         except Exception as e:
                 logger.error("Error during TTS: %s", e)
 

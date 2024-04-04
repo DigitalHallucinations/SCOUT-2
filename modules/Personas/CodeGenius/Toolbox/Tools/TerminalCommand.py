@@ -3,6 +3,25 @@ import subprocess
 import logging
 from logging.handlers import RotatingFileHandler
 import time
+import ctypes
+import sys
+import os
+
+# Function to check if the script is running with administrative privileges
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+# Function to relaunch the script with administrative privileges if not already running as admin
+def run_as_admin():
+    if not is_admin():
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        sys.exit()
+
+# Ensure the script is running with administrative privileges
+run_as_admin()
 
 logger = logging.getLogger('TerminalCommand')
 
@@ -34,9 +53,9 @@ def adjust_logging_level(level):
 command_history = []
 
 # Define a list of applications that are expected to run indefinitely
-indefinite_apps = ["chrome", "main.py", "taskmgr"]
+indefinite_apps = ["main.py", "taskmgr"]
 
-async def TerminalCommand(command: str, timeout: int = 60, encoding: str = 'utf-8', verbose: bool = False, output_limit: int = 1024 * 1024, max_retries: int = 3):
+async def TerminalCommand(command: str, timeout: int = 60, encoding: str = 'utf-8', verbose: bool = False, output_limit: int = 1024 * 1024, max_retries: int = 3, wait_for_indefinite_app: int = 10):
     retry_count = 0
     while retry_count <= max_retries:
         process = None
@@ -54,20 +73,17 @@ async def TerminalCommand(command: str, timeout: int = 60, encoding: str = 'utf-
                 limit=output_limit 
             )
 
-            # Log if the command is an indefinite application
+            # Check if the command is an indefinite application
             if any(app in command for app in indefinite_apps):
                 logger.info(f"Launched application/script (expected to run indefinitely): {command}")
-
-            feedback_interval = 10  # seconds
-            last_feedback_time = start_time
-
-            while True:
-                if verbose and time.time() - last_feedback_time >= feedback_interval:
-                    logger.info(f"Command is still running: {command}")
-                    last_feedback_time = time.time()
-                if process.returncode is not None:
-                    break
-                await asyncio.sleep(1)
+                await asyncio.sleep(wait_for_indefinite_app)  # Wait for the application to fully launch and stabilize
+                # Check if the process is still running
+                if process.returncode is None:
+                    logger.info(f"Application is running: {command}")
+                    command_history.append((command, "Running", "", time.time() - start_time))
+                    return {"output": "", "error": "", "status_code": 0}  # Consider successful launch
+                else:
+                    logger.info(f"Application terminated unexpectedly: {command}")
 
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout - (time.time() - start_time))
             result_stdout = stdout.decode(encoding).strip()

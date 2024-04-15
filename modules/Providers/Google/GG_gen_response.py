@@ -45,7 +45,7 @@ def adjust_logging_level(level):
 """
  Default model
 """
-GG_MODEL = 'gemini-pro' 
+GG_MODEL = 'gemini-1.5-pro-latest' 
 
 def set_GG_model(model_name):
     """

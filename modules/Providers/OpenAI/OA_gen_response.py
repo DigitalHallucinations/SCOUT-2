@@ -242,7 +242,7 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
     logger.error(f"Function {function_name} not found in function map.")
     return None, True
 
-async def use_tool(user, conversation_id, message, conversation_history, function_map, current_persona, temperature_var, top_p_var):
+async def use_tool(user, conversation_id, message, conversation_history, function_map, functions, current_persona, temperature_var, top_p_var):
     """
     Handles the logic for using a tool (function call) when the AI model's response is None.
 
@@ -279,8 +279,8 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
         data = create_request_body(current_persona, 
                            messages + [{"role": "user", "content": formatted_function_response}], 
                            temperature_var, 
-                           top_p_var, 
-                           None)
+                           top_p_var, functions 
+                           if is_model_allowed() else None)
 
         response_data = await api.generate_conversation(data)
 
@@ -290,7 +290,7 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
 
             if new_text is None:
                 new_prompt = f"System Message: The function call was executed successfully with the following results: {function_response} If needed, you can make another tool call for further proccesing or multi-step requests. Provide the answer to the users question, a summary or ask for further details."
-                new_text = await call_model_with_new_prompt(new_prompt, current_persona, temperature_var, top_p_var, function_map)
+                new_text = await call_model_with_new_prompt(new_prompt, current_persona, temperature_var, top_p_var, function_map, functions)
                 if not new_text:
                     new_text = "Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
 
@@ -301,7 +301,7 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
                 conversation_history.add_message(user, conversation_id, "assistant", new_text, current_time)                    
                 logger.info("Assistant message added to conversation history.")
             try:
-                if tts.get_tts():    
+                if tts.get_tts():
                     if contains_code(new_text):
                         logger.info("Skipping TTS as the text contains code.")
                 else:
@@ -350,7 +350,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
 
     data = create_request_body(current_persona, 
                            messages, temperature_var, 
-                           top_p_var,functions 
+                           top_p_var, functions 
                            if is_model_allowed() else None)
     
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
@@ -364,7 +364,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
         text = message["content"]  
 
         if text is None:
-            text = await use_tool(user, conversation_id, message, conversation_history, function_map, current_persona, temperature_var, top_p_var)
+            text = await use_tool(user, conversation_id, message, conversation_history, function_map, functions, current_persona, temperature_var, top_p_var)
             if text is None:
                 text = "Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
 
@@ -381,9 +381,9 @@ async def generate_response(user, current_persona, message, session_id, conversa
     else:
         return "Sorry, I couldn't generate a response. Please try again."
 
-async def call_model_with_new_prompt(prompt, current_persona, temperature_var, top_p_var, function_map):
+async def call_model_with_new_prompt(prompt, current_persona, temperature_var, top_p_var, functions):
     global api
-    data = create_request_body(current_persona, [{"role": "user", "content": prompt}], temperature_var, top_p_var, function_map)    
+    data = create_request_body(current_persona, [{"role": "user", "content": prompt}], temperature_var, top_p_var, functions)    
     response_data = await api.generate_conversation(data)
     
     if response_data and response_data.get("choices"):

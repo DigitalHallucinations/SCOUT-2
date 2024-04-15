@@ -79,6 +79,7 @@ class ChatComponent(tk.Frame):
         self.temperature = 0.1  
         self.top_p = 0.9 
         self.top_k = 40  
+        self.font_size = 1.0
         self.entry_box = tk.Entry(self)
    
         self.create_widgets()
@@ -129,7 +130,7 @@ class ChatComponent(tk.Frame):
         buttons_frame = tk.Frame(self, bg="#000000")
         buttons_frame.pack(side="top", fill="x", padx=10, pady=(10, 10))
 
-        self.persona_button = tk.Menubutton(buttons_frame, text=self.personas[0]["name"], relief="flat", bg="#000000", fg="white")
+        self.persona_button = tk.Menubutton(buttons_frame, text=self.personas[0]["name"], relief="flat", bg="#000000", fg="white", font=("Helvetica", int(self.font_size * 10), "normal"))
         self.persona_button.pack(side="left", padx=(0, 10))
         ToolTip(self.persona_button, "Change Persona")
 
@@ -139,19 +140,32 @@ class ChatComponent(tk.Frame):
         for persona in self.personas:
             self.persona_menu.add_command(label=persona["name"], command=lambda p=persona["name"]: self.on_persona_selection(p))
 
-        self.logout_button = tk.Button(buttons_frame, text="Logout", relief="flat", bg="#000000", fg="white", command=self.on_logout)
+        self.logout_button = tk.Button(buttons_frame, text="Logout", relief="flat", bg="#000000", fg="white", command=self.on_logout, font=("Helvetica", int(self.font_size * 10), "normal"))
         self.logout_button.pack(side="right", padx=(0, 10))
 
-        self.settings_button = tk.Button(buttons_frame, text="", image=self.settings_icon, relief="flat", bg="#000000", command=self.open_settings)
+        self.settings_button = tk.Button(buttons_frame, text="", image=self.settings_icon, relief="flat", bg="#000000", command=self.open_settings, font=("Helvetica", int(self.font_size * 10), "normal"))
         self.settings_button.pack(side="right")
         ToolTip(self.settings_button, "Settings")
-
 
         self.create_chat_log()
         self.create_message_entry()
 
+    def create_chat_log(self):
+        chat_log_container = tk.Frame(self, bg="#000000")
+        chat_log_container.pack(side="top", fill="both", expand=True, padx=10, pady=(10, 0))
+
+        self.chat_log = tk.Text(chat_log_container, wrap="word", font=("Helvetica", int(self.font_size * 10), "normal"), bg="#000000", fg="#ffffff", padx=10, pady=10)
+        self.show_message("system", self.current_persona["message"])
+        self.chat_log.configure(state="disabled")
+        self.chat_log.tag_configure("SCOUT", foreground="#00BFFF")
+        self.chat_log.tag_configure("timestamp")
+
+        self.chat_log.pack(side="left", fill="both", expand=True)
+        self.chat_log.bind("<<Paste>>", self.paste_func)
+
+        self.show_context_menu()
+
     def create_message_entry(self):
- 
         icon_size = int(32 * self.scale_factor)
 
         send_arrow_img = Image.open("assets/SCOUT/icons/send_arrow.png")
@@ -180,26 +194,22 @@ class ChatComponent(tk.Frame):
         entry_frame = tk.Frame(self, bg="#000000")
         entry_frame.pack(side="bottom", fill="x", padx=10, pady=(10, 0))
 
-        self.message_entry = CustomEntry(entry_frame, height=10, wrap="word", font=("Helvetica", 10), bg="#000000", fg="white", insertbackground="white")
-        self.message_entry.pack(fill="x", expand=True)
+        self.message_entry = CustomEntry(entry_frame, height=10, wrap="word", font=("Helvetica", int(self.font_size * 10), "normal"), bg="#000000", fg="white", insertbackground="white")
+        self.message_entry.pack(fill="x", expand=True) 
 
-    def create_chat_log(self):
+    def set_font_size(self, font_size):
 
-        chat_log_container = tk.Frame(self, bg="#000000")
-        chat_log_container.pack(side="top", fill="both", expand=True, padx=10, pady=(10, 0))
-
-        self.chat_log = tk.Text(chat_log_container, wrap="word", font=("Helvetica", 10), bg="#000000", fg="#ffffff", padx=10, pady=10)    
-        self.show_message("system", self.current_persona["message"])  
-        self.chat_log.configure(state="disabled")               
-        self.chat_log.tag_configure("SCOUT", foreground="#00BFFF")  
-        self.chat_log.tag_configure("timestamp")
-
-        self.chat_log.pack(side="left", fill="both", expand=True)
-        self.chat_log.bind("<<Paste>>", self.paste_func)
-
-        self.show_context_menu() 
-
-
+        self.font_size = font_size
+        self.chat_log.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.message_entry.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.persona_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.logout_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.settings_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.listen_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.send_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.font_size_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.master.title(f"SCOUT - {self.user}")
+    
     def resize_icon(self, icon_path, scale_factor):
 
         img = Image.open(icon_path)

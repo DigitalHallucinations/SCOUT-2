@@ -1,3 +1,4 @@
 @echo off
-python "C:\SCOUT\main.py"
+cd /d "%~dp0"
+python "C:\SCOUT-2\main.py"
 pause

@@ -1,4 +1,7 @@
+#gui/Settings/chat_settings.py
+
 import tkinter as tk
+from tkinter import ttk
 import json
 import asyncio
 import logging
@@ -59,7 +62,7 @@ class ChatSettings(tk.Toplevel):
         self.master = master
         self.user = user
         self.llm_providers = []  
-        self.current_llm_provider = 'OpenAI'  
+        self.current_llm_provider = 'Google'  
         self.title("Chat Settings")
         self.configure(bg="#000000") 
         self.load_providers() 
@@ -88,7 +91,7 @@ class ChatSettings(tk.Toplevel):
         Creates the various widgets for the chat settings window, including the providers button, fetch models button, 
         topmost button, load chat button, voice button, toggle TTS button, temperature spinbox, top_p spinbox, and top_k spinbox.
         """
-        # Providers Button
+        
         self.load_providers()
         self.providers_button = tk.Menubutton(self, text="LLM Providers", relief="raised", bg="#000000", fg="white")
         self.providers_button.pack()
@@ -130,6 +133,19 @@ class ChatSettings(tk.Toplevel):
    
         self.populate_voice_menu()
 
+        self.font_size_frame = tk.Frame(self, bg="#000000")
+        self.font_size_frame.pack()
+
+        self.font_size_button = tk.Menubutton(self.font_size_frame, text="Font Size", relief="raised", bg="#000000", fg="white")
+        self.font_size_button.pack(side="left")
+
+        self.font_size_menu = tk.Menu(self.font_size_button, tearoff=0)
+        self.font_size_button.configure(menu=self.font_size_menu)
+
+        self.font_size_var = tk.DoubleVar(value=1.0)
+        self.font_size_spinbox = ttk.Spinbox(self.font_size_frame, from_=1.0, to=1.5, increment=0.1, textvariable=self.font_size_var, width=3, command=self.update_font_size)
+        self.font_size_spinbox.pack(side="left")
+
         self.temperature_var = tk.DoubleVar(value=0.1)
         self.temperature_frame = tk.Frame(self)
         self.temperature_frame.pack()
@@ -153,6 +169,13 @@ class ChatSettings(tk.Toplevel):
         self.top_k_label.pack(side="left")  
         self.top_k_spinbox = tk.Spinbox(self.top_k_frame, from_=0.0, to=100.0, increment=1, textvariable=self.top_k_var, width=6, bg="#000000", fg="white", buttonbackground="#000000", format="%.2f")
         self.top_k_spinbox.pack(side="left")   
+
+    def show_font_size_menu(self):
+        self.font_size_menu.post(self.font_size_button.winfo_rootx(), self.font_size_button.winfo_rooty() + self.font_size_button.winfo_height())
+    
+    def update_font_size(self):
+        selected_font_size = self.font_size_var.get()
+        self.master.set_font_size(selected_font_size)
 
     def toggle_tts(self):
         """
@@ -217,6 +240,7 @@ class ChatSettings(tk.Toplevel):
             self.master.temperature = self.temperature_var.get()
             self.master.top_p = self.top_p_var.get()
             self.master.top_k = self.top_k_var.get()
+            self.master.font_size = self.font_size_var.get()
             logger.info("Chat component updated - Temp: %f, Top P: %f, Top K: %d",
                         self.master.temperature, self.master.top_p, self.master.top_k)
         except Exception as e:

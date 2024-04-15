@@ -1,0 +1,229 @@
+{
+    "name": "github_client",
+    "description": "A module that allows the LLM model to interact with the GitHub API, providing functionality for retrieving user and repository data, creating and managing repositories, and working with issues.",
+    "functions": [
+        {
+            "name": "send_request",
+            "description": "Sends a request to the specified GitHub API endpoint.",
+            "parameters": [
+                {
+                    "name": "endpoint",
+                    "type": "string",
+                    "description": "The API endpoint to send the request to."
+                },
+                {
+                    "name": "method",
+                    "type": "string",
+                    "default": "GET",
+                    "description": "The HTTP method to use for the request (GET, POST, PUT, DELETE)."
+                },
+                {
+                    "name": "data",
+                    "type": "object",
+                    "default": null,
+                    "description": "The data to include in the request body (for POST and PUT requests)."
+                }
+            ]
+        },
+        {
+            "name": "get_user",
+            "description": "Retrieves user data from GitHub for the specified username.",
+            "parameters": [
+                {
+                    "name": "username",
+                    "type": "string",
+                    "description": "The username of the user to retrieve data for."
+                }
+            ]
+        },
+        {
+            "name": "get_repository",
+            "description": "Retrieves repository data from GitHub for the specified repository owner and name.",
+            "parameters": [
+                {
+                    "name": "repo_owner",
+                    "type": "string",
+                    "description": "The owner of the repository."
+                },
+                {
+                    "name": "repo_name",
+                    "type": "string",
+                    "description": "The name of the repository."
+                }
+            ]
+        },
+        {
+            "name": "create_repository",
+            "description": "Creates a new repository on GitHub with the specified name, description, and privacy settings.",
+            "parameters": [
+                {
+                    "name": "name",
+                    "type": "string",
+                    "description": "The name of the repository to create."
+                },
+                {
+                    "name": "description",
+                    "type": "string",
+                    "default": null,
+                    "description": "The description of the repository."
+                },
+                {
+                    "name": "private",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether the repository should be private or public."
+                }
+            ]
+        },
+        {
+            "name": "update_repository",
+            "description": "Updates the description and privacy settings of an existing repository on GitHub.",
+            "parameters": [
+                {
+                    "name": "repo_owner",
+                    "type": "string",
+                    "description": "The owner of the repository."
+                },
+                {
+                    "name": "repo_name",
+                    "type": "string",
+                    "description": "The name of the repository."
+                },
+                {
+                    "name": "description",
+                    "type": "string",
+                    "default": null,
+                    "description": "The new description for the repository."
+                },
+                {
+                    "name": "private",
+                    "type": "boolean",
+                    "default": null,
+                    "description": "The new privacy setting for the repository."
+                }
+            ]
+        },
+        {
+            "name": "delete_repository",
+            "description": "Deletes a repository from GitHub.",
+            "parameters": [
+                {
+                    "name": "repo_owner",
+                    "type": "string",
+                    "description": "The owner of the repository."
+                },
+                {
+                    "name": "repo_name",
+                    "type": "string",
+                    "description": "The name of the repository."
+                }
+            ]
+        },
+        {
+            "name": "get_repository_issues",
+            "description": "Retrieves the issues for a specific repository from GitHub.",
+            "parameters": [
+                {
+                    "name": "repo_owner",
+                    "type": "string",
+                    "description": "The owner of the repository."
+                },
+                {
+                    "name": "repo_name",
+                    "type": "string",
+                    "description": "The name of the repository."
+                }
+            ]
+        },
+        {
+            "name": "create_issue",
+            "description": "Creates a new issue in a repository on GitHub.",
+            "parameters": [
+                {
+                    "name": "repo_owner",
+                    "type": "string",
+                    "description": "The owner of the repository."
+                },
+                {
+                    "name": "repo_name",
+                    "type": "string",
+                    "description": "The name of the repository."
+                },
+                {
+                    "name": "title",
+                    "type": "string",
+                    "description": "The title of the issue."
+                },
+                {
+                    "name": "body",
+                    "type": "string",
+                    "default": null,
+                    "description": "The body content of the issue."
+                },
+                {
+                    "name": "assignee",
+                    "type": "string",
+                    "default": null,
+                    "description": "The username of the assignee for the issue."
+                },
+                {
+                    "name": "labels",
+                    "type": "array",
+                    "default": null,
+                    "description": "The labels to assign to the issue."
+                }
+            ]
+        },
+        {
+            "name": "update_issue",
+            "description": "Updates an existing issue in a repository on GitHub.",
+            "parameters": [
+                {
+                    "name": "repo_owner",
+                    "type": "string",
+                    "description": "The owner of the repository."
+                },
+                {
+                    "name": "repo_name",
+                    "type": "string",
+                    "description": "The name of the repository."
+                },
+                {
+                    "name": "issue_number",
+                    "type": "integer",
+                    "description": "The number of the issue to update."
+                },
+                {
+                    "name": "title",
+                    "type": "string",
+                    "default": null,
+                    "description": "The new title for the issue."
+                },
+                {
+                    "name": "body",
+                    "type": "string",
+                    "default": null,
+                    "description": "The new body content for the issue."
+                },
+                {
+                    "name": "assignee",
+                    "type": "string",
+                    "default": null,
+                    "description": "The new assignee for the issue."
+                },
+                {
+                    "name": "labels",
+                    "type": "array",
+                    "default": null,
+                    "description": "The new labels for the issue."
+                },
+                {
+                    "name": "state",
+                    "type": "string",
+                    "default": null,
+                    "description": "The new state of the issue (open or closed)."
+                }
+            ]
+        }
+    ]
+}

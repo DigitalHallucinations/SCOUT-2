@@ -1,6 +1,6 @@
 # modules\Personas\Toolbox\WeatherGenius\maps.py
 
-from modules.Time.time import get_current_info
+from modules.Tools.Base_Tools.time import get_current_info
 from modules.Tools.Base_Tools.Google_search import GoogleSearch
 from modules.Personas.WeatherGenius.Toolbox.weather import get_current_weather
 from modules.Personas.WeatherGenius.Toolbox.historical_weather import get_historical_weather

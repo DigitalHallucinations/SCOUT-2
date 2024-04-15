@@ -1,7 +1,9 @@
 #gui/Settings/chat_settings.py
 
 import tkinter as tk
-from tkinter import ttk
+import tkinter.font as tkFont
+import tkinter.colorchooser as colorchooser
+import configparser
 import json
 import asyncio
 import logging
@@ -66,9 +68,21 @@ class ChatSettings(tk.Toplevel):
         self.title("Chat Settings")
         self.configure(bg="#000000") 
         self.load_providers() 
+
+        # Load saved font settings
+        font_family, font_size, font_color = self.load_font_settings()
+        self.master.set_font_family(font_family)
+        self.master.set_font_size(font_size)
+        self.master.set_font_color(font_color)
+
+        self.font_color_var = tk.StringVar(value=font_color)
+
+        # Update ChatSettings window font
+        self.update_window_font(self.master.font_family, self.master.font_size, self.font_color_var.get()) 
+
         self.create_widgets()
         logger.info("ChatSettings widgets created")
-        
+            
     def load_providers(self):
         """
         Loads the available providers from the `providers.json` file.
@@ -133,17 +147,37 @@ class ChatSettings(tk.Toplevel):
    
         self.populate_voice_menu()
 
+        self.font_style_frame = tk.Frame(self, bg="#000000")
+        self.font_style_frame.pack()
+
+        self.font_style_button = tk.Menubutton(self, text="Font Style", relief="raised", bg="#000000", fg="white")
+        self.font_style_button.pack()
+
+        self.font_style_menu = tk.Menu(self.font_style_button, tearoff=0)
+        self.font_style_button.configure(menu=self.font_style_menu)
+
+        available_fonts = list(tkFont.families())
+
+        for font_family in available_fonts:
+            self.font_style_menu.add_command(label=font_family, command=lambda f=font_family: self.set_font_family(f))  
+
+        self.font_color_frame = tk.Frame(self, bg="#000000")
+        self.font_color_frame.pack()
+
+        self.font_color_button = tk.Button(self.font_color_frame, text="Font Color", command=self.choose_font_color, bg="#000000", fg="white")
+        self.font_color_button.pack(side="left")
+
         self.font_size_frame = tk.Frame(self, bg="#000000")
         self.font_size_frame.pack()
-
-        self.font_size_button = tk.Menubutton(self.font_size_frame, text="Font Size", relief="raised", bg="#000000", fg="white")
-        self.font_size_button.pack(side="left")
-
-        self.font_size_menu = tk.Menu(self.font_size_button, tearoff=0)
-        self.font_size_button.configure(menu=self.font_size_menu)
-
+        
+        self.font_size_label = tk.Label(self.font_size_frame, text="Font Size:", bg="#000000", fg="white")
+        self.font_size_label.pack(side="left")
+        
         self.font_size_var = tk.DoubleVar(value=1.0)
-        self.font_size_spinbox = ttk.Spinbox(self.font_size_frame, from_=1.0, to=1.5, increment=0.1, textvariable=self.font_size_var, width=3, command=self.update_font_size)
+        self.font_size_spinbox = tk.Spinbox(self.font_size_frame, from_=1.0, to=1.5, increment=0.1, 
+                                            textvariable=self.font_size_var, width=6, 
+                                            bg="#000000", fg="white", buttonbackground="#000000", 
+                                            command=self.update_font_size, format="%.2f")
         self.font_size_spinbox.pack(side="left")
 
         self.temperature_var = tk.DoubleVar(value=0.1)
@@ -170,12 +204,183 @@ class ChatSettings(tk.Toplevel):
         self.top_k_spinbox = tk.Spinbox(self.top_k_frame, from_=0.0, to=100.0, increment=1, textvariable=self.top_k_var, width=6, bg="#000000", fg="white", buttonbackground="#000000", format="%.2f")
         self.top_k_spinbox.pack(side="left")   
 
-    def show_font_size_menu(self):
-        self.font_size_menu.post(self.font_size_button.winfo_rootx(), self.font_size_button.winfo_rooty() + self.font_size_button.winfo_height())
-    
+        # Apply loaded font settings to widgets
+        self.update_window_font(self.master.font_family, self.master.font_size, self.font_color_var.get())
+        self.font_size_var.set(self.master.font_size)  # Update the font size spinbox
+        self.font_style_button.config(text=self.master.font_family)  # Update the font style button text
+
+
+    def save_font_settings(self, font_family, font_size, font_color, config_file="config.ini"):
+        logger.info(f"Saving font settings: Family: {font_family}, Size: {font_size}, Color: {font_color}")
+
+        config = configparser.ConfigParser()
+        config.read(config_file)
+
+        if not config.has_section("Font"):
+            logger.info("Creating new 'Font' section in config file")
+            config.add_section("Font")
+
+        config.set("Font", "family", font_family)
+        config.set("Font", "size", str(font_size))
+        config.set("Font", "color", font_color)
+
+        with open(config_file, "w") as f:
+            config.write(f)
+            logger.info(f"Font settings saved to {config_file}")
+
+    def load_font_settings(self, config_file="config.ini"):
+        logger.info(f"Loading font settings from {config_file}")
+
+        config = configparser.ConfigParser()
+        config.read(config_file)
+
+        try:
+            font_family = config.get("Font", "family")
+            font_size = config.getfloat("Font", "size")
+            font_color = config.get("Font", "color")
+            logger.info(f"Loaded font settings: Family: {font_family}, Size: {font_size}, Color: {font_color}")
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            logger.warning("No font settings found in config file, using defaults")
+            font_family = "Helvetica"
+            font_size = 12.0
+            font_color = "#ffffff"
+            self.save_font_settings(font_family, font_size, font_color, config_file)
+
+        return font_family, font_size, font_color
+
+    def update_window_font(self, font_family, font_size, font_color):
+        for widget in self.winfo_children():
+            try:
+                widget.configure(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+            except tk.TclError:
+                pass
+
+        if hasattr(self, 'font_size_label'):
+            self.font_size_label.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'font_size_spinbox'):
+            self.font_size_spinbox.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'font_color_button'):
+            self.font_color_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'temperature_label'):
+            self.temperature_label.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'temperature_spinbox'):
+            self.temperature_spinbox.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'top_p_label'):
+            self.top_p_label.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'top_p_spinbox'):
+            self.top_p_spinbox.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'top_k_label'):
+            self.top_k_label.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'top_k_spinbox'):
+            self.top_k_spinbox.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'providers_button'):
+            self.providers_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'fetch_models_button'):
+            self.fetch_models_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'topmost_button'):
+            self.topmost_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'load_chat_button'):
+            self.load_chat_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'voice_button'):
+            self.voice_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'toggle_tts_button'):
+            self.toggle_tts_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+        if hasattr(self, 'font_style_button'):
+            self.font_style_button.config(font=(font_family, int(font_size * 10), "normal"), fg=font_color)
+
+            
+    def set_font_size(self):
+        selected_font_size = self.font_size_var.get()
+        self.master.set_font_size(selected_font_size)
+
+        for widget in self.winfo_children():
+            try:
+                widget.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+            except tk.TclError:
+                pass  # Handle widgets that don't support the 'font' option
+
+        self.font_style_button.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.font_size_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+
+        self.temperature_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_p_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_k_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+
+        self.temperature_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_p_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_k_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.font_size_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+
+
+        self.update_window_font(self.master.font_family, selected_font_size)
+        self.save_font_settings(self.master.font_family, selected_font_size)
+
+    def set_font_family(self, font_family):
+        self.master.set_font_family(font_family)
+
+        for widget in self.winfo_children():
+            try:
+                widget.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+            except tk.TclError:
+                pass
+
+        self.font_style_button.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+        self.font_size_label.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+
+        self.temperature_label.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+        self.top_p_label.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+        self.top_k_label.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+
+        self.temperature_spinbox.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+        self.top_p_spinbox.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+        self.top_k_spinbox.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+        self.font_size_spinbox.config(font=(font_family, int(self.master.font_size * 10), "normal"))
+
+        self.font_style_button.config(text=font_family)
+
+        self.update_window_font(font_family, self.master.font_size, self.font_color_var.get())
+
+        self.save_font_settings(font_family, self.master.font_size, self.font_color_var.get())
+
     def update_font_size(self):
         selected_font_size = self.font_size_var.get()
         self.master.set_font_size(selected_font_size)
+
+        for widget in self.winfo_children():
+            try:
+                widget.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+            except tk.TclError:
+                pass
+
+        self.font_style_button.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.font_size_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+
+        self.temperature_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_p_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_k_label.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+
+        self.temperature_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_p_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.top_k_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+        self.font_size_spinbox.config(font=(self.master.font_family, int(selected_font_size * 10), "normal"))
+
+        # Update ChatSettings window font
+        self.update_window_font(self.master.font_family, selected_font_size, self.font_color_var.get())
+
+        # Save the font settings
+        self.save_font_settings(self.master.font_family, selected_font_size, self.font_color_var.get())
+
+    def choose_font_color(self):
+        color = colorchooser.askcolor(title="Choose Font Color")[1]
+        if color:
+            self.font_color_var.set(color)
+            self.update_font_color()
+
+    def update_font_color(self):
+        selected_font_color = self.font_color_var.get()
+        self.master.set_font_color(selected_font_color)
+        self.update_window_font(self.master.font_family, self.master.font_size, selected_font_color)
+        self.save_font_settings(self.master.font_family, self.master.font_size, selected_font_color)
 
     def toggle_tts(self):
         """
@@ -191,7 +396,6 @@ class ChatSettings(tk.Toplevel):
             self.toggle_tts_button.configure(bg="green")
             logger.info("TTS turned on")
         logger.info("Exiting toggle_tts")
-
 
     def populate_voice_menu(self):
         """
@@ -229,7 +433,6 @@ class ChatSettings(tk.Toplevel):
         except Exception as e:
             logger.error("Failed to select voice: %s", voice_name, exc_info=True)
     
-
     def update_chat_component(self):
         """
         Updates the chat component settings based on the values of the temperature, top_p, and top_k spinboxes. 
@@ -283,7 +486,6 @@ class ChatSettings(tk.Toplevel):
                 self.fetch_models_menu.add_cascade(label=model, menu=model_menu)
         except Exception as e:
             logger.error("Failed to populate models menu", exc_info=True)
-
 
     def check_current_model(self):
         """
@@ -388,7 +590,6 @@ class ChatSettings(tk.Toplevel):
         except Exception as e:
             logger.error("Failed to show model context menu", exc_info=True)
 
-
     def fetch_model_details(self, chat_log, model_name):
         """
         Fetches the details of a selected model. 
@@ -403,7 +604,6 @@ class ChatSettings(tk.Toplevel):
             logger.info("Asynchronous task to fetch model details started for: %s", model_name)
         except Exception as e:
             logger.error("Failed to start task for fetching model details for: %s", model_name, exc_info=True)
-
 
     def show(self):
         """

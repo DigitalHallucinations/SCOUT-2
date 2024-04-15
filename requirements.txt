@@ -20,3 +20,6 @@ customtkinter
 func_timeout
 pyspellchecker
 numpy
+feedparser
+bs4
+selenium

@@ -1,9 +1,9 @@
 # modules/OpenAI/maps.py
 
-from modules.Time.time import get_current_time, get_current_date
+from modules.Tools.Base_Tools.time import get_current_time, get_current_date
 from modules.location_services.ip_api import get_current_location
 from modules.location_services.geocode import geocode_location
-from modules.News.hacker_news import get_top_stories, get_new_stories, get_best_stories
+from modules.Personas.NewsManager.Toolbox.News_APIs.hacker_news import get_top_stories, get_new_stories, get_best_stories
 
 # A dictionary to map function names to actual function objects
 function_map = {

@@ -4,7 +4,7 @@ import asyncio
 import logging
 import time
 import tkinter as tk
-
+import configparser
 from logging.handlers import RotatingFileHandler
 from PIL import Image, ImageTk
 from .custom_entry import CustomEntry
@@ -49,7 +49,6 @@ def adjust_logging_level(level):
 
 class ChatComponent(tk.Frame):
     def __init__(self, master=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, scale_factor=1.0):
-
         super().__init__(master)
         self.scale_factor = scale_factor
         self.persona = persona
@@ -72,19 +71,36 @@ class ChatComponent(tk.Frame):
         self.prompt = tk.StringVar()
         self.system_name = "SCOUT"
         self.system_name_color = "#00BFFF"
-        self.system_name_font = ("Helvetica", 10, "bold")
         self.system_name_tag = "SCOUT"
         self.timestamp_color = "#888888"
-        self.timestamp_font = ("Helvetica", 8)
         self.temperature = 0.1  
         self.top_p = 0.9 
         self.top_k = 40  
-        self.font_size = 1.0
         self.entry_box = tk.Entry(self)
-   
+
+        self.font_family, self.font_size, self.font_color = self.load_font_settings()
+
         self.create_widgets()
         logger.info("ChatComponent initialized")
-    
+
+    def load_font_settings(self, config_file="config.ini"):
+        logger.info(f"Loading font settings from {config_file}")
+        
+        config = configparser.ConfigParser()
+        config.read(config_file)
+
+        try:
+            font_family = config.get("Font", "family")
+            font_size = config.getfloat("Font", "size")
+            font_color = config.get("Font", "color")
+            logger.info(f"Loaded font settings: Family: {font_family}, Size: {font_size}, Color: {font_color}")
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            logger.warning("No font settings found in config file, using defaults")
+            font_family = "Helvetica"
+            font_size = 1.0
+            font_color = "#ffffff"
+
+        return font_family, font_size, font_color
     
     def on_persona_selection(self, persona_name):
         
@@ -119,8 +135,18 @@ class ChatComponent(tk.Frame):
         self.conversation_id = new_conversation_id
         logger.info(f"ChatComponent updated with new conversation_id: {new_conversation_id}")
 
-    def create_widgets(self):
+    def apply_font_settings(self):
+        font = (self.font_family, int(self.font_size * 10), "normal")
+        self.chat_log.configure(font=font, fg=self.font_color)
+        self.message_entry.configure(font=font, fg=self.font_color)
+        self.persona_button.configure(font=font, fg=self.font_color)
+        self.logout_button.configure(font=font, fg=self.font_color)
+        self.settings_button.configure(font=font)
+        self.listen_button.configure(font=font)
+        self.send_button.configure(font=font)
+        self.master.title(f"SCOUT - {self.user}")
 
+    def create_widgets(self):
         self.configure(bg="#000000")
         icon_size = int(32 * self.scale_factor)
         settings_img = Image.open("assets/SCOUT/icons/settings_icon.png")
@@ -129,8 +155,8 @@ class ChatComponent(tk.Frame):
 
         buttons_frame = tk.Frame(self, bg="#000000")
         buttons_frame.pack(side="top", fill="x", padx=10, pady=(10, 10))
-
-        self.persona_button = tk.Menubutton(buttons_frame, text=self.personas[0]["name"], relief="flat", bg="#000000", fg="white", font=("Helvetica", int(self.font_size * 10), "normal"))
+ 
+        self.persona_button = tk.Menubutton(buttons_frame, text=self.personas[0]["name"], relief="flat", bg="#000000", fg="white")
         self.persona_button.pack(side="left", padx=(0, 10))
         ToolTip(self.persona_button, "Change Persona")
 
@@ -140,21 +166,23 @@ class ChatComponent(tk.Frame):
         for persona in self.personas:
             self.persona_menu.add_command(label=persona["name"], command=lambda p=persona["name"]: self.on_persona_selection(p))
 
-        self.logout_button = tk.Button(buttons_frame, text="Logout", relief="flat", bg="#000000", fg="white", command=self.on_logout, font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.logout_button = tk.Button(buttons_frame, text="Logout", relief="flat", bg="#000000", fg="white", command=self.on_logout)
         self.logout_button.pack(side="right", padx=(0, 10))
 
-        self.settings_button = tk.Button(buttons_frame, text="", image=self.settings_icon, relief="flat", bg="#000000", command=self.open_settings, font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.settings_button = tk.Button(buttons_frame, text="", image=self.settings_icon, relief="flat", bg="#000000", command=self.open_settings)
         self.settings_button.pack(side="right")
         ToolTip(self.settings_button, "Settings")
 
         self.create_chat_log()
         self.create_message_entry()
 
+        self.apply_font_settings()
+
     def create_chat_log(self):
         chat_log_container = tk.Frame(self, bg="#000000")
         chat_log_container.pack(side="top", fill="both", expand=True, padx=10, pady=(10, 0))
 
-        self.chat_log = tk.Text(chat_log_container, wrap="word", font=("Helvetica", int(self.font_size * 10), "normal"), bg="#000000", fg="#ffffff", padx=10, pady=10)
+        self.chat_log = tk.Text(chat_log_container, wrap="word", bg="#000000", fg="#ffffff", padx=10, pady=10)
         self.show_message("system", self.current_persona["message"])
         self.chat_log.configure(state="disabled")
         self.chat_log.tag_configure("SCOUT", foreground="#00BFFF")
@@ -194,11 +222,11 @@ class ChatComponent(tk.Frame):
         entry_frame = tk.Frame(self, bg="#000000")
         entry_frame.pack(side="bottom", fill="x", padx=10, pady=(10, 0))
 
-        self.message_entry = CustomEntry(entry_frame, height=10, wrap="word", font=("Helvetica", int(self.font_size * 10), "normal"), bg="#000000", fg="white", insertbackground="white")
+        self.message_entry = CustomEntry(entry_frame, height=10, wrap="word", bg="#000000", fg="white", insertbackground="white")
         self.message_entry.pack(fill="x", expand=True) 
-
+    
+    #delete?
     def set_font_size(self, font_size):
-
         self.font_size = font_size
         self.chat_log.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
         self.message_entry.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
@@ -207,17 +235,26 @@ class ChatComponent(tk.Frame):
         self.settings_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
         self.listen_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
         self.send_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
-        self.font_size_button.configure(font=("Helvetica", int(self.font_size * 10), "normal"))
+        self.chat_log.configure(font=(self.font_family, int(self.font_size * 10), "normal"))
         self.master.title(f"SCOUT - {self.user}")
     
-    def resize_icon(self, icon_path, scale_factor):
+    #delete?
+    def set_font_family(self, font_family):
+        """Sets the font family for the chat log."""
+        self.font_family = font_family
+        self.chat_log.config(font=(font_family, int(self.font_size * 10), "normal"))
 
+    #delete?
+    def set_font_color(self, font_color):
+        self.font_color = font_color
+        self.apply_font_settings()
+
+    def resize_icon(self, icon_path, scale_factor):
         img = Image.open(icon_path)
         img = img.resize((int(img.width * scale_factor), int(img.height * scale_factor)), Image.Resampling.LANCZOS)
         return ImageTk.PhotoImage(img)
 
     def on_logout(self):
-
         logger.info(f"Logout initiated from ChatComponent.")
         if self.logout_callback:
             self.logout_callback()
@@ -225,24 +262,20 @@ class ChatComponent(tk.Frame):
             logger.error(f"No logout callback provided.")
             
     def clear_chat_interface(self):
-  
         if hasattr(self.master, 'log_out'):
             self.master.log_out(None)
 
     def open_settings(self):
- 
         self.chat_settings_instance = ChatSettings(master=self, user=self.user)
         self.chat_settings_instance.withdraw()  
         self.chat_settings_instance.deiconify()  
 
     def show_context_menu(self):
-
         context_menu = tk.Menu(self.chat_log, tearoff=0)
         context_menu.add_command(label="Copy", command=self.copy_selected)
         self.chat_log.bind("<Button-3>", lambda event: context_menu.tk_popup(event.x_root, event.y_root))
 
     def copy_selected(self):
-
         self.clipboard_clear()  
         try:
             selected_text = self.chat_log.get(tk.SEL_FIRST, tk.SEL_LAST)    
@@ -265,7 +298,6 @@ class ChatComponent(tk.Frame):
             pass  
 
     def show_message(self, role, message):
-  
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         self.chat_log.configure(state="normal")
         self.chat_log.insert("end", f"{timestamp}\n", "timestamp")

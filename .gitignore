@@ -35,3 +35,6 @@ __pycache__/
 /modules/user_accounts/user_profiles/*.json
 /modules/user_accounts/user_profiles/*.txt
 /modules/user_accounts/user_profiles/*.db
+
+# Ignore
+feeds.json

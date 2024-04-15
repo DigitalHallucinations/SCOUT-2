@@ -1,6 +1,6 @@
 # modules\Personas\CBGenius\Toolbox\maps.py
 
-from modules.Time.time import get_current_info
+from modules.Tools.Base_Tools.time import get_current_info
 from modules.Tools.Base_Tools.Google_search import GoogleSearch
 
 # Create an instance of GoogleSearch

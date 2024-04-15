@@ -14,16 +14,13 @@ log_filename = 'SCOUT.log'
 log_max_size = 10 * 1024 * 1024  # 10 MB
 log_backup_count = 5
 
-# Create rotating file handler for file logging
 rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 rotating_handler.setFormatter(formatter)
 
-# Create stream handler for console logging
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 
-# Attach handlers to the logger
 logger.addHandler(rotating_handler)
 logger.addHandler(stream_handler)
 logger.setLevel(logging.INFO)
@@ -71,28 +68,3 @@ class GoogleSearch:
         except Exception as e:
             logger.error("An error occurred: %s", e)
             return -1, str(e)
-        
-
-    async def _summarize_results(self, results: list) -> str:
-        results_text = ' '.join(results)
-        logger.debug( "Results text to be summarized: %s", results_text)
-        chunk_size = 2500
-        overlap = 100
-        chunks = [results_text[i:i+chunk_size] for i in range(0, len(results_text), chunk_size-overlap)]
-        
-        logger.debug("Chunks to be summarized: %s", chunks) 
-        summarized_chunks = []
-        
-        for chunk in chunks:
-            data = {
-                "model": "gpt-3.5-turbo-16k",
-                "messages": [{"role": "user", "content": f"Summarize the following: {chunk}"}],
-            }
-            response_data = await self.openai_api.generate_response(data)
-            logger.debug("OpenAI Response for chunk: %s", response_data)  # Log the response from OpenAI
-            
-            if response_data:
-                message = response_data["choices"][0]["message"]
-                summarized_chunks.Google_searchend(message["content"])
-        
-        return ' '.join(summarized_chunks)

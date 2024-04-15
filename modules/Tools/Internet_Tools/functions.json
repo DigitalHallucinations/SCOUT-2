@@ -1,0 +1,81 @@
+[
+    {
+        "name": "internet_search",
+        "description": "An Internet search result API using SerpAPI. When you need a short and clear answer to a specific question, you can use it. The input should be a search query. It also navigates to the top search result and extracts relevant information.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search content."
+                },
+                "summarize": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to generate a summary of the search results and extracted information."
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "webpage_retriever",
+        "description": "A module that accepts a URL address and retrieves the text content and optionally a screenshot of the webpage.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "description": "The URL address of the webpage to retrieve."
+                },
+                "capture_screenshot": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to capture a screenshot of the webpage."
+                }
+            },
+            "required": ["url"]
+        }
+    },
+    {
+        "name": "web_scraper",
+        "description": "A generic web scraping tool that enables the LLM model to extract data from any website by specifying the target elements using CSS selectors or XPath expressions. The tool can handle pagination, process JavaScript-rendered content, and export the scraped data in various formats like CSV or JSON.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "description": "The URL of the website to scrape."
+                },
+                "target_elements": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "A list of CSS selectors or XPath expressions to locate the desired elements on the page."
+                },
+                "method": {
+                    "type": "string",
+                    "enum": ["css", "xpath"],
+                    "default": "css",
+                    "description": "The method to use for locating elements, either 'css' for CSS selectors or 'xpath' for XPath expressions."
+                },
+                "paginate": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether pagination is required."
+                },
+                "max_pages": {
+                    "type": "integer",
+                    "description": "The maximum number of pages to scrape (optional)."
+                },
+                "javascript": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether the page requires JavaScript rendering."
+                }
+            },
+            "required": ["url", "target_elements"]
+        }
+    }
+]

@@ -1,0 +1,269 @@
+[
+    {
+        "name": "google_search",
+        "description": "A Google search result API. When you need a short and clear answer to a specific question, you can use it. The input should be a search query.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search content."
+                },
+                "k": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Select first k results in the search results as response."
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "terminal_command",
+        "description": "Execute a terminal command and return the output, error, and status code.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The terminal command to execute."
+                },
+                "timeout": {
+                    "type": "integer",
+                    "default": 60,
+                    "description": "The maximum time (in seconds) to wait for the command to complete. This overrides the default_timeout if both are provided."
+                },
+                "default_timeout": {
+                    "type": "integer",
+                    "description": "The default timeout value (in seconds) to use if no specific timeout is provided. This value is used as the fallback timeout."
+                },
+                "encoding": {
+                    "type": "string",
+                    "default": "utf-8",
+                    "description": "The encoding to use for decoding the command's output and error messages."
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable verbose mode to log additional information about the command execution process."
+                },
+                "output_limit": {
+                    "type": "integer",
+                    "default": "1048576, // 1024 * 1024",
+                    "description": "The maximum size (in bytes) of the command's output."
+                },
+                "max_retries": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "The maximum number of retries to attempt if the command fails due to temporary issues."
+                }
+            },
+            "required": ["command"]
+        }
+    },
+    {
+        "name": "init_repo",
+        "description": "Initialize a new Git repository at the specified path.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path where the new Git repository should be initialized."
+                }
+            },
+            "required": ["repo_path"]
+        }
+    },
+    {
+        "name": "stage_changes",
+        "description": "Stage changes in the specified Git repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The files to stage in the Git repository."
+                }
+            },
+            "required": ["repo_path", "files"]
+        }
+    },
+    {
+        "name": "commit_changes",
+        "description": "Commit changes in the specified Git repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "The commit message."
+                }
+            },
+            "required": ["repo_path", "message"]
+        }
+    },
+    {
+        "name": "create_branch",
+        "description": "Create a new branch in the specified Git repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "branch_name": {
+                    "type": "string",
+                    "description": "The name of the new branch."
+                }
+            },
+            "required": ["repo_path", "branch_name"]
+        }
+    },
+    {
+        "name": "switch_branch",
+        "description": "Switch to a different branch in the specified Git repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "branch_name": {
+                    "type": "string",
+                    "description": "The name of the branch to switch to."
+                }
+            },
+            "required": ["repo_path", "branch_name"]
+        }
+    },
+    {
+        "name": "merge_branches",
+        "description": "Merge two branches in the specified Git repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "source_branch": {
+                    "type": "string",
+                    "description": "The name of the source branch to merge from."
+                },
+                "target_branch": {
+                    "type": "string",
+                    "description": "The name of the target branch to merge into."
+                }
+            },
+            "required": ["repo_path", "source_branch", "target_branch"]
+        }
+    },
+    {
+        "name": "push_to_remote",
+        "description": "Push changes to a remote repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "remote_url": {
+                    "type": "string",
+                    "description": "The URL of the remote repository."
+                },
+                "branch": {
+                    "type": "string",
+                    "description": "The branch to push to the remote repository."
+                }
+            },
+            "required": ["repo_path", "remote_url", "branch"]
+        }
+    },
+    {
+        "name": "pull_from_remote",
+        "description": "Pull changes from a remote repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "remote_url": {
+                    "type": "string",
+                    "description": "The URL of the remote repository."
+                },
+                "branch": {
+                    "type": "string",
+                    "description": "The branch to pull from the remote repository."
+                }
+            },
+            "required": ["repo_path", "remote_url", "branch"]
+        }
+    },
+    {
+        "name": "clone_repo",
+        "description": "Clone a remote repository to a local path.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "remote_url": {
+                    "type": "string",
+                    "description": "The URL of the remote repository to clone."
+                },
+                "local_path": {
+                    "type": "string",
+                    "description": "The local path where the repository should be cloned."
+                }
+            },
+            "required": ["remote_url", "local_path"]
+        }
+    },
+    {
+        "name": "get_status",
+        "description": "Get the status of the specified Git repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                }
+            },
+            "required": ["repo_path"]
+        }
+    },
+    {
+        "name": "get_log",
+        "description": "Get the commit log of the specified Git repository.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repo_path": {
+                    "type": "string",
+                    "description": "The path of the Git repository."
+                },
+                "num_commits": {
+                    "type": "integer",
+                    "description": "The number of commits to retrieve (optional)."
+                }
+            },
+            "required": ["repo_path"]
+        }
+    }
+]

@@ -1,0 +1,5 @@
+1. **Web-based File Downloader**: A tool that allows the LLM model to download files from the internet by providing the file URL. The tool can support various file types, handle large file sizes, and manage download progress. This tool can be useful for the model to retrieve files requested by users or to access additional data sources for analysis or processing.
+
+2. **Web Form Filler**: A tool that enables the LLM model to automatically fill out web forms based on predefined data or user input. The tool can navigate to a specific web page, locate the form fields, and populate them with the appropriate values. This tool can assist users in completing repetitive forms or automating data entry tasks, saving them time and effort.
+
+3. **Web-based Image Downloader**: A tool that allows the LLM model to download images from a given web page or URL. The tool can extract all the images present on the page, filter them based on specific criteria (e.g., size, format), and save them locally. This tool can be useful for the model to collect visual data or build image datasets based on user requirements or to assist users in acquiring specific images from the web.

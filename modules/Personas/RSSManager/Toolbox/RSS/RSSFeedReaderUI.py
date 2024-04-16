@@ -1,16 +1,21 @@
+# modules/Personas/RSSManager/Toolbox/RSS/RSSFeedReaderUI.py
+
 import os
 import asyncio
+from asyncio import Queue
 import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json
 import configparser
+import feedparser
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 #from modules.Personas.RSSManager.Toolbox.RSS.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
 from rss_feed_reader import RSSFeedReader, RSSFeedReaderError
 import logging
 from logging.handlers import RotatingFileHandler
+
 
 logger = logging.getLogger('RSSFeedReaderUI.py')
 
@@ -54,7 +59,7 @@ class RSSFeedReaderUI:
         if not self.url_cooldown:
             self.url_cooldown = True
             threading.Thread(target=self.open_url_thread, args=(url,)).start()
-            self.master.after(5000, self.reset_url_cooldown)  # Start the cooldown timer
+            self.master.after(5000, self.reset_url_cooldown) 
         else:
             messagebox.showinfo("Cooldown", "Please wait before clicking the URL again.")
 
@@ -263,32 +268,27 @@ class RSSFeedReaderUI:
             for entry in entries:
                 if entry.title == selected_entry:
                     entry_details = self.rss_feed_reader.get_entry_details(entry)
-                    self.entry_details_text.configure(state='normal')  # Enable the widget
+                    self.entry_details_text.configure(state='normal')  
                     self.entry_details_text.delete(1.0, tk.END)
                     self.entry_details_text.insert(tk.END, f"Title: {entry_details['title']}\n\n")
                     
-                    # Insert the "Link:" text
                     self.entry_details_text.insert(tk.END, "Link: ")
                     
-                    # Insert the URL with lighter blue text and tag it as "url"
                     url_start = self.entry_details_text.index(tk.END)
                     self.entry_details_text.insert(tk.END, entry_details['link'], "url")
                     url_end = self.entry_details_text.index(tk.END)
                     self.entry_details_text.tag_config("url", foreground="lightblue")
                     
-                    # Bind hover events to the URL
                     self.entry_details_text.tag_bind("url", "<Enter>", self.on_url_hover)
                     self.entry_details_text.tag_bind("url", "<Leave>", self.on_url_leave)
                     
-                    # Bind a click event to the URL
                     self.entry_details_text.tag_bind("url", "<Button-1>", lambda e: self.open_url(entry_details['link']))
                     
-                    # Insert a newline after the URL
                     self.entry_details_text.insert(tk.END, "\n\n")
                     
                     self.entry_details_text.insert(tk.END, f"Published: {entry_details['published']}\n\n")
                     self.entry_details_text.insert(tk.END, f"Summary: {entry_details['summary']}")
-                    self.entry_details_text.configure(state='disabled')  # Disable the widget
+                    self.entry_details_text.configure(state='disabled')  
                     break
         else:
             messagebox.showerror("Error", "Please select an entry to show details.")
@@ -355,7 +355,6 @@ class RSSFeedReaderUI:
             for feed in feeds:
                 self.feeds_listbox.insert(tk.END, f"{feed.url} - {feed.category}")
 
-            # Refresh feeds periodically based on the refresh interval
             self.master.after(self.refresh_interval_mins * 60000, self.refresh_feeds)
         except Exception as e:
             logger.exception("Error occurred while refreshing feeds.")
@@ -367,11 +366,18 @@ class RSSFeedReaderUI:
             if os.path.exists(config_path):
                 with open(config_path, "r") as file:
                     feed_data = json.load(file)
-                    for feed in feed_data:
-                        self.rss_feed_reader.add_feed(feed["url"], feed["category"])
+                    self.loaded_entries = {}  # Dictionary to store loaded entries
+                    for category, data in feed_data.items():
+                        for feed in data["feeds"]:
+                            self.rss_feed_reader.add_feed(feed["url"], category)
+                            entries = data["entries"].get(feed["url"], [])
+                            self.loaded_entries[feed["url"]] = []  # Initialize an empty list for each feed URL
+                            for entry_details in entries:
+                                entry = feedparser.FeedParserDict(entry_details)
+                                self.loaded_entries[feed["url"]].append(entry)  # Store the entry in the loaded_entries dictionary
         except Exception as e:
             logger.exception("Error occurred while loading feeds.")
-
+    
     def on_feed_select(self, event):
         try:
             selected_feed = self.feeds_listbox.get(tk.ACTIVE)
@@ -424,13 +430,28 @@ class RSSFeedReaderUI:
     def save_feeds(self):
         try:
             feeds = self.rss_feed_reader.get_feeds()
-            feed_data = []
+            feed_data = {}
+            
             for feed in feeds:
-                feed_data.append({"url": feed.url, "category": feed.category})
-
+                category = feed.category
+                if category not in feed_data:
+                    feed_data[category] = {"feeds": [], "entries": {}}
+                
+                feed_data[category]["feeds"].append({"url": feed.url})
+                
+                entries = self.rss_feed_reader.get_feed_entries(feed.url)
+                feed_data[category]["entries"][feed.url] = []
+                
+                for entry in entries:
+                    try:
+                        entry_details = self.rss_feed_reader.get_entry_details(entry)
+                        feed_data[category]["entries"][feed.url].append(entry_details)
+                    except RSSFeedReaderError as e:
+                        logger.warning(f"Skipping entry due to missing details: {str(e)}")
+            
             config_path = os.path.join("C:\\", "SCOUT-2", "feeds.json")
             with open(config_path, "w") as file:
-                json.dump(feed_data, file)
+                json.dump(feed_data, file, indent=2)
         except Exception as e:
             logger.exception("Error occurred while saving feeds.")
 

@@ -45,16 +45,28 @@
             "properties": {
                 "action": {
                     "type": "string",
-                    "enum": ["add_feed", "remove_feed", "get_feeds", "get_feed_entries", "get_entry_details"],
+                    "enum": ["add_feed", "remove_feed", "get_feeds", "update_feed", "get_feed_entries", "get_entry_details", "remove_entry"],
                     "description": "The action to perform on the RSS feed."
                 },
                 "feed_url": {
                     "type": "string",
                     "description": "The URL of the RSS feed."
                 },
+                "category": {
+                    "type": "string",
+                    "description": "The category of the RSS feed (optional)."
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "description": "The enabled status of the RSS feed (optional)."
+                },
                 "entry": {
                     "type": "object",
                     "description": "The entry object (required for 'get_entry_details' action)."
+                },
+                "entry_title": {
+                    "type": "string",
+                    "description": "The title of the entry to remove (required for 'remove_entry' action)."
                 }
             },
             "required": ["action"]

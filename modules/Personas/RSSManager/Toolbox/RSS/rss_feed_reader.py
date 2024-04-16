@@ -1,13 +1,13 @@
-# modules/Tools/Intenet_Tools/RSS/rss_feed_reader.py
-
 import feedparser
+import chardet
+import requests
 import logging
 from logging.handlers import RotatingFileHandler
 from urllib.parse import urlparse
 
 logger = logging.getLogger('rss_feed_reader.py')
 
-log_filename = 'SCOUT.log'
+log_filename = 'RSS.log'
 log_max_size = 10 * 1024 * 1024  # 10 MB
 log_backup_count = 5
 
@@ -123,11 +123,21 @@ class RSSFeedReader:
     def get_feed_entries(self, feed_url):
         logger.info(f"Retrieving entries from RSS feed: {feed_url}")
         try:
-            feed = self.parse_feed(feed_url)
-            if feed:
-                entries = feed.entries
-                logger.info(f"Retrieved {len(entries)} entries from RSS feed: {feed_url}")
-                return entries
+            response = requests.get(feed_url)
+            
+            encoding = chardet.detect(response.content)['encoding']
+            
+            content = response.content.decode(encoding)
+            
+            feed = feedparser.parse(content)
+            
+            if feed.bozo:
+                logger.warning(f"Error parsing RSS feed: {feed.bozo_exception}")
+                raise RSSFeedReaderError(f"Failed to parse RSS feed: {feed_url}. Please check the feed format and try again.")
+            
+            entries = feed.entries
+            logger.info(f"Retrieved {len(entries)} entries from RSS feed: {feed_url}")
+            return entries
         except RSSFeedReaderError as e:
             logger.exception(f"Error occurred while retrieving entries from RSS feed: {str(e)}")
             raise e
@@ -136,19 +146,16 @@ class RSSFeedReader:
             raise RSSFeedReaderError(f"Failed to retrieve entries from RSS feed: {feed_url}. An unexpected error occurred.")
 
     def get_entry_details(self, entry):
-        logger.info(f"Retrieving details for entry: {entry.title}")
+        logger.info(f"Retrieving details for entry: {getattr(entry, 'title', 'N/A')}")
         try:
             entry_details = {
-                'title': entry.title,
-                'link': entry.link,
-                'published': entry.published,
-                'summary': entry.summary
+                'title': getattr(entry, 'title', ''),
+                'link': getattr(entry, 'link', ''),
+                'published': getattr(entry, 'published', ''),
+                'summary': getattr(entry, 'summary', '')
             }
-            logger.info(f"Retrieved details for entry: {entry.title}")
+            logger.info(f"Retrieved details for entry: {getattr(entry, 'title', 'N/A')}")
             return entry_details
-        except AttributeError as e:
-            logger.exception(f"Error occurred while retrieving entry details: {str(e)}")
-            raise RSSFeedReaderError(f"Failed to retrieve details for entry. The required attributes are missing.")
         except Exception as e:
             logger.exception(f"Error occurred while retrieving entry details: {str(e)}")
             raise RSSFeedReaderError(f"Failed to retrieve details for entry. An unexpected error occurred.")

@@ -1,54 +1,14 @@
 # gui/Anthropic/OA_gen_response.py
 
-
-import logging
 import json
 import re
-
-
 from .Anthropic_api import AnthropicAPI
-from logging.handlers import RotatingFileHandler
 from modules.speech_services.GglCldSvcs import tts
 from datetime import datetime
 from modules.chat_history.convo_manager import ConversationManager
+from modules.logging.logger import setup_logger
 
- 
-
-logger = logging.getLogger('Anthropic_gen_response.py')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-# Create rotating file handler for file logging
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-# Create stream handler for console logging
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-# Attach handlers to the logger
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('Anthropic_gen_response.py')
  
 api = AnthropicAPI()
 

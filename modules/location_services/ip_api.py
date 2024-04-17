@@ -1,7 +1,7 @@
 #modules/location_services/ip_api.py
 
 import aiohttp
-import os
+
 
 IP_API_URL = "http://ip-api.com/json"
 

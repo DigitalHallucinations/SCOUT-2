@@ -1,42 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
-import logging
-from logging.handlers import RotatingFileHandler
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from modules.logging.logger import setup_logger
 
-logger = logging.getLogger('webpage_retriever.py')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('webpage_retriever.py')
 
 class WebpageRetriever:
     def __init__(self, timeout=10):
         self.timeout = timeout
         chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+        chrome_options.add_argument("--headless")  
         self.driver = webdriver.Chrome(options=chrome_options)
 
     async def retrieve_page(self, url: str, capture_screenshot: bool = False) -> dict:

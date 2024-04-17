@@ -2,45 +2,10 @@
 
 import tkinter as tk
 from datetime import datetime
-import logging
-from logging.handlers import RotatingFileHandler
 from modules.chat_history.convo_manager import ConversationManager
+from modules.logging.logger import setup_logger
 
-logger = logging.getLogger('chist_functions.py')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-# Create rotating file handler for file logging
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-# Create stream handler for console logging
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-# Attach handlers to the logger
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('chist_functions.py')
 
 def load_chat_popup(chat_component):
     """Open the chat history popup.
@@ -56,10 +21,8 @@ def load_chat_popup(chat_component):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    # Create a new ConversationManager instance for the specific persona
     conversation_manager = ConversationManager(user, persona_name)
 
-    # Fetch chat logs for the current persona
     chat_logs = conversation_manager.get_conversations(user, persona=persona_name)
     logger.info(f"Chat logs fetched for {persona_name}: {chat_logs}")
 
@@ -92,9 +55,8 @@ def delete_conversation(chat_component):
 
     selected_chat_log = chat_component.chat_log_listbox.get(selected_index[0])
 
-    # Extract details from the selected chat log entry
     parts = selected_chat_log.split(": ")
-    persona_convo_id, _ = parts[0], parts[1]  # Timestamp is no longer needed
+    persona_convo_id, _ = parts[0], parts[1]  
     _, conversation_id = persona_convo_id.rsplit(" (", 1)
     conversation_id = conversation_id.strip(")")
     user = chat_component.user
@@ -102,13 +64,10 @@ def delete_conversation(chat_component):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    # Create a new ConversationManager instance for the specific persona
     conversation_manager = ConversationManager(user, persona_name)
 
-    # Delete the chat log and related data from the database
     conversation_manager.delete_conversation(user, conversation_id)
 
-    # Remove the entry from the listbox
     chat_component.chat_log_listbox.delete(selected_index[0])
 
     logger.info(f"Chat log deleted: {selected_chat_log}")
@@ -122,10 +81,8 @@ def clear_chat_log(chat_component):
     """
     logger.info("Clearing chat log in the chat component")
     
-    # Save the current chat log before clearing it
     save_chat_log(chat_component)
     
-    # Clear the chat log in the chat component
     chat_component.chat_log.configure(state="normal")  
     chat_component.chat_log.delete(1.0, "end") 
     chat_component.chat_log.configure(state="disabled")
@@ -145,7 +102,6 @@ def save_chat_log(chat_component):
         persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
         logger.info(f"Current persona_name: {persona_name}")
 
-        # Create a new ConversationManager instance for the specific persona
         conversation_manager = ConversationManager(user, persona_name)
 
         conversation_manager.insert_conversation(user, conversation_id, current_chat_log, timestamp, chat_component.current_persona["name"])  
@@ -163,27 +119,21 @@ def load_chat(chat_component, selected_chat_log=None):
         logger.warning("No chat log entry selected.")
         return
 
-    # Extracting the conversation ID from the listbox entry
-    _, conversation_id = selected_chat_log.split("@@", 1)  # Splitting to get the conversation_id
+    _, conversation_id = selected_chat_log.split("@@", 1)  
 
     user = chat_component.user
 
-    # Update conversation_id in ChatComponent
     chat_component.update_conversation_id(conversation_id)
 
-    # Log the new conversation_id
     logger.info(f"Updated conversation_id in ChatComponent: {conversation_id}")
 
-    # Clearing the chat log before loading new content
     clear_chat_log(chat_component)
 
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    # Create a new ConversationManager instance for the specific persona
     conversation_manager = ConversationManager(user, persona_name)
 
-    # Retrieving the actual chat log from the database
     actual_chat_log = conversation_manager.get_chat_log(user, conversation_id)
 
     if actual_chat_log:

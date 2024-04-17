@@ -6,8 +6,6 @@ import tkinter.colorchooser as colorchooser
 import configparser
 import json
 import asyncio
-import logging
-from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from google.cloud import texttospeech
 from modules.speech_services.GglCldSvcs.tts import set_voice, set_tts, get_tts
@@ -19,39 +17,9 @@ from modules.Providers.Mistral.Mistral_gen_response import set_Mistral_model, ge
 from modules.Providers.HuggingFace.HF_gen_response import set_hf_model, get_hf_model
 from modules.Providers.Google.GG_gen_response import set_GG_model, get_GG_model
 from modules.Providers.Anthropic.Anthropic_gen_response import set_Anthropic_model, get_Anthropic_model
+from modules.logging.logger import setup_logger
 
-logger = logging.getLogger('chat_settings.py')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('chat_settings.py')
 
 class ChatSettings(tk.Toplevel):
     """
@@ -69,7 +37,6 @@ class ChatSettings(tk.Toplevel):
         self.configure(bg="#000000") 
         self.load_providers() 
 
-        # Load saved font settings
         font_family, font_size, font_color = self.load_font_settings()
         self.master.set_font_family(font_family)
         self.master.set_font_size(font_size)
@@ -77,7 +44,6 @@ class ChatSettings(tk.Toplevel):
 
         self.font_color_var = tk.StringVar(value=font_color)
 
-        # Update ChatSettings window font
         self.update_window_font(self.master.font_family, self.master.font_size, self.font_color_var.get()) 
 
         self.create_widgets()

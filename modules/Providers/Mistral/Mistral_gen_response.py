@@ -1,51 +1,17 @@
 # gui/Mistral/Mistral_gen_response.py
 
-import logging
 import json
 import re
 import inspect
 import importlib.util
 import sys
-
 from modules.Providers.Mistral.Mistral_api import MistralAPI
-from logging.handlers import RotatingFileHandler
 from modules.speech_services.GglCldSvcs import tts
 from datetime import datetime
 from modules.chat_history.convo_manager import ConversationManager
+from modules.logging.logger import setup_logger
 
-
-logger = logging.getLogger('Mistral_gen_response.py')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'info', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'info': logging.info,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('Mistral_gen_response.py')
 
 """ Default model """
 MODEL = "mistral-medium-latest"

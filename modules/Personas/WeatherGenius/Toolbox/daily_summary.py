@@ -3,8 +3,7 @@
 import aiohttp
 import os
 
-DEBUG_MODE = False  # Set this flag to True to enable debug statements
-
+DEBUG_MODE = False  
 async def get_daily_weather_summary(lat, lon, date, units='imperial', lang=None, tz=None):
     OPENWEATHER_API_KEY = os.environ['OPENWEATHERMAP_API_KEY']
     if DEBUG_MODE:
@@ -30,7 +29,6 @@ async def get_weather_data(url):
 
             if response.status == 200:
                 weather_data = await response.json()
-                # Return all the weather data
                 return weather_data
             else:
                 return f"Error: {response.status}"

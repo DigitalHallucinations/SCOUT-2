@@ -1,22 +1,9 @@
 import google.generativeai as genai
 import os
-import logging
 from dotenv import load_dotenv
-from logging.handlers import RotatingFileHandler
+from modules.logging.logger import setup_logger
 
-# Setup logging
-logger = logging.getLogger('genai_api.py')
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
+logger = setup_logger('genai_api.py')
 
 load_dotenv()
 
@@ -27,9 +14,6 @@ if not GOOGLE_API_KEY:
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# Gemini_pro Endpoint - https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
-
-# List available models and check for 'generateContent' support
 logger.info("Listing available models:")
 for m in genai.list_models():
     if 'generateContent' in m.supported_generation_methods:

@@ -23,3 +23,5 @@ numpy
 feedparser
 bs4
 selenium
+matplotlib
+pypdf2

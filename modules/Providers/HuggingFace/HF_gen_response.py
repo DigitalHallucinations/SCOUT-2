@@ -1,15 +1,15 @@
 # gui/HuggingFace/HF_gen_response.py
 
 import json
-import logging
 import os
 from dotenv import load_dotenv
 import requests
 from modules.speech_services.GglCldSvcs import tts
+from modules.logging.logger import setup_logger
+
+logger = setup_logger("HF_gen_response.py")
 
 load_dotenv()
-
-logger = logging.getLogger(__name__)
 
 API_TOKEN = os.getenv("HF_API_TOKEN")
 

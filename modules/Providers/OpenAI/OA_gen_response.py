@@ -5,52 +5,16 @@ import re
 import inspect
 import importlib.util
 import sys
-import logging
-from logging.handlers import RotatingFileHandler
-
 from .openai_api import OpenAIAPI
 from modules.speech_services.GglCldSvcs import tts
-
 from datetime import datetime
 from modules.chat_history.convo_manager import ConversationManager
+from modules.logging.logger import setup_logger
 
-logger = logging.getLogger('OA_gen_response.py')
+logger = setup_logger('OA_gen_response.py')
 
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
-
-# Default model
 MODEL = "gpt-4-turbo-preview"
 
-# Model contants
 MODEL_GPT4_0613 = "gpt-4-0613"
 MODEL_GPT4_1106_PREVIEW = "gpt-4-1106-preview"
 MODEL_GPT4_TURBO_PREVIEW = "gpt-4-turbo-preview"

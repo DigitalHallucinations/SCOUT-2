@@ -3,8 +3,6 @@
 import os
 import time
 import asyncio
-import logging
-from logging.handlers import RotatingFileHandler
 import ctypes
 import tkinter as tk
 from tkinter import messagebox
@@ -16,45 +14,13 @@ from modules.user_accounts.user_account_db import UserAccountDatabase
 from modules.user_accounts.sign_up import SignUpComponent
 from gui.Settings import chist_functions as cf
 from modules.Personas.persona_manager import PersonaManager
+from modules.logging.logger import setup_logger
 
-logger = logging.getLogger('app.py')
+logger = setup_logger('app.py')
 
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024 
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
-
-# Make application DPI aware to handle high resolution displays properly
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
 except AttributeError:
-    # The above call may fail on older Windows versions or non-Windows platforms
     pass
 
 class SCOUT(tk.Tk):
@@ -64,13 +30,10 @@ class SCOUT(tk.Tk):
         self.configure(bg="#000000")
         self.title("SCOUT")
 
-        # Original geometry
         width, height = 600, 700
 
-        # Get the scaling factor
         scale_factor = self.get_scaling_factor()
 
-        # Increase the size by 10% if scaling factor is higher than 1
         if scale_factor > 1:
             width = int(width * scale_factor * 1)
             height = int(height * scale_factor * 1)
@@ -95,21 +58,16 @@ class SCOUT(tk.Tk):
         self.login_component.grab_set()
         self.protocol("WM_DELETE_WINDOW", self.on_closing)     
 
-    # Make application DPI aware to handle high resolution displays properly
     def get_scaling_factor(self):
         """Get the scaling factor for high resolution displays."""
-        # Set default scaling to 1 (100%)
         scaling_factor = 1.0
 
-        # Get the scaling factor from Windows
         try:
             user32 = ctypes.windll.user32
             user32.SetProcessDPIAware()
-            # The DPI is the pixel scale factor
             dpi = user32.GetDpiForSystem()
-            scaling_factor = dpi / 96.0  # 96 dpi is 100%
+            scaling_factor = dpi / 96.0  
         except AttributeError:
-            # On non-Windows or older Windows, we fall back to the default
             pass
 
         return scaling_factor
@@ -129,22 +87,18 @@ class SCOUT(tk.Tk):
             self.session_id = f"{self.user}_{int(time.time())}"
             self.set_current_user_username(self.user)
 
-            # Instantiate PersonaManager with the current user
             self.persona_handler = PersonaManager(self, self.user)
             current_persona = self.persona_handler.current_persona
 
             self.database = ConversationManager(self.user, current_persona['name'])
             logger.info("Database instantiated successfully.")
 
-            # Initialize conversation_id using the ConversationManager instance
             self.conversation_id = self.database.init_conversation_id()
             logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Current Persona: {current_persona['name'] if current_persona else 'None'}")
 
-            # Release any previous login component if it exists
             if hasattr(self, 'login_component'):
                 self.login_component.grab_release()
 
-            # Instantiate ChatComponent with necessary arguments
             scale_factor = self.get_scaling_factor()
             self.chat_component = ChatComponent(
                 master=self, persona=current_persona,
@@ -167,7 +121,6 @@ class SCOUT(tk.Tk):
 
     def reset_to_prelogin_state(self):
         """Reset the application to the pre-login state."""
-        # Check if the frames exist and are not None before destroying them
         if hasattr(self, 'main_frame') and self.main_frame is not None:
             self.main_frame.destroy()
             self.main_frame = None
@@ -206,14 +159,13 @@ class SCOUT(tk.Tk):
         - *args: Additional arguments for the command.
         - **kwargs: Additional keyword arguments for the command.
         """
-        if not self.quit_loop:  # Assuming quit_loop is set to True to indicate closing
+        if not self.quit_loop:  
             self.after(0, command, *args, **kwargs)
 
     def on_closing(self):
         """Handle the application closing event."""
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             try:
-                # Save the chat log first
                 if hasattr(self, 'chat_component1'):
                     cf.save_chat_log(self.chat_component1)
             except Exception as e:

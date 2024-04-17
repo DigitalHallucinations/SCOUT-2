@@ -1,50 +1,19 @@
 # modules/EL_tts.py
+
 # Description: Text to speech module using Eleven Labs
 
 import pygame
 import threading
-import logging
 import os
 import requests
 import re
-from logging.handlers import RotatingFileHandler
 import os
 from dotenv import load_dotenv
+from modules.logging.logger import setup_logger
 
-logger = logging.getLogger('EL_tts.py')
+logger = setup_logger('EL_tts.py')
 
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-logger = logging.getLogger('')
-for handler in logger.handlers[:]:
-    logger.removeHandler(handler)
-
-logger.addHandler(rotating_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
-
-CHUNK_SIZE = 1024  # Size of chunks to read/write at a time
+CHUNK_SIZE = 1024 
 OUTPUT_PATH = "assets/SCOUT/tts_mp3/output.mp3"  
 
 _use_tts = False

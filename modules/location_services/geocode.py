@@ -3,7 +3,7 @@
 import aiohttp
 import os
 
-DEBUG_MODE = False  # Set this flag to True to enable debug statements
+DEBUG_MODE = False
 
 async def geocode_location(location):
     """Get the coordinates of a location by its name using OpenWeather's Geocoding API"""
@@ -12,7 +12,7 @@ async def geocode_location(location):
 
     params = {
         'q': location,
-        'limit': 1,  # only the first location is needed
+        'limit': 1, 
         'appid': OPENWEATHER_API_KEY,
     }
 
@@ -26,8 +26,7 @@ async def geocode_location(location):
 
             if response.status == 200:
                 data = await response.json()
-                # Extract the latitude and longitude from the response
-                if data:  # if any location found
+                if data:  
                     lat = data[0]['lat']
                     lon = data[0]['lon']
                     if DEBUG_MODE:

@@ -2,42 +2,10 @@
 
 import os
 import json
-import logging
-from logging.handlers import RotatingFileHandler
 from modules.user_accounts.user_data_manager import UserDataManager
+from modules.logging.logger import setup_logger
 
-logger = logging.getLogger('persona_manager.py')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('persona_manager.py')
 
 class PersonaManager:
     """
@@ -125,7 +93,7 @@ class PersonaManager:
         logger.info(f"Persona switched to {selected_persona_name} and personalized")
    
     def personalize_persona(self, persona):
-        logging.info("Attempting to personalize persona with user content.")
+        logger.info("Attempting to personalize persona with user content.")
         self.user_name = self.user
         user_data_manager = UserDataManager(self.user)
         self.user_profile = user_data_manager.get_profile_text()

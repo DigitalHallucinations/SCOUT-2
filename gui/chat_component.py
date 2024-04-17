@@ -1,11 +1,9 @@
 # gui/components/chat_component.py
 
 import asyncio
-import logging
 import time
 import tkinter as tk
 import configparser
-from logging.handlers import RotatingFileHandler
 from PIL import Image, ImageTk
 from .custom_entry import CustomEntry
 from modules.Personas.persona_manager import PersonaManager
@@ -16,36 +14,9 @@ from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
 from modules.speech_services.GglCldSvcs.stt import SpeechToText
 from modules.Providers.provider_manager import ProviderManager
+from modules.logging.logger import setup_logger
 
-
-logger = logging.getLogger('chat_component.py') 
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('chat_component.py') 
 
 class ChatComponent(tk.Frame):
     def __init__(self, master=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, scale_factor=1.0):

@@ -3,48 +3,13 @@
 
 import pygame 
 import threading
-import logging
 import os
 import re
-
 from datetime import datetime
 from google.cloud import texttospeech
-import logging
+from modules.logging.logger import setup_logger
 
-from logging.handlers import RotatingFileHandler
-
-logger = logging.getLogger('Ggl_tts.py')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-logger = logging.getLogger('')
-for handler in logger.handlers[:]:
-    logger.removeHandler(handler)
-
-logger.addHandler(rotating_handler)
-logger.setLevel(logging.INFO)  
-
-def adjust_logging_level(level):
-    """Adjust the logging level.
-    
-    Parameters:
-    - level (str): Desired logging level. Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', or 'CRITICAL'.
-    """
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('Ggl_tts.py')
 
 VOICE = texttospeech.VoiceSelectionParams(
     language_code="en-US",

@@ -2,10 +2,9 @@
 
 import time
 import asyncio
-import logging
+from modules.logging.logger import setup_logger
 
-
-logger = logging.getLogger()
+logger = setup_logger("HF_send_message.py")
 
 async def send_message(chat_log, user, message_entry, system_name, system_name_tag, typing_indicator_index, generate_response, current_persona, temperature_var, top_p_var, top_k_var):
     logger.info("send_message called")
@@ -40,8 +39,8 @@ async def process_message(chat_log, system_name, system_name_tag, typing_indicat
     chat_log.yview("end")
     chat_log.update_idletasks()
 
-    response = await generate_response(current_persona, [{'role': 'user', 'content': message}], temperature_var, top_p_var, top_k_var)  # pass message as list of dict
-    response_content = response.get('generated_text')  # get generated_text from response
+    response = await generate_response(current_persona, [{'role': 'user', 'content': message}], temperature_var, top_p_var, top_k_var)  
+    response_content = response.get('generated_text')  
     logger.info("Generated response: %s", response_content)
     chat_log.configure(state="normal")
     chat_log.delete(typing_indicator_index, "end")  

@@ -1,7 +1,6 @@
 import aiohttp
-import os
 
-DEBUG_MODE = False  # Set this flag to True to enable debug statements
+DEBUG_MODE = False  
 
 async def get_historical_weather(lat, lon, time, units='imperial', lang=None):
     OPENWEATHER_API_KEY = ['b2ccc00153bac527d4adf035c695f05c']
@@ -26,7 +25,6 @@ async def get_weather_data(url):
 
             if response.status == 200:
                 weather_data = await response.json()
-                # Return all the weather data
                 return weather_data
             else:
                 return f"Error: {response.status}"

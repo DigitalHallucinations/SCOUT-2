@@ -1,58 +1,27 @@
 import asyncio
-import subprocess
-import logging
-from logging.handlers import RotatingFileHandler
+from modules.logging.logger import setup_logger
 import time
 import ctypes
 import sys
-import os
 
-# Function to check if the script is running with administrative privileges
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
 
-# Function to relaunch the script with administrative privileges if not already running as admin
 def run_as_admin():
     if not is_admin():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
         sys.exit()
 
-# Ensure the script is running with administrative privileges
 run_as_admin()
 
-logger = logging.getLogger('TerminalCommand')
-
-log_filename = 'SCOUT.log'
-log_max_size = 10 * 1024 * 1024  # 10 MB
-log_backup_count = 5
-
-rotating_handler = RotatingFileHandler(log_filename, maxBytes=log_max_size, backupCount=log_backup_count, encoding='utf-8')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-rotating_handler.setFormatter(formatter)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(rotating_handler)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.INFO)
-
-def adjust_logging_level(level):
-    levels = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }
-    logger.setLevel(levels.get(level, logging.WARNING))
+logger = setup_logger('TerminalCommand')
 
 command_history = []
 
-# Define a list of applications that are expected to run indefinitely
 indefinite_apps = ["main.py", "taskmgr"]
 
 async def TerminalCommand(command: str, timeout: int = 60, encoding: str = 'utf-8', verbose: bool = False, output_limit: int = 1024 * 1024, max_retries: int = 3, wait_for_indefinite_app: int = 10):
@@ -73,15 +42,13 @@ async def TerminalCommand(command: str, timeout: int = 60, encoding: str = 'utf-
                 limit=output_limit 
             )
 
-            # Check if the command is an indefinite application
             if any(app in command for app in indefinite_apps):
                 logger.info(f"Launched application/script (expected to run indefinitely): {command}")
-                await asyncio.sleep(wait_for_indefinite_app)  # Wait for the application to fully launch and stabilize
-                # Check if the process is still running
+                await asyncio.sleep(wait_for_indefinite_app)  
                 if process.returncode is None:
                     logger.info(f"Application is running: {command}")
                     command_history.append((command, "Running", "", time.time() - start_time))
-                    return {"output": "", "error": "", "status_code": 0}  # Consider successful launch
+                    return {"output": "", "error": "", "status_code": 0}  
                 else:
                     logger.info(f"Application terminated unexpectedly: {command}")
 
@@ -99,14 +66,14 @@ async def TerminalCommand(command: str, timeout: int = 60, encoding: str = 'utf-
             await process.wait()
             command_history.append((command, "Timeout", "", timeout))
             retry_count += 1
-            await asyncio.sleep(2 ** retry_count)  # Exponential backoff
+            await asyncio.sleep(2 ** retry_count)  
         except Exception as e:
             logger.error(f"Error executing command: {command} - {str(e)}")
             if process:
                 await process.wait()
             command_history.append((command, "Error", str(e), time.time() - start_time))
             retry_count += 1
-            await asyncio.sleep(2 ** retry_count)  # Exponential backoff
+            await asyncio.sleep(2 ** retry_count)  
         finally:
             if process is not None and process.returncode is None:
                 try:

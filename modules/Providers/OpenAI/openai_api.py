@@ -49,7 +49,7 @@ class OpenAIAPI:
                     return response_data
                 else:
                     error_message = await response.text()
-                    logger.erroe("Error generating CBS response from API: %s: %s", response.status, error_message)
+                    logger.error("Error generating CBS response from API: %s: %s", response.status, error_message)
                     return None
 
                   

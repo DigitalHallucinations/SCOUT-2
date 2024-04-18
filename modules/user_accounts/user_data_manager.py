@@ -4,7 +4,6 @@ import os
 import json
 import re
 import subprocess
-import re
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('user_data_manager.py')
@@ -68,7 +67,7 @@ class UserDataManager:
         self.user = user
         self.profile = self.get_profile_text
         self.emr = self.get_emr
-        self.system_info = self.get_system_info
+        self.system_info = self.get_system_info()
         logger.info(f"UDM instantiated with user: {self.user}, {self.profile}")
 
     def get_profile(self):
@@ -109,7 +108,7 @@ class UserDataManager:
         logger.info("Getting EMR.")
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
-        EMR_filename = f"{self.user}_emr.txt"
+        EMR_filename = f"{self.user}_emr.txt" 
         relative_EMR_path = os.path.join(script_dir, '..', '..', 'modules', 'user_accounts', 'user_profiles', EMR_filename)
         
         EMR_path = os.path.abspath(relative_EMR_path)
@@ -133,14 +132,16 @@ class UserDataManager:
     def get_system_info(self):
         """Retrieves and formats detailed system information for persona personalization."""
         try:
-            detailed_info = SystemInfo.get_detailed_system_info()
-            formatted_info = ""
-            for category, info in detailed_info.items():
-                logger.info(f"Retrieving {category} information:")
-                logger.info(info)
-                formatted_info += f"--- {category} ---\n{info}\n"
-            logger.info("System information retrieved successfully.")
-            return formatted_info
+            if not hasattr(self, '_system_info'):
+                detailed_info = SystemInfo.get_detailed_system_info()
+                formatted_info = ""
+                for category, info in detailed_info.items():
+                    logger.debug(f"Retrieving {category} information:")
+                    logger.debug(info)
+                    formatted_info += f"--- {category} ---\n{info}\n"
+                logger.info("System information retrieved successfully.")
+                self._system_info = formatted_info
+            return self._system_info
         except Exception as e:
             logger.error(f"Error retrieving system information: {e}")
             return "System information not available"

@@ -81,7 +81,7 @@ class ConversationManager:
                 logger.error(f"Error checking if conversation exists: {e}")
                 raise
     
-    def insert_conversation(self, user, conversation_id, chat_log, timestamp, persona):
+    async def insert_conversation(self, user, conversation_id, chat_log, timestamp, persona):
         """
         Used in chist_ functions, app.py and chist_functions.py to save chat_log by inserting the entire chat_log into the 'conversations' table.
 
@@ -114,8 +114,7 @@ class ConversationManager:
                 logger.error(f"Error inserting conversation: {e}")
                 raise
 
-        # Generate and update the conversation name
-        asyncio.create_task(self.cognitive_services.generate_and_update_conversation_name(user, conversation_id, chat_log))    
+        asyncio.create_task(self.cognitive_services.generate_and_update_conversation_name(user, conversation_id, chat_log))
 
     def get_conversations(self, user, persona=None, conversation_id=None):
         """
@@ -279,7 +278,7 @@ class ConversationManager:
         Returns:
         - message_id: The ID of the inserted message
         """
-        message_id_placeholder = "<[message_id]>"
+        message_id_placeholder = "Message ID: 1005"
         function_call_id_placeholder = "<[function_call_id]>"
 
         full_message = f"{message}\n{message_id_placeholder}"
@@ -295,7 +294,7 @@ class ConversationManager:
                 ''', (user, conversation_id, role, full_message, timestamp))
                 message_id = cursor.lastrowid
 
-                updated_message = full_message.replace("<[message_id]>", f"Message ID: {message_id}")
+                updated_message = full_message.replace("Message ID: 1005", f"Message ID: {message_id}")
                 if self.function_call_id is not None:
                     updated_message = updated_message.replace("<[function_call_id]>", f"Function Call ID: {self.function_call_id}")
 
@@ -325,7 +324,6 @@ class ConversationManager:
                 cursor.execute('SELECT role, content, timestamp FROM messages WHERE user = ? AND conversation_id = ?', (user, conversation_id,))
                 messages = []
                 for role, content, timestamp in cursor.fetchall():
-                    # Assuming message_id is at the end of the content and starts with "Message ID: "
                     if 'Message ID: ' in content:
                         # Remove the message ID from the content
                         content = content.rsplit('Message ID: ', 1)[0].strip()

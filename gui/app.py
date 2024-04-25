@@ -1,12 +1,12 @@
-#gui/app.py
+# gui/app.py
 
 import os
 import time
 import asyncio
-import ctypes
-import tkinter as tk
-from tkinter import messagebox
-
+import keyring
+from keyring.errors import PasswordDeleteError
+from PySide6 import QtWidgets, QtGui
+from PySide6 import QtCore as qtc
 from gui.chat_component import ChatComponent
 from modules.chat_history.convo_manager import ConversationManager
 from modules.user_accounts.login import LoginComponent
@@ -15,33 +15,22 @@ from modules.user_accounts.sign_up import SignUpComponent
 from gui.Settings import chist_functions as cf
 from modules.Personas.persona_manager import PersonaManager
 from modules.logging.logger import setup_logger
+from modules.Background_Services.CognitiveBackgroundServices import CognitiveBackgroundServices
 
 logger = setup_logger('app.py')
 
-try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
-except AttributeError:
-    pass
-
-class SCOUT(tk.Tk):
+class SCOUT(QtWidgets.QMainWindow):
     """Initialize the SCOUT application."""
     def __init__(self):
         super().__init__()
-        self.configure(bg="#000000")
-        self.title("SCOUT")
+        self.setStyleSheet("background-color: #000000;")
+        self.setWindowFlags(qtc.Qt.FramelessWindowHint) 
 
         width, height = 600, 700
+        self.resize(width, height)
 
-        scale_factor = self.get_scaling_factor()
-
-        if scale_factor > 1:
-            width = int(width * scale_factor * 1)
-            height = int(height * scale_factor * 1)
-
-        self.geometry(f"{width}x{height}+0+0")
-
-
-        self.iconbitmap(default=os.path.join("assets", "SCOUT", "SCOUT_icon.ico"))
+        icon_path = os.path.join("assets", "SCOUT", "SCOUT_icon.ico")
+        self.setWindowIcon(QtGui.QIcon(icon_path))
 
         self.user_database = UserAccountDatabase()
 
@@ -51,27 +40,67 @@ class SCOUT(tk.Tk):
 
         self.conversation_id = None
 
-        self.login_component = LoginComponent(master=self, 
-                                              callback=self.session_manager, 
-                                              database=self.user_database, 
-                                              signup_callback=self.show_signup_component)
-        self.login_component.grab_set()
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)     
+        self.titlebar_color = "#2d2d2d"  
 
-    def get_scaling_factor(self):
-        """Get the scaling factor for high resolution displays."""
-        scaling_factor = 1.0
+        logger.info("Creating LoginComponent")
+        self.login_component = LoginComponent(parent=self, 
+                                            callback=self.session_manager, 
+                                            database=self.user_database, 
+                                            signup_callback=self.show_signup_component)
+        self.login_component.setModal(True)
+        self.login_component.show()
+        
+        self.closeEvent = self.on_closing
 
-        try:
-            user32 = ctypes.windll.user32
-            user32.SetProcessDPIAware()
-            dpi = user32.GetDpiForSystem()
-            scaling_factor = dpi / 96.0  
-        except AttributeError:
-            pass
+    def create_custom_title_bar(self):
+        title_bar = QtWidgets.QFrame(self)
+        title_bar.setStyleSheet(f"background-color: {self.titlebar_color}; color: white;")
+        title_bar.setFixedHeight(30)
 
-        return scaling_factor
-    
+        title_layout = QtWidgets.QHBoxLayout(title_bar)
+        title_layout.setContentsMargins(0, 0, 0, 0)
+        title_layout.setSpacing(0)
+
+        title_label = QtWidgets.QLabel(f"SCOUT - {self.user}", title_bar)
+        title_label.setAlignment(qtc.Qt.AlignCenter)
+        title_label.setStyleSheet("color: white;")
+
+        title_layout.addStretch(1)  
+        title_layout.addWidget(title_label)
+        title_layout.addStretch(1)  
+
+        logout_button = QtWidgets.QPushButton(title_bar)
+        logout_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
+        logout_button.setIconSize(qtc.QSize(24, 24))
+        logout_button.setStyleSheet("background-color: transparent; border: none;")
+        logout_button.clicked.connect(self.log_out)
+        title_layout.addWidget(logout_button)
+
+        self.setMenuWidget(title_bar)
+
+        # Make the title bar draggable
+        self.draggable = False
+        self.drag_position = qtc.QPoint()
+
+        def mousePressEvent(event):
+            if event.button() == qtc.Qt.LeftButton:
+                self.draggable = True
+                self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
+                event.accept()
+
+        def mouseMoveEvent(event):
+            if event.buttons() == qtc.Qt.LeftButton and self.draggable:
+                self.move(event.globalPos() - self.drag_position)
+                event.accept()
+
+        def mouseReleaseEvent(event):
+            if event.button() == qtc.Qt.LeftButton:
+                self.draggable = False
+
+        title_bar.mousePressEvent = mousePressEvent
+        title_bar.mouseMoveEvent = mouseMoveEvent
+        title_bar.mouseReleaseEvent = mouseReleaseEvent
+
     def set_current_user_username(self, username):
         """Set the current user's username."""
         self.current_username = username
@@ -82,8 +111,10 @@ class SCOUT(tk.Tk):
         Parameters:
         - user: The user object.
         """
+        logger.info(f"Session manager called with user: {user}")
         self.user = user
         if self.user:
+            self.create_custom_title_bar()  
             self.session_id = f"{self.user}_{int(time.time())}"
             self.set_current_user_username(self.user)
 
@@ -97,59 +128,50 @@ class SCOUT(tk.Tk):
             logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Current Persona: {current_persona['name'] if current_persona else 'None'}")
 
             if hasattr(self, 'login_component'):
-                self.login_component.grab_release()
+                self.login_component.close()
 
-            scale_factor = self.get_scaling_factor()
+            persona_name = current_persona['name']
+            db_file = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
+            self.cognitive_services = CognitiveBackgroundServices(db_file, self.user)
+
+            logger.info("Creating ChatComponent")
             self.chat_component = ChatComponent(
-                master=self, persona=current_persona,
-                user=self.user, logout_callback=self.reset_to_prelogin_state,
-                session_id=self.session_id, conversation_id=self.conversation_id,
-                scale_factor=scale_factor
+                parent=self, persona=current_persona,
+                user=self.user, session_id=self.session_id, 
+                conversation_id=self.conversation_id,
+                persona_manager=self.persona_handler,
+                titlebar_color=self.titlebar_color  
             )
-            self.chat_component.pack(fill='both', expand=True)
+            self.setCentralWidget(self.chat_component)
+            self.chat_component.show()
+            self.show()  
         else:
-            messagebox.showerror("Login Error", "Invalid username or password.")
+            QtWidgets.QMessageBox.critical(self, "Login Error", "Invalid username or password.")
             self.session_id = None
             self.conversation_id = None
 
     def show_signup_component(self):
         """Show the sign-up component."""
-        self.signup_component = SignUpComponent(master=self, 
+        logger.info("Showing SignUpComponent")
+        self.signup_component = SignUpComponent(parent=self, 
                                                 callback=self.session_manager, 
                                                 database=self.user_database)
-        self.signup_component.grab_set()
-
-    def reset_to_prelogin_state(self):
-        """Reset the application to the pre-login state."""
-        if hasattr(self, 'main_frame') and self.main_frame is not None:
-            self.main_frame.destroy()
-            self.main_frame = None
-        
-        self.user = None
-        self.session_id = None
-        self.conversation_id = None
-        self.login_component = LoginComponent(master=self, 
-                                              callback=self.session_manager, 
-                                              database=self.user_database, 
-                                              signup_callback=self.show_signup_component)
-        self.login_component.grab_set()
-        logger.info("Application has been reset to pre-login state.")
+        self.signup_component.setModal(True)
+        self.signup_component.show()
 
     def log_out(self, event):
-        """Log out the current user.
-        
-        Parameters:
-        - event: The event that triggered the log out.
-        """
-        self.user = None
-        self.main_frame.destroy()
+        logger.info("Logging out user")
+        current_user = self.user
+        self.user = None 
         self.session_id = None
         self.conversation_id = None
-        self.login_component = LoginComponent(master=self, 
-                                              callback=self.session_manager, 
-                                              database=self.user_database, 
-                                              signup_callback=self.show_signup_component)
-        self.login_component.grab_set()
+        
+        try:
+            keyring.delete_password("SCOUT", current_user)
+        except PasswordDeleteError as e:
+            logger.debug(f"Caught PasswordDeleteError while deleting password (password still cleared): {str(e)}")        
+        self.close()
+        QtWidgets.QApplication.quit()
 
     def safe_update(self, command, *args, **kwargs):
         """Safely update the application.
@@ -160,41 +182,56 @@ class SCOUT(tk.Tk):
         - **kwargs: Additional keyword arguments for the command.
         """
         if not self.quit_loop:  
-            self.after(0, command, *args, **kwargs)
+            QtWidgets.QApplication.postEvent(self, qtc.QEvent(qtc.QEvent.User), command)
+    
+    def on_closing(self, event):
+        logger.info("Application closing")
 
-    def on_closing(self):
-        """Handle the application closing event."""
-        if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            try:
-                if hasattr(self, 'chat_component1'):
-                    cf.save_chat_log(self.chat_component1)
-            except Exception as e:
-                logger.error("Error saving chat log: {}".format(e))
-            self.cleanup_on_exit()
+        message_box = QtWidgets.QMessageBox(self)
+        message_box.setWindowTitle('Quit')
+        message_box.setText('Do you want to quit?')
+        message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        message_box.setDefaultButton(QtWidgets.QMessageBox.No)
 
-    def cleanup_on_exit(self):
-        """Clean up resources on application exit."""
-        self.user_database.close_connection()     
-        
+        font_family = self.chat_component.font_family
+        font_size = self.chat_component.font_size
+        font_color = self.chat_component.font_color
+
+        message_box.setStyleSheet(f"""
+            QMessageBox {{
+                background-color: #000000;
+                color: {font_color};
+                font-family: {font_family};
+                font-size: {font_size}pt;
+            }}
+            QPushButton {{
+                background-color: #000000;
+                color: {font_color};
+                font-family: {font_family};
+                font-size: {font_size}pt;
+                border: 1px solid {font_color};
+                padding: 5px;
+            }}
+            QPushButton:hover {{
+                background-color: #333333;
+            }}
+        """)
+
+        reply = message_box.exec()
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            event.accept()
+            self.cleanup_on_exit(event)
+        else:
+            event.ignore()
+
+    def cleanup_on_exit(self, event):
+        logger.info("Cleaning up resources")
+        self.user_database.close_connection()
         logger.info("Application closed by the user.")
-
-        self.quit_loop = True
-        self.destroy()
+        self.close()
 
     async def async_main(self):
-        """Asynchronous main loop of the application."""
-        while not self.quit_loop:
-            self.update()
+        while True:
             await asyncio.sleep(0.01)
-
-    def run_asyncio_loop(self):
-        """Run the asynchronous event loop."""
-        self.quit_loop = False
-        asyncio.run(self.async_main())
-
-    @staticmethod
-    def main():
-            """Main entry point of the application."""
-            app = SCOUT()
-            logger.info("Application started.")
-            app.run_asyncio_loop()
+            QtWidgets.QApplication.processEvents()

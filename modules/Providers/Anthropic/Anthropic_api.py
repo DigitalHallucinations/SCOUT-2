@@ -1,4 +1,4 @@
-# gui/Anthropic/Anthropic_api.py
+# modules/Providers/Anthropic/Anthropic_api.py
 
 import anthropic
 import os

@@ -1,4 +1,4 @@
 @echo off
 cd /d "%~dp0"
-python "C:\SCOUT-2\main.py"
+python "C:\SCOUT-PySide6\main.py"
 pause

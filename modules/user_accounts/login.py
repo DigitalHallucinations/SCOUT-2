@@ -1,15 +1,13 @@
-# gui/user_accounts/Login.py
-
-import customtkinter as ctk
-import tkinter as tk
-from tkinter import messagebox
+from PySide6 import QtWidgets
+from PySide6 import QtCore as qtc
+from PySide6 import QtGui as qtg
 import keyring
 import time 
 import json
 
-class LoginComponent(ctk.CTkToplevel):
-    def __init__(self, master=None, callback=None, database=None, signup_callback=None):
-        super().__init__(master=master)
+class LoginComponent(QtWidgets.QDialog):
+    def __init__(self, parent=None, callback=None, database=None, signup_callback=None):
+        super().__init__(parent=parent)
 
         self.service_id = 'SCOUT'
         self.keyring = keyring.get_keyring()
@@ -17,40 +15,46 @@ class LoginComponent(ctk.CTkToplevel):
         self.callback = callback
         self.database = database
 
-        self.title("Login")
-        self.geometry("300x200")
-        self.configure(bg="#000000")
-        self.attributes("-topmost", True) 
+        self.setWindowTitle("Login")
+        self.resize(300, 200)
+        self.setStyleSheet("background-color: #000000; color: white;")
+        self.setModal(True) 
 
-        self.username_label = ctk.CTkLabel(self, text="Username:")
-        self.username_label.pack()
+        layout = QtWidgets.QVBoxLayout(self)
 
-        self.username_entry = ctk.CTkEntry(self)
-        self.username_entry.pack()
+        self.username_label = QtWidgets.QLabel("Username:")
+        layout.addWidget(self.username_label)
 
-        self.password_label = ctk.CTkLabel(self, text="Password:")
-        self.password_label.pack()
+        self.username_entry = QtWidgets.QLineEdit()
+        layout.addWidget(self.username_entry)
 
-        self.password_entry = ctk.CTkEntry(self, show="*")
-        self.password_entry.pack()
+        self.password_label = QtWidgets.QLabel("Password:")
+        layout.addWidget(self.password_label)
 
-        self.login_button = ctk.CTkButton(self, text="Login", command=self.login)
-        self.login_button.pack()
+        self.password_entry = QtWidgets.QLineEdit()
+        self.password_entry.setEchoMode(QtWidgets.QLineEdit.Password)
+        layout.addWidget(self.password_entry)
+
+        self.login_button = QtWidgets.QPushButton("Login")
+        self.login_button.clicked.connect(self.login)
+        layout.addWidget(self.login_button)
 
         self.signup_callback = signup_callback
 
-        self.signup_label = tk.Label(self, text="Don't have an account? Sign up", fg="blue", cursor="hand2")
-        self.signup_label.pack()
-        self.signup_label.bind("<Button-1>", self.sign_up)
+        self.signup_label = QtWidgets.QLabel("Don't have an account? Sign up")
+        self.signup_label.setStyleSheet("color: blue;")
+        self.signup_label.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
+        self.signup_label.mouseReleaseEvent = self.sign_up
+        layout.addWidget(self.signup_label)
 
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.closeEvent = self.on_closing
 
-        self.bind('<Return>', lambda event: self.login())
-        # self.after_idle(self.fetch_credentials)
+        self.password_entry.returnPressed.connect(self.login)
+        qtc.QTimer.singleShot(0, self.fetch_credentials)
 
     def login(self):
-        username = self.username_entry.get()
-        password = self.password_entry.get()
+        username = self.username_entry.text()
+        password = self.password_entry.text()
 
         user = self.database.get_user(username)
         if user and user[2] == password:
@@ -58,33 +62,28 @@ class LoginComponent(ctk.CTkToplevel):
             keyring.set_password(self.service_id, 'last_user', username)
             keyring.set_password(self.service_id, username, json.dumps(credentials))
             self.callback(user[1])
-            if self.winfo_exists():
-                self.destroy()
+            self.close()
 
         else:
-            messagebox.showerror("Error", "Invalid username or password.")
+            QtWidgets.QMessageBox.critical(self, "Error", "Invalid username or password.")
 
-    def on_closing(self):
-        if self.winfo_exists():
-            self.destroy()
-
+    def on_closing(self, event):
+        event.accept()
 
     def sign_up(self, event):
         if self.signup_callback:
             self.signup_callback()
-            if self.winfo_exists():
-                self.destroy()
+            self.close()
 
-
-    # def fetch_credentials(self):
+    def fetch_credentials(self):
         stored_username = keyring.get_password(self.service_id, 'last_user')
         if stored_username:
             stored_credentials = keyring.get_password(self.service_id, stored_username)
             if stored_credentials:
                 credentials = json.loads(stored_credentials)
                 if time.time() - credentials['timestamp'] < 3600:
-                    self.username_entry.insert(0, credentials['username'])
-                    self.password_entry.insert(0, credentials['password'])
+                    self.username_entry.setText(credentials['username'])
+                    self.password_entry.setText(credentials['password'])
                     self.login()
                 else:
                     keyring.delete_password(self.service_id, stored_username)

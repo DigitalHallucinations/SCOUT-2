@@ -414,7 +414,6 @@ class CognitiveBackgroundServices:
         The user profile as a JSON object. If the profile file does not exist or an error occurs, an empty dictionary is returned.
         """
         try:
-            # Construct the absolute profile path for a JSON file
             profile_path = os.path.abspath(os.path.join(
                 os.path.dirname(__file__), '..', '..', 'modules', 'user_accounts', 'user_profiles',
                 f"{self.user}.json"
@@ -422,12 +421,10 @@ class CognitiveBackgroundServices:
 
             logger.info(f"Profile path: {profile_path}")
 
-            # Ensure the profile file exists
             if not os.path.exists(profile_path):
                 logger.error(f"Profile file does not exist: {profile_path}")
                 return {}
 
-            # Read the profile content as JSON
             with open(profile_path, 'r', encoding='utf-8') as file:
                 profile = json.load(file)
                # logger.info(f"Profile found: {profile}")
@@ -437,3 +434,5 @@ class CognitiveBackgroundServices:
         except Exception as e:
             logger.error(f"Error loading profile: {e}")
             return {}
+        
+    

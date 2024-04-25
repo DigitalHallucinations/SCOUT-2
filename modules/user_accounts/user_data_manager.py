@@ -64,19 +64,31 @@ class SystemInfo:
 
 class UserDataManager:
     def __init__(self, user):
+        """
+        Initializes the UserDataManager with the given user.
+
+        Args:
+            user (str): The username of the user.
+        """
         self.user = user
-        self.profile = self.get_profile_text
-        self.emr = self.get_emr
+        self.profile = self.get_profile_text()
+        self.emr = self.get_emr()
         self.system_info = self.get_system_info()
-        logger.info(f"UDM instantiated with user: {self.user}, {self.profile}")
+        #logger.info(f"UDM instantiated with user: {self.user}, {self.profile}")
 
     def get_profile(self):
+        """
+        Retrieves the user's profile from a JSON file.
+
+        Returns:
+            dict: The user's profile as a dictionary.
+        """
         logger.info("Entering get_profile() method")
         try:
-            profile_path = os.path.abspath(os.path.join(
+            profile_path = os.path.join(
                 os.path.dirname(__file__), '..', '..', 'modules', 'user_accounts', 'user_profiles',
                 f"{self.user}.json"
-            ))
+            )
 
             if not os.path.exists(profile_path):
                 logger.error(f"Profile file does not exist: {profile_path}")
@@ -92,6 +104,15 @@ class UserDataManager:
             return {}
         
     def format_profile_as_text(self, profile_json):
+        """
+        Formats the user's profile as a string.
+
+        Args:
+            profile_json (dict): The user's profile as a dictionary.
+
+        Returns:
+            str: The formatted profile as a string.
+        """
         logger.info("Formatting profile.")
         profile_lines = []
         for key, value in profile_json.items():
@@ -100,18 +121,28 @@ class UserDataManager:
         return '\n'.join(profile_lines)
     
     def get_profile_text(self):
+        """
+        Retrieves the user's profile as a formatted string.
+
+        Returns:
+            str: The user's profile as a formatted string.
+        """
         logger.info("Entering get_profile_text() method")
         profile_json = self.get_profile()
         return self.format_profile_as_text(profile_json)
     
     def get_emr(self):
-        logger.info("Getting EMR.")
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        """
+        Retrieves the user's EMR (Electronic Medical Record) from a text file.
 
-        EMR_filename = f"{self.user}_emr.txt" 
-        relative_EMR_path = os.path.join(script_dir, '..', '..', 'modules', 'user_accounts', 'user_profiles', EMR_filename)
-        
-        EMR_path = os.path.abspath(relative_EMR_path)
+        Returns:
+            str: The user's EMR as a string.
+        """
+        logger.info("Getting EMR.")
+        EMR_path = os.path.join(
+            os.path.dirname(__file__), '..', '..', 'modules', 'user_accounts', 'user_profiles',
+            f"{self.user}_emr.txt"
+        )
 
         logger.info(f"EMR path: {EMR_path}")
 
@@ -130,17 +161,24 @@ class UserDataManager:
             return ""
 
     def get_system_info(self):
-        """Retrieves and formats detailed system information for persona personalization."""
+        """
+        Retrieves and formats detailed system information for persona personalization.
+
+        Returns:
+            str: The formatted system information as a string.
+        """
         try:
-            if not hasattr(self, '_system_info'):
-                detailed_info = SystemInfo.get_detailed_system_info()
-                formatted_info = ""
-                for category, info in detailed_info.items():
-                    logger.debug(f"Retrieving {category} information:")
-                    logger.debug(info)
-                    formatted_info += f"--- {category} ---\n{info}\n"
-                logger.info("System information retrieved successfully.")
-                self._system_info = formatted_info
+            if hasattr(self, '_system_info'):
+                return self._system_info
+
+            detailed_info = SystemInfo.get_detailed_system_info()
+            formatted_info = ""
+            for category, info in detailed_info.items():
+                logger.debug(f"Retrieving {category} information:")
+                logger.debug(info)
+                formatted_info += f"--- {category} ---\n{info}\n"
+            logger.info("System information retrieved successfully.")
+            self._system_info = formatted_info
             return self._system_info
         except Exception as e:
             logger.error(f"Error retrieving system information: {e}")

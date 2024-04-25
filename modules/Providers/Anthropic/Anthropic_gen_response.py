@@ -1,4 +1,4 @@
-# gui/Anthropic/OA_gen_response.py
+# modules/Providers/Anthropic/Anthropic_gen_response.py
 
 import json
 import re

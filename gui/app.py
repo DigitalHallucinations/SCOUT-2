@@ -65,20 +65,22 @@ class SCOUT(QtWidgets.QMainWindow):
         title_label.setAlignment(qtc.Qt.AlignCenter)
         title_label.setStyleSheet("color: white;")
 
-        title_layout.addStretch(1)  
+        title_layout.addStretch(1)
         title_layout.addWidget(title_label)
-        title_layout.addStretch(1)  
+        title_layout.addStretch(1)
 
-        logout_button = QtWidgets.QPushButton(title_bar)
-        logout_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
-        logout_button.setIconSize(qtc.QSize(24, 24))
-        logout_button.setStyleSheet("background-color: transparent; border: none;")
-        logout_button.clicked.connect(self.log_out)
-        title_layout.addWidget(logout_button)
+        self.power_button = QtWidgets.QPushButton(title_bar)
+        self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
+        self.power_button.setIconSize(qtc.QSize(24, 24))
+        self.power_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
+        self.power_button.clicked.connect(self.log_out)
+        title_layout.addWidget(self.power_button)
+
+        self.power_button.enterEvent = self.on_power_button_hover
+        self.power_button.leaveEvent = self.on_power_button_leave
 
         self.setMenuWidget(title_bar)
 
-        # Make the title bar draggable
         self.draggable = False
         self.drag_position = qtc.QPoint()
 
@@ -100,6 +102,12 @@ class SCOUT(QtWidgets.QMainWindow):
         title_bar.mousePressEvent = mousePressEvent
         title_bar.mouseMoveEvent = mouseMoveEvent
         title_bar.mouseReleaseEvent = mouseReleaseEvent
+
+    def on_power_button_hover(self, event):
+        self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_rd.png"))
+
+    def on_power_button_leave(self, event):
+        self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
 
     def set_current_user_username(self, username):
         """Set the current user's username."""

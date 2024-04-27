@@ -12,7 +12,7 @@ logger = setup_logger('Anthropic_gen_response.py')
  
 api = AnthropicAPI()
 
-MODEL = "claude-3-haiku-20240307"
+MODEL = "claude-3-opus-20240229"
 
 MODEL_CLAUDE_3_OPUS = "claude-3-opus-20240229"
 MODEL_CLAUDE_3_SONNET = "claude-3-sonnet-20240229" 
@@ -21,7 +21,6 @@ MODEL_CLAUDE_3_SONNET = 4096
 MODEL_CLAUDE_3_OPUS = 4096
 MODEL_CLAUDE_3_HAIKU = 4096
 MAX_TOKENS = 4096 
-
 
 FUNCTIONS_JSON_PATH_TEMPLATE = 'modules/Personas/{}/Toolbox/functions.json'
 
@@ -117,8 +116,8 @@ async def generate_response(user, current_persona, message, session_id, conversa
       
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
 
-    logger.info("Data being sent in HTTP request to AnthropicAPI: %s", data) 
-    #logger.info("Data being sent in HTTP request to AnthropicAPI.") 
+    #logger.info("Data being sent in HTTP request to AnthropicAPI: %s", data) 
+    logger.info("Data being sent in HTTP request to AnthropicAPI.") 
 
     response_data = await api.generate_conversation(data)
 

@@ -7,7 +7,7 @@ logger = logging.getLogger('provider_manager.py')
 class ProviderManager:
     def __init__(self, chat_component):
         self.chat_component = chat_component
-        self.current_llm_provider = "Google"
+        self.current_llm_provider = "Anthropic"
         self.switch_provider(self.current_llm_provider)
 
     def switch_provider(self, llm_provider):

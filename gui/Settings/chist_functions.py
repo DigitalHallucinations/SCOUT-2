@@ -18,7 +18,7 @@ def load_chat_popup(chat_component):
     chat_component.popup.setWindowTitle("Chat History")
     chat_component.popup.setStyleSheet(f"background-color: #000000; color: {chat_component.font_color};")
 
-    font = QtGui.QFont(chat_component.font_family, int(chat_component.font_size * chat_component.font_magnification), QtGui.QFont.Normal)
+    font = QtGui.QFont(chat_component.font_family, int(chat_component.font_size), QtGui.QFont.Normal)
     chat_component.popup.setFont(font)
 
     user = chat_component.user

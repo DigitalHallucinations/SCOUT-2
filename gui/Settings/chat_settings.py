@@ -248,18 +248,18 @@ class ChatSettings(QtWidgets.QDialog):
         selected_font_size = self.font_size_spinbox.value()
         self.parent.set_font_size(selected_font_size)
 
-        self.update_window_font(self.parent.font_family, selected_font_size, self.parent.font_magnification, self.font_color_var)
+        self.update_window_font(self.parent.font_family, selected_font_size, self.font_color_var)
 
-        self.save_font_settings(self.parent.font_family, selected_font_size, self.parent.font_magnification, self.font_color_var)
+        self.save_font_settings(self.parent.font_family, selected_font_size, self.font_color_var)
 
     def set_font_family(self, font_family):
         self.parent.set_font_family(font_family)
 
         self.font_style_button.setText(font_family)
 
-        self.update_window_font(font_family, self.parent.font_size, self.parent.font_magnification, self.font_color_var)
+        self.update_window_font(font_family, self.parent.font_size, self.font_color_var)
 
-        self.save_font_settings(font_family, self.parent.font_size, self.parent.font_magnification, self.font_color_var)
+        self.save_font_settings(font_family, self.parent.font_size, self.font_color_var)
 
     def update_font_size(self, value):
         selected_font_size = value

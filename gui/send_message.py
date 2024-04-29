@@ -1,8 +1,6 @@
 # gui/send_message.py
 
-import time
 import asyncio
-from PySide6 import QtGui
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('send_message.py')

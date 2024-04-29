@@ -155,7 +155,7 @@ async def load_chat(chat_component, selected_chat_log=None):
         chat_component.chat_log.setPlainText(actual_chat_log)
         chat_component.chat_log.verticalScrollBar().setValue(chat_component.chat_log.verticalScrollBar().maximum())
 
-        font = QtGui.QFont(chat_component.font_family, int(chat_component.font_size * chat_component.font_magnification), QtGui.QFont.Normal)
+        font = QtGui.QFont(chat_component.font_family, int(chat_component.font_size), QtGui.QFont.Normal)
         chat_component.chat_log.setFont(font)
         chat_component.chat_log.setStyleSheet(f"background-color: #000000; color: {chat_component.font_color};")
     else:

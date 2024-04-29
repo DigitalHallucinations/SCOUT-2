@@ -26,7 +26,7 @@ class SCOUT(QtWidgets.QMainWindow):
         self.setStyleSheet("background-color: #000000;")
         self.setWindowFlags(qtc.Qt.FramelessWindowHint) 
 
-        width, height = 600, 700
+        width, height = 600, 800
         self.resize(width, height)
 
         icon_path = os.path.join("assets", "SCOUT", "SCOUT_icon.ico")
@@ -54,7 +54,7 @@ class SCOUT(QtWidgets.QMainWindow):
 
     def create_custom_title_bar(self):
         title_bar = QtWidgets.QFrame(self)
-        title_bar.setStyleSheet(f"background-color: {self.titlebar_color}; color: white;")
+        title_bar.setStyleSheet(f"background-color: {self.titlebar_color}; color: white; border-bottom: 2px solid black;")
         title_bar.setFixedHeight(30)
 
         title_layout = QtWidgets.QHBoxLayout(title_bar)

@@ -7,6 +7,7 @@ from PySide6.QtCore import QRunnable
 import configparser
 from gui.Settings import chist_functions as cf
 from gui.Settings.chat_settings import ChatSettings
+from gui.sidebar import Sidebar
 from PySide6.QtWidgets import QMessageBox
 from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
@@ -83,7 +84,15 @@ class ChatComponent(QtWidgets.QWidget):
             self.entry_sidebar_frame_bg,
             self.entry_sidebar_font_color,
             self.entry_sidebar_font_family,
-            self.entry_sidebar_font_size
+            self.entry_sidebar_font_size,
+            self.settings_page_main_frame_bg,
+            self.settings_page_content_frame_bg,
+            self.settings_page_title_label_bg,
+            self.settings_page_title_label_font,
+            self.settings_page_font_color,
+            self.settings_page_font_family,
+            self.settings_page_font_size,
+            self.settings_page_spinbox_bg
         ) = font_settings
 
         self.create_widgets()
@@ -126,6 +135,15 @@ class ChatComponent(QtWidgets.QWidget):
             entry_sidebar_font_family = config.get("EntrySideBarSettings", "font_family")
             entry_sidebar_font_size = config.getint("EntrySideBarSettings", "font_size")
 
+            settings_page_main_frame_bg = config.get("SettingsPageSettings", "main_frame_bg")
+            settings_page_content_frame_bg = config.get("SettingsPageSettings", "content_frame_bg")
+            settings_page_title_label_bg = config.get("SettingsPageSettings", "title_tab_bg")
+            settings_page_title_label_font = config.get("SettingsPageSettings", "title_tab_font")
+            settings_page_font_color = config.get("SettingsPageSettings", "font_color")
+            settings_page_font_family = config.get("SettingsPageSettings", "font_family")
+            settings_page_font_size = config.getint("SettingsPageSettings", "font_size")
+            settings_page_spinbox_bg = config.get("SettingsPageSettings", "spinbox_bg")
+
             logger.info(f"Loaded font settings: Family: {font_family}, Size: {font_size}, Color: {font_color}, Titlebar Color: {titlebar_color}")
         except (configparser.NoSectionError, configparser.NoOptionError):
             logger.warning("No font settings found in config file, using defaults")
@@ -153,6 +171,14 @@ class ChatComponent(QtWidgets.QWidget):
             entry_sidebar_font_color = "#ffffff"
             entry_sidebar_font_family = "Sitka"
             entry_sidebar_font_size = 15
+            settings_page_main_frame_bg = "#000000"
+            settings_page_content_frame_bg = "#2d2d2d"
+            settings_page_title_label_bg = "#2d2d2d"
+            settings_page_title_label_font = "Sitka"
+            settings_page_font_color = "#ffffff"
+            settings_page_font_family = "Sitka"
+            settings_page_font_size = 15
+            settings_page_spinbox_bg = "#808080"
 
         return (
             font_family,
@@ -178,8 +204,40 @@ class ChatComponent(QtWidgets.QWidget):
             entry_sidebar_frame_bg,
             entry_sidebar_font_color,
             entry_sidebar_font_family,
-            entry_sidebar_font_size
+            entry_sidebar_font_size,
+            settings_page_main_frame_bg,
+            settings_page_content_frame_bg,
+            settings_page_title_label_bg,
+            settings_page_title_label_font,
+            settings_page_font_color,
+            settings_page_font_family,
+            settings_page_font_size,
+            settings_page_spinbox_bg
         )
+    
+    def apply_font_settings(self):
+        logger.info("Applying font settings")
+        font = QtGui.font = QtGui.QFont(self.font_family, self.font_size, QtGui.QFont.Normal)
+        self.setFont(font)
+        
+        self.chat_log.setFont(QtGui.QFont(self.chatlog_font_family, self.chatlog_font_size))
+        self.chat_log.setStyleSheet(f"background-color: {self.chatlog_frame_bg}; color: {self.chatlog_font_color}; font-size: {self.chatlog_font_size}px;")
+        
+        self.message_entry.setFont(QtGui.QFont(self.message_entry_font_family, self.message_entry_font_size))
+        self.message_entry.setStyleSheet(f"background-color: {self.message_entry_frame_bg}; color: {self.message_entry_font_color}; font-size: {self.message_entry_font_size}px;")
+        
+        if hasattr(self, 'microphone_button'):
+            self.microphone_button.setFont(font)
+        
+        if hasattr(self, 'send_button'):
+            self.send_button.setFont(font)
+        
+        self.parent().setWindowTitle(f"SCOUT - {self.user}")
+
+        for widget in self.findChildren(QtWidgets.QWidget):
+            widget.setFont(font)
+            if isinstance(widget, QtWidgets.QPushButton):
+                widget.setStyleSheet(f"background-color: #000000; color: {self.font_color}; font-size: {self.font_size}px;")
 
     async def on_persona_selection(self, persona_name):
         logger.info(f"Current persona_name: {persona_name}")
@@ -216,34 +274,6 @@ class ChatComponent(QtWidgets.QWidget):
         self.conversation_id = new_conversation_id
         logger.info(f"ChatComponent updated with new conversation_id: {new_conversation_id}")
 
-    def apply_font_settings(self):
-        logger.info("Applying font settings")
-        font = QtGui.font = QtGui.QFont(self.font_family, self.font_size, QtGui.QFont.Normal)
-        self.setFont(font)
-        
-        self.chat_log.setFont(QtGui.QFont(self.chatlog_font_family, self.chatlog_font_size))
-        self.chat_log.setStyleSheet(f"background-color: {self.chatlog_frame_bg}; color: {self.chatlog_font_color}; font-size: {self.chatlog_font_size}px;")
-        
-        self.message_entry.setFont(QtGui.QFont(self.message_entry_font_family, self.message_entry_font_size))
-        self.message_entry.setStyleSheet(f"background-color: {self.message_entry_frame_bg}; color: {self.message_entry_font_color}; font-size: {self.message_entry_font_size}px;")
-        
-        self.persona_button.setFont(font)
-        self.persona_button.setStyleSheet(f"background-color: #000000; color: {self.font_color}; font-size: {self.font_size}px;")
-        self.settings_button.setFont(font)
-        
-        if hasattr(self, 'microphone_button'):
-            self.microphone_button.setFont(font)
-        
-        if hasattr(self, 'send_button'):
-            self.send_button.setFont(font)
-        
-        self.parent().setWindowTitle(f"SCOUT - {self.user}")
-
-        for widget in self.findChildren(QtWidgets.QWidget):
-            widget.setFont(font)
-            if isinstance(widget, QtWidgets.QPushButton):
-                widget.setStyleSheet(f"background-color: #000000; color: {self.font_color}; font-size: {self.font_size}px;")
-    
     def create_widgets(self):
         logger.info("Creating widgets")
         self.setStyleSheet("background-color: #000000;")
@@ -256,7 +286,8 @@ class ChatComponent(QtWidgets.QWidget):
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
 
-        self.create_sidebar(content_layout)
+        self.sidebar = self.create_sidebar()
+        content_layout.addWidget(self.sidebar)
 
         right_layout = QtWidgets.QVBoxLayout()
         right_layout.setContentsMargins(0, 0, 0, 0)
@@ -269,7 +300,10 @@ class ChatComponent(QtWidgets.QWidget):
 
         self.create_settings_page()
 
-        self.create_speech_bar(right_layout)
+        speech_bar_frame = QtWidgets.QFrame(self)
+        speech_bar_frame.setObjectName("SpeechBarFrame")
+        self.create_speech_bar(speech_bar_frame)
+        right_layout.addWidget(speech_bar_frame)
 
         content_layout.addLayout(right_layout)
 
@@ -277,139 +311,10 @@ class ChatComponent(QtWidgets.QWidget):
 
         self.apply_font_settings()
 
-    def create_sidebar(self, main_layout):
+    def create_sidebar(self):
         logger.info("Creating sidebar")
-        sidebar = QtWidgets.QFrame(self)
-        sidebar.setStyleSheet(f"background-color: {self.sidebar_frame_bg}; border-right: 2px solid black;")
-        sidebar.setFixedWidth(40)
-        sidebar_layout = QtWidgets.QVBoxLayout(sidebar)
-        sidebar_layout.setContentsMargins(5, 13, 5, 10)
-        sidebar_layout.setSpacing(10)
-        self.sidebar = sidebar
-
-        icon_size = QtCore.QSize(32, 32)
-
-        providers_button_frame = QtWidgets.QFrame(sidebar)
-        providers_button_frame.setStyleSheet("border: none;")
-        providers_button_layout = QtWidgets.QVBoxLayout(providers_button_frame)
-        providers_button_layout.setContentsMargins(2, 2, 2, 2)
-        providers_button_layout.setSpacing(0)
-
-        self.providers_button = QtWidgets.QPushButton(providers_button_frame)
-        self.providers_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/providers_wt.png"))
-        self.providers_button.setIconSize(icon_size)
-        self.providers_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.providers_button.clicked.connect(self.handle_providers_button)
-        providers_button_layout.addWidget(self.providers_button)
-        self.providers_button.enterEvent = self.on_providers_button_hover
-        self.providers_button.leaveEvent = self.on_providers_button_leave
-
-        ToolTip.setToolTip(self.providers_button, "Providers")
-
-        sidebar_layout.addWidget(providers_button_frame)
-
-        models_button_frame = QtWidgets.QFrame(sidebar)
-        models_button_frame.setStyleSheet("border: none;")
-        models_button_layout = QtWidgets.QVBoxLayout(models_button_frame)
-        models_button_layout.setContentsMargins(2, 2, 2, 2)
-        models_button_layout.setSpacing(0)
-
-        self.models_button = QtWidgets.QPushButton(models_button_frame)
-        self.models_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/models_wt.png"))
-        self.models_button.setIconSize(icon_size)
-        self.models_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.models_button.clicked.connect(self.handle_models_button)
-        models_button_layout.addWidget(self.models_button)
-        self.models_button.enterEvent = self.on_models_button_hover
-        self.models_button.leaveEvent = self.on_models_button_leave
-
-        ToolTip.setToolTip(self.models_button, "Models")
-
-        sidebar_layout.addWidget(models_button_frame)
-
-        history_button_frame = QtWidgets.QFrame(sidebar)
-        history_button_frame.setStyleSheet("border: none;")
-        history_button_layout = QtWidgets.QVBoxLayout(history_button_frame)
-        history_button_layout.setContentsMargins(0, 2, 0, 2)
-        history_button_layout.setSpacing(0)
-
-        self.history_button = QtWidgets.QPushButton(history_button_frame)
-        self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
-        self.history_button.setIconSize(icon_size)
-        self.history_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.history_button.clicked.connect(self.handle_history_button)
-        history_button_layout.addWidget(self.history_button)
-        self.history_button.enterEvent = self.on_history_button_hover
-        self.history_button.leaveEvent = self.on_history_button_leave
-
-        ToolTip.setToolTip(self.history_button, "History")
-
-        sidebar_layout.addWidget(history_button_frame)
-
-        chat_button_frame = QtWidgets.QFrame(sidebar)
-        chat_button_frame.setStyleSheet("border: none;")
-        chat_button_layout = QtWidgets.QVBoxLayout(chat_button_frame)
-        chat_button_layout.setContentsMargins(2, 2, 2, 2)
-        chat_button_layout.setSpacing(0)
-
-        self.chat_button = QtWidgets.QPushButton(chat_button_frame)
-        self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_wt.png"))
-        self.chat_button.setIconSize(icon_size)
-        self.chat_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.chat_button.clicked.connect(self.show_chat_page)
-        chat_button_layout.addWidget(self.chat_button)
-        self.chat_button.enterEvent = self.on_chat_button_hover
-        self.chat_button.leaveEvent = self.on_chat_button_leave
-
-        ToolTip.setToolTip(self.chat_button, "Chat")
-
-        sidebar_layout.addWidget(chat_button_frame)
-
-        persona_button_frame = QtWidgets.QFrame(sidebar)
-        persona_button_frame.setStyleSheet("border: none;")
-        persona_button_layout = QtWidgets.QVBoxLayout(persona_button_frame)
-        persona_button_layout.setContentsMargins(2, 2, 2, 2)
-        persona_button_layout.setSpacing(0)
-
-        self.persona_button = QtWidgets.QPushButton(persona_button_frame)
-        self.persona_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/agent_wt.png"))
-        self.persona_button.setIconSize(icon_size)
-        self.persona_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.persona_button.clicked.connect(self.show_persona_menu)
-        persona_button_layout.addWidget(self.persona_button)
-        self.persona_button.enterEvent = self.on_persona_button_hover
-        self.persona_button.leaveEvent = self.on_persona_button_leave
-
-        ToolTip.setToolTip(self.persona_button, "Change Persona")
-
-        self.persona_menu = QtWidgets.QMenu(self.persona_button)
-        for persona in self.personas:
-            action = self.persona_menu.addAction(persona["name"])
-            action.triggered.connect(lambda checked, p=persona["name"]: asyncio.ensure_future(self.on_persona_selection(p)))
-
-        sidebar_layout.addWidget(persona_button_frame)
-
-        sidebar_layout.addStretch(1)
-
-        settings_button_frame = QtWidgets.QFrame(sidebar)
-        settings_button_frame.setStyleSheet("border: none;")
-        settings_button_layout = QtWidgets.QVBoxLayout(settings_button_frame)
-        settings_button_layout.setContentsMargins(0, 0, 0, 0)
-        settings_button_layout.setSpacing(0)
-
-        self.settings_button = QtWidgets.QPushButton(settings_button_frame)
-        self.settings_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/settings_wt.png"))
-        self.settings_button.setIconSize(icon_size)
-        self.settings_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.settings_button.clicked.connect(self.show_settings_page)
-        settings_button_layout.addWidget(self.settings_button)
-        self.settings_button.enterEvent = self.on_settings_button_hover
-        self.settings_button.leaveEvent = self.on_settings_button_leave
-        ToolTip.setToolTip(self.settings_button, "Settings")
-
-        sidebar_layout.addWidget(settings_button_frame)
-
-        main_layout.addWidget(sidebar)
+        sidebar = Sidebar(self, self.personas, self.sidebar_frame_bg, self.font_color, self.font_size, self.font_family)
+        return sidebar
 
     def create_chat_page(self):
         logger.info("Creating chat page")
@@ -444,19 +349,19 @@ class ChatComponent(QtWidgets.QWidget):
     def create_settings_page(self):
         logger.info("Creating settings page")
         self.settings_page = QtWidgets.QWidget()
-        self.settings_page.setStyleSheet(f"background-color: {self.chatlog_frame_bg};")
+        self.settings_page.setStyleSheet(f"background-color: {self.settings_page_main_frame_bg};")
         settings_layout = QtWidgets.QVBoxLayout(self.settings_page)
         settings_layout.setContentsMargins(0, 0, 0, 0)
         settings_layout.setSpacing(0)
 
         title_label = QtWidgets.QLabel("Settings")
-        title_label.setStyleSheet(f"color: {self.chatlog_font_color}; font-size: 24px; font-weight: bold; border: 2px solid black;")
+        title_label.setStyleSheet(f"background-color: {self.settings_page_title_label_bg}; color: {self.settings_page_font_color}; font-family: {self.settings_page_title_label_font}; font-size: 24px; font-weight: bold; border: 2px solid black; border-radius: 10px; padding: 5px;")
         title_label.setFixedHeight(40)
         title_label.setAlignment(QtCore.Qt.AlignCenter)
         settings_layout.addWidget(title_label)
 
         main_frame = QtWidgets.QFrame(self.settings_page)
-        main_frame.setStyleSheet(f"background-color: {self.chatlog_frame_bg}; 2px solid black;")
+        main_frame.setStyleSheet(f"background-color: {self.settings_page_main_frame_bg}; 2px solid black;")
 
         settings_layout.addWidget(main_frame)
 
@@ -465,7 +370,7 @@ class ChatComponent(QtWidgets.QWidget):
         main_frame_layout.setSpacing(5)
 
         content_frame = QtWidgets.QFrame(main_frame)
-        content_frame.setStyleSheet(f"background-color: {self.chatlog_frame_bg}; border: 2px solid black; border-radius: 10px;")
+        content_frame.setStyleSheet(f"background-color: {self.settings_page_content_frame_bg}; border: 2px solid black; border-radius: 10px;")
         content_frame.setFixedWidth(580)
         content_frame.setFixedHeight(480)  
         main_frame_layout.addWidget(content_frame, alignment=QtCore.Qt.AlignCenter)
@@ -475,18 +380,12 @@ class ChatComponent(QtWidgets.QWidget):
         content_layout.setSpacing(20)
 
         self.chat_settings_instance = ChatSettings(parent=self, user=self.user)
-        self.chat_settings_instance.setStyleSheet(f"background-color: {self.chatlog_frame_bg}; color: {self.chatlog_font_color}; font-family: {self.chatlog_font_family}; font-size: {self.chatlog_font_size}px;")
+        self.chat_settings_instance.setStyleSheet(f"background-color: {self.settings_page_content_frame_bg}; color: {self.settings_page_font_color}; font-family: {self.settings_page_font_family}; font-size: {self.settings_page_font_size}px;")
         content_layout.addWidget(self.chat_settings_instance)
 
         content_layout.addStretch(1)
 
         self.stacked_widget.addWidget(self.settings_page)
-
-    def on_chat_button_hover(self, event):
-        self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_bl.png"))
-
-    def on_chat_button_leave(self, event):
-        self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_wt.png"))
 
     def show_chat_page(self):
         self.stacked_widget.setCurrentWidget(self.chat_page)
@@ -497,7 +396,7 @@ class ChatComponent(QtWidgets.QWidget):
     def create_entry_sidebar(self, main_layout):
         logger.info("Creating entry sidebar")
         entry_sidebar = QtWidgets.QFrame(self)
-        entry_sidebar.setStyleSheet(f"background-color: {self.entry_sidebar_frame_bg}; border-left: 2px solid black;")
+        entry_sidebar.setStyleSheet(f"background-color: {self.entry_sidebar_frame_bg}; border: none;")
         entry_sidebar.setFixedWidth(30)
         entry_sidebar_layout = QtWidgets.QVBoxLayout(entry_sidebar)
         entry_sidebar_layout.setContentsMargins(0, 0, 0, 0)
@@ -516,16 +415,15 @@ class ChatComponent(QtWidgets.QWidget):
         main_layout.addWidget(entry_sidebar)
 
     
-    def create_speech_bar(self, main_layout):
+    def create_speech_bar(self, speech_bar_frame):
         logger.info("Creating speech bar")
-        SpeechBar = QtWidgets.QFrame(self)
-        SpeechBar.setStyleSheet(f"background-color: {self.speechbar_frame_bg}; border-left: 2px solid black; border-top: 2px solid black;")
-        SpeechBar.setFixedHeight(40)
-        buttons_layout = QtWidgets.QHBoxLayout(SpeechBar)
+        speech_bar_frame.setStyleSheet(f"background-color: {self.speechbar_frame_bg}; border: none;")
+        speech_bar_frame.setFixedHeight(40)
+        buttons_layout = QtWidgets.QHBoxLayout(speech_bar_frame)
         buttons_layout.setContentsMargins(5, 5, 5, 5)
         buttons_layout.setSpacing(0)
 
-        self.microphone_button = QtWidgets.QPushButton(SpeechBar)
+        self.microphone_button = QtWidgets.QPushButton(speech_bar_frame)
         self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_wt.png"))
         self.microphone_button.setIconSize(QtCore.QSize(32, 32))
         self.microphone_button.setFixedSize(QtCore.QSize(32, 32))
@@ -537,57 +435,6 @@ class ChatComponent(QtWidgets.QWidget):
 
         buttons_layout.addStretch(1)
 
-        main_layout.addWidget(SpeechBar)
-
-    def on_providers_button_hover(self, event):
-        self.providers_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/providers_bl.png"))
-
-    def on_providers_button_leave(self, event):
-        self.providers_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/providers_wt.png"))
-
-    def handle_providers_button(self):
-        providers_menu = QtWidgets.QMenu(self)
-        for provider in self.llm_providers:
-            action = providers_menu.addAction(provider)
-            action.triggered.connect(lambda checked, p=provider: self.set_provider(p))
-        providers_menu.exec(QtGui.QCursor.pos())
-
-    def on_models_button_hover(self, event):
-        self.models_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/models_bl.png"))
-
-    def on_models_button_leave(self, event):
-        self.models_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/models_wt.png"))
-
-    def handle_models_button(self):
-        models_menu = QtWidgets.QMenu(self)
-        for model in self.available_models:
-            action = models_menu.addAction(model)
-            action.triggered.connect(lambda checked, m=model: self.set_model(m))
-        models_menu.exec(QtGui.QCursor.pos())
-
-    def on_history_button_hover(self, event):
-        self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_bl.png"))
-
-    def on_history_button_leave(self, event):
-        self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
-
-    def handle_history_button(self):
-        history_dialog = QtWidgets.QDialog(self)
-        history_dialog.setWindowTitle("Chat History")
-        history_dialog.exec()
-
-    def on_persona_button_hover(self, event):
-        self.persona_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/agent_bl.png"))
-
-    def on_persona_button_leave(self, event):
-        self.persona_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/agent_wt.png"))
-
-    def on_settings_button_hover(self, event):
-        self.settings_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/settings_bl.png"))
-
-    def on_settings_button_leave(self, event):
-        self.settings_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/settings_wt.png"))
-    
     def create_chat_log(self, main_layout):
         logger.info("Creating chat log")
         chat_log_container = QtWidgets.QFrame(self)
@@ -706,51 +553,6 @@ class ChatComponent(QtWidgets.QWidget):
     def show_persona_menu(self):
         self.persona_menu.exec_(QtGui.QCursor.pos())
 
-    def show_settings_frame(self):
-        self.settings_frame.setVisible(True)
-        animation = QtCore.QPropertyAnimation(self.settings_frame, b"geometry")
-        animation.setDuration(100)  
-        animation.setStartValue(QtCore.QRect(-200, 0, 200, self.height()))
-        animation.setEndValue(QtCore.QRect(self.sidebar.width() + 5, 0, 200, self.height()))  # Add spacing
-        animation.start()
-
-    def hide_settings_frame(self):
-        animation = QtCore.QPropertyAnimation(self.settings_frame, b"geometry")
-        animation.setDuration(300)
-        animation.setStartValue(QtCore.QRect(self.sidebar.width() + 5, 0, 200, self.height()))  # Add spacing
-        animation.setEndValue(QtCore.QRect(-200, 0, 200, self.height()))
-        animation.finished.connect(self.clear_settings_frame)
-        animation.start()
-        self.settings_frame.setVisible(False)
-
-    def toggle_settings_frame(self):
-        if self.settings_frame.isVisible():
-            self.hide_settings_frame()
-        else:
-            self.show_settings_frame()
-
-    def clear_settings_frame(self):
-        self.settings_frame.setVisible(False)
-        layout = self.settings_frame.layout()
-        if layout is not None:
-            while layout.count():
-                item = layout.takeAt(0)
-                widget = item.widget()
-                if widget is not None:
-                    widget.deleteLater()
-                else:
-                    self.clear_layout(item.layout())
-            QtWidgets.QWidget().setLayout(layout)
-
-    def clear_layout(self, layout):
-        while layout.count():
-            item = layout.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
-            else:
-                self.clear_layout(item.layout())
-              
     def set_font_size(self, font_size):
         self.font_size = font_size
         self.apply_font_settings()
@@ -844,3 +646,5 @@ class ChatComponent(QtWidgets.QWidget):
         """
         self.chat_log.insertHtml(code_block)
         self.chat_log.insertPlainText("\n")
+
+   

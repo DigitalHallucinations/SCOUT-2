@@ -1,4 +1,4 @@
-
+PySide6
 python-dotenv 
 requests
 cachetools
@@ -13,10 +13,8 @@ keyring
 sounddevice 
 soundfile 
 pygame 
-tkfontchooser 
 textblob
 pytz 
-customtkinter
 func_timeout
 pyspellchecker
 numpy

@@ -2,17 +2,22 @@
 
 import asyncio 
 import time
+from datetime import datetime
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtCore import QRunnable
 import configparser
-from gui.Settings import chist_functions as cf
-from gui.Settings.chat_settings import ChatSettings
+from gui import chist_functions as cf
+from gui.Settings.appearance_settings import AppearanceSettings
 from gui.sidebar import Sidebar
 from PySide6.QtWidgets import QMessageBox
 from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
 from modules.speech_services.GglCldSvcs.stt import SpeechToText
 from modules.Providers.provider_manager import ProviderManager
+from google.cloud import texttospeech
+#from modules.speech_services.GglCldSvcs.tts import set_voice, set_tts, get_tts
+from modules.speech_services.Eleven_Labs.tts import set_voice, set_tts, get_tts
+
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('chat_component.py') 
@@ -92,12 +97,16 @@ class ChatComponent(QtWidgets.QWidget):
             self.settings_page_font_color,
             self.settings_page_font_family,
             self.settings_page_font_size,
-            self.settings_page_spinbox_bg
+            self.settings_page_spinbox_bg,
+            self.statusbar_frame_bg,
+            self.statusbar_font_color,
+            self.statusbar_font_family,
+            self.statusbar_font_size
         ) = font_settings
 
         self.create_widgets()
         logger.info("ChatComponent initialized")
-        
+
     def load_appearance_settings(self, config_file="config.ini"):
         logger.info(f"Loading font settings from {config_file}")
         
@@ -144,6 +153,11 @@ class ChatComponent(QtWidgets.QWidget):
             settings_page_font_size = config.getint("SettingsPageSettings", "font_size")
             settings_page_spinbox_bg = config.get("SettingsPageSettings", "spinbox_bg")
 
+            statusbar_frame_bg = config.get("StatusBarSettings", "frame_bg")
+            statusbar_font_color = config.get("StatusBarSettings", "font_color")
+            statusbar_font_family = config.get("StatusBarSettings", "font_family")
+            statusbar_font_size = config.getint("StatusBarSettings", "font_size")
+
             logger.info(f"Loaded font settings: Family: {font_family}, Size: {font_size}, Color: {font_color}, Titlebar Color: {titlebar_color}")
         except (configparser.NoSectionError, configparser.NoOptionError):
             logger.warning("No font settings found in config file, using defaults")
@@ -179,6 +193,10 @@ class ChatComponent(QtWidgets.QWidget):
             settings_page_font_family = "Sitka"
             settings_page_font_size = 15
             settings_page_spinbox_bg = "#808080"
+            statusbar_frame_bg = "#2d2d2d"
+            statusbar_font_color = "#ffffff"
+            statusbar_font_family = "Sitka"
+            statusbar_font_size = 15
 
         return (
             font_family,
@@ -212,9 +230,13 @@ class ChatComponent(QtWidgets.QWidget):
             settings_page_font_color,
             settings_page_font_family,
             settings_page_font_size,
-            settings_page_spinbox_bg
+            settings_page_spinbox_bg,
+            statusbar_frame_bg,
+            statusbar_font_color,
+            statusbar_font_family,
+            statusbar_font_size
         )
-    
+        
     def apply_font_settings(self):
         logger.info("Applying font settings")
         font = QtGui.font = QtGui.QFont(self.font_family, self.font_size, QtGui.QFont.Normal)
@@ -286,19 +308,25 @@ class ChatComponent(QtWidgets.QWidget):
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
 
+        left_layout = QtWidgets.QVBoxLayout()
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(5)
+
         self.sidebar = self.create_sidebar()
-        content_layout.addWidget(self.sidebar)
+        left_layout.addWidget(self.sidebar)
+
+        content_layout.addLayout(left_layout)
 
         right_layout = QtWidgets.QVBoxLayout()
         right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(0)
+        right_layout.setSpacing(5)
 
         self.stacked_widget = QtWidgets.QStackedWidget(self)
         right_layout.addWidget(self.stacked_widget)
 
         self.create_chat_page()
 
-        self.create_settings_page()
+        self.create_appearance_settings_page()
 
         speech_bar_frame = QtWidgets.QFrame(self)
         speech_bar_frame.setObjectName("SpeechBarFrame")
@@ -309,12 +337,48 @@ class ChatComponent(QtWidgets.QWidget):
 
         main_layout.addLayout(content_layout)
 
+        status_bar_frame = QtWidgets.QFrame(self)
+        status_bar_frame.setObjectName("StatusBarFrame")
+        self.create_status_bar(status_bar_frame)
+        main_layout.addWidget(status_bar_frame)
+
         self.apply_font_settings()
+        self.update_status_bar()
 
     def create_sidebar(self):
         logger.info("Creating sidebar")
         sidebar = Sidebar(self, self.personas, self.sidebar_frame_bg, self.font_color, self.font_size, self.font_family)
+        sidebar.chat_component = self  
         return sidebar
+
+    def create_status_bar(self, status_bar_frame):
+        status_bar_frame.setStyleSheet(f"background-color: {self.statusbar_frame_bg}; border: none;")
+        status_bar_frame.setFixedHeight(30)
+        status_bar_layout = QtWidgets.QHBoxLayout(status_bar_frame)
+        status_bar_layout.setContentsMargins(5, 0, 5, 0)
+        status_bar_layout.setSpacing(10)
+
+        self.provider_label = QtWidgets.QLabel(status_bar_frame)
+        self.provider_label.setStyleSheet(f"color: {self.statusbar_font_color}; font-family: {self.statusbar_font_family}; font-size: {self.statusbar_font_size}px;")
+        status_bar_layout.addWidget(self.provider_label)
+
+        self.model_label = QtWidgets.QLabel(status_bar_frame)
+        self.model_label.setStyleSheet(f"color: {self.statusbar_font_color}; font-family: {self.statusbar_font_family}; font-size: {self.statusbar_font_size}px;")
+        status_bar_layout.addWidget(self.model_label)
+
+        status_bar_layout.addStretch(1)
+
+        self.username_label = QtWidgets.QLabel(status_bar_frame)
+        self.username_label.setStyleSheet(f"color: {self.statusbar_font_color}; font-family: {self.statusbar_font_family}; font-size: {self.statusbar_font_size}px;")
+        status_bar_layout.addWidget(self.username_label)
+
+    def update_status_bar(self):
+        provider = self.provider_manager.get_current_llm_provider()
+        model = self.provider_manager.get_current_model()
+
+        self.provider_label.setText(f"Provider: {provider}")
+        self.model_label.setText(f"Model: {model}")
+        self.username_label.setText(f"User: {self.user}")
 
     def create_chat_page(self):
         logger.info("Creating chat page")
@@ -346,7 +410,7 @@ class ChatComponent(QtWidgets.QWidget):
 
         self.stacked_widget.addWidget(self.chat_page)
 
-    def create_settings_page(self):
+    def create_appearance_settings_page(self):
         logger.info("Creating settings page")
         self.settings_page = QtWidgets.QWidget()
         self.settings_page.setStyleSheet(f"background-color: {self.settings_page_main_frame_bg};")
@@ -361,7 +425,8 @@ class ChatComponent(QtWidgets.QWidget):
         settings_layout.addWidget(title_label)
 
         main_frame = QtWidgets.QFrame(self.settings_page)
-        main_frame.setStyleSheet(f"background-color: {self.settings_page_main_frame_bg}; 2px solid black;")
+        main_frame.setObjectName("SettingsPageMainFrame")
+        main_frame.setStyleSheet(f"background-color: {self.settings_page_main_frame_bg}; border: 2px solid black;")
 
         settings_layout.addWidget(main_frame)
 
@@ -370,6 +435,7 @@ class ChatComponent(QtWidgets.QWidget):
         main_frame_layout.setSpacing(5)
 
         content_frame = QtWidgets.QFrame(main_frame)
+        content_frame.setObjectName("SettingsPageContentFrame")
         content_frame.setStyleSheet(f"background-color: {self.settings_page_content_frame_bg}; border: 2px solid black; border-radius: 10px;")
         content_frame.setFixedWidth(580)
         content_frame.setFixedHeight(480)  
@@ -379,9 +445,9 @@ class ChatComponent(QtWidgets.QWidget):
         content_layout.setContentsMargins(10, 10, 10, 10)
         content_layout.setSpacing(20)
 
-        self.chat_settings_instance = ChatSettings(parent=self, user=self.user)
-        self.chat_settings_instance.setStyleSheet(f"background-color: {self.settings_page_content_frame_bg}; color: {self.settings_page_font_color}; font-family: {self.settings_page_font_family}; font-size: {self.settings_page_font_size}px;")
-        content_layout.addWidget(self.chat_settings_instance)
+        self.appearance_settings_instance = AppearanceSettings(parent=self, user=self.user)
+        self.appearance_settings_instance.setStyleSheet(f"background-color: {self.settings_page_content_frame_bg}; color: {self.settings_page_font_color}; font-family: {self.settings_page_font_family}; font-size: {self.settings_page_font_size}px;")
+        content_layout.addWidget(self.appearance_settings_instance)
 
         content_layout.addStretch(1)
 
@@ -396,6 +462,7 @@ class ChatComponent(QtWidgets.QWidget):
     def create_entry_sidebar(self, main_layout):
         logger.info("Creating entry sidebar")
         entry_sidebar = QtWidgets.QFrame(self)
+        entry_sidebar.setObjectName("EntrySidebarFrame")
         entry_sidebar.setStyleSheet(f"background-color: {self.entry_sidebar_frame_bg}; border: none;")
         entry_sidebar.setFixedWidth(30)
         entry_sidebar_layout = QtWidgets.QVBoxLayout(entry_sidebar)
@@ -417,11 +484,43 @@ class ChatComponent(QtWidgets.QWidget):
     
     def create_speech_bar(self, speech_bar_frame):
         logger.info("Creating speech bar")
-        speech_bar_frame.setStyleSheet(f"background-color: {self.speechbar_frame_bg}; border: none;")
+        speech_bar_frame.setObjectName("SpeechBarFrame")
+        speech_bar_frame.setStyleSheet(f"""
+            QFrame {{
+                background-color: {self.speechbar_frame_bg};
+                border: none;
+                border-radius: 10px;
+                margin-left: 5px;
+                margin-right: 5px;
+            }}
+        """)
         speech_bar_frame.setFixedHeight(40)
         buttons_layout = QtWidgets.QHBoxLayout(speech_bar_frame)
         buttons_layout.setContentsMargins(5, 5, 5, 5)
-        buttons_layout.setSpacing(0)
+        buttons_layout.setSpacing(10)
+
+        self.toggle_tts_button = QtWidgets.QPushButton("TTS", self)
+        self.toggle_tts_button.setStyleSheet("background-color: #000000; color: white;")
+        self.toggle_tts_button.clicked.connect(self.toggle_tts)
+        if get_tts():
+            self.toggle_tts_button.setStyleSheet("background-color: green; color: white;")
+        else:
+            self.toggle_tts_button.setStyleSheet("background-color: #000000; color: white;")
+        buttons_layout.addWidget(self.toggle_tts_button, alignment=QtCore.Qt.AlignLeft)
+
+        self.speech_provider_button = QtWidgets.QPushButton("Speech Provider", self)
+        self.speech_provider_button.setStyleSheet("background-color: #000000; color: white;")
+        self.speech_provider_menu = QtWidgets.QMenu(self.speech_provider_button)
+        self.speech_provider_button.clicked.connect(self.show_speech_provider_menu)
+        buttons_layout.addWidget(self.speech_provider_button, alignment=QtCore.Qt.AlignLeft)
+
+        self.voice_button = QtWidgets.QPushButton("Voice", self)
+        self.voice_button.setStyleSheet("background-color: #000000; color: white;")
+        self.voice_menu = QtWidgets.QMenu(self.voice_button)
+        self.voice_button.clicked.connect(self.show_voice_menu)
+        buttons_layout.addWidget(self.voice_button, alignment=QtCore.Qt.AlignLeft)
+
+        buttons_layout.addStretch(1)
 
         self.microphone_button = QtWidgets.QPushButton(speech_bar_frame)
         self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_wt.png"))
@@ -431,13 +530,113 @@ class ChatComponent(QtWidgets.QWidget):
         self.microphone_button.clicked.connect(self.toggle_listen)
         self.microphone_button.enterEvent = self.on_microphone_button_hover
         self.microphone_button.leaveEvent = self.on_microphone_button_leave
-        buttons_layout.addWidget(self.microphone_button, alignment=QtCore.Qt.AlignLeft)
+        buttons_layout.addWidget(self.microphone_button, alignment=QtCore.Qt.AlignRight)
 
-        buttons_layout.addStretch(1)
+        self.populate_voice_menu()
+
+    def show_speech_provider_menu(self):
+        self.speech_provider_menu.clear()
+        speech_providers = ["Google Cloud Text-to-Speech", "Eleven Labs"]
+        for provider in speech_providers:
+            action = self.speech_provider_menu.addAction(provider)
+            action.triggered.connect(lambda checked, p=provider: self.on_speech_provider_selection(p))
+        self.speech_provider_menu.exec(QtGui.QCursor.pos())
+
+    def on_speech_provider_selection(self, speech_provider):
+        self.provider_manager.switch_speech_provider(speech_provider)
+        self.speech_provider_button.setText(speech_provider)
+        self.populate_voice_menu()
+
+    def toggle_tts(self):
+        """
+        The `toggle_tts` method toggles the text-to-speech (TTS) functionality on or off. It updates the state of the TTS button and logs the corresponding action.
+        """
+        logger.info("Entering toggle_tts")
+        if get_tts():
+            set_tts(False)
+            self.toggle_tts_button.setStyleSheet("background-color: #000000; color: white; font-size: 16px;")
+            logger.info("TTS turned off")
+        else:
+            set_tts(True)
+            self.toggle_tts_button.setStyleSheet("background-color: green; color: white; font-size: 16px;")
+            logger.info("TTS turned on")
+        logger.info("Exiting toggle_tts")
+
+    def populate_voice_menu(self):
+        """
+        Populates the voice menu with available voices based on the selected provider (Google Cloud Text-to-Speech or Eleven Labs).
+        """
+        logger.info(f"{datetime.now()}: Populating voice menu...")
+        self.voice_menu = QtWidgets.QMenu(self.voice_button)
+        self.voice_button.setMenu(self.voice_menu)
+
+        provider = self.provider_manager.get_current_speech_provider()
+
+        if provider == "Google Cloud Text-to-Speech":
+            self.populate_google_voice_menu()
+        elif provider == "Eleven Labs":
+            self.populate_eleven_labs_voice_menu()
+        else:
+            logger.warning(f"{datetime.now()}: Unsupported provider: {provider}")
+
+    def populate_google_voice_menu(self):
+        """
+        Populates the voice menu with available English voices using the Google Cloud Text-to-Speech API.
+        """
+        logger.info(f"{datetime.now()}: Populating Google Cloud Text-to-Speech voice menu...")
+        client = texttospeech.TextToSpeechClient()
+        english_language_codes = ["en-GB", "en-US"]
+
+        for language_code in english_language_codes:
+            try:
+                logger.info(f"{datetime.now()}: Getting voices for {language_code}...")
+                response = client.list_voices(language_code=language_code)
+                logger.info(f"{datetime.now()}: Received response for {language_code}.")
+
+                for voice in response.voices:
+                    voice_name = voice.name
+                    action = self.voice_menu.addAction(voice_name)
+                    action.triggered.connect(lambda checked, v=voice_name: self.on_voice_selection(v))
+            except Exception as e:
+                logger.error(f"{datetime.now()}: Error while getting voices for {language_code}: {e}")
+
+    def populate_eleven_labs_voice_menu(self):
+        """
+        Populates the voice menu with available voices from Eleven Labs.
+        """
+        logger.info(f"{datetime.now()}: Populating Eleven Labs voice menu...")
+        from modules.speech_services.Eleven_Labs.tts import get_voices
+
+        try:
+            voices = get_voices()
+            for voice in voices:
+                voice_name = voice['name']
+                action = self.voice_menu.addAction(voice_name)
+                action.triggered.connect(lambda checked, v=voice_name: self.on_voice_selection(v))
+        except Exception as e:
+            logger.error(f"{datetime.now()}: Error while getting voices from Eleven Labs: {e}")
+
+    def show_voice_menu(self):
+        self.populate_voice_menu()
+        self.voice_menu.exec(QtGui.QCursor.pos())    
+
+    def on_voice_selection(self, voice_name):
+        """
+        Called when a voice is selected from the menu, and it sets the selected voice.
+        """
+        logger.info("Voice selection started: %s", voice_name)
+        try:
+            from modules.speech_services.Eleven_Labs.tts import set_voice
+            set_voice(voice_name)
+            self.voice_button.setText(voice_name)
+            logger.info("Voice selected and applied: %s", voice_name)
+        except Exception as e:
+            logger.error("Failed to select voice: %s", voice_name, exc_info=True)
 
     def create_chat_log(self, main_layout):
         logger.info("Creating chat log")
         chat_log_container = QtWidgets.QFrame(self)
+        chat_log_container.setObjectName("ChatLogContainer")
         chat_log_container.setStyleSheet(f"""
             QFrame {{
                 background-color: {self.chatlog_frame_bg};
@@ -466,6 +665,7 @@ class ChatComponent(QtWidgets.QWidget):
     def create_message_entry(self, main_layout):
         logger.info("Creating message entry")
         entry_frame = QtWidgets.QFrame(self)
+        entry_frame.setObjectName("MessageEntryFrame")
         entry_frame.setStyleSheet(f"""
             QFrame {{
                 background-color: {self.message_entry_frame_bg};
@@ -575,15 +775,9 @@ class ChatComponent(QtWidgets.QWidget):
 
     def open_settings(self):
         logger.info("Opening settings")
-        self.chat_settings_instance = ChatSettings(parent=self, user=self.user)
-        self.chat_settings_instance.hide()  
-        self.chat_settings_instance.show()  
-
-    def toggle_topmost(self):
-        logger.info("Toggling topmost")
-        if self.isVisible():
-            self.parent().setWindowFlags(self.parent().windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
-            self.parent().show() 
+        self.appearance_settings_instance = AppearanceSettings(parent=self, user=self.user)
+        self.appearance_settings_instance.hide()  
+        self.appearance_settings_instance.show()  
 
     def sync_send_message(self):
         logger.info("Sending message")

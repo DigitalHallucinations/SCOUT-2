@@ -1,5 +1,3 @@
-# modules/Providers/provider_manager.py
-
 import logging
 
 logger = logging.getLogger('provider_manager.py')
@@ -8,9 +6,12 @@ class ProviderManager:
     def __init__(self, chat_component):
         self.chat_component = chat_component
         self.current_llm_provider = "Anthropic"
-        self.switch_provider(self.current_llm_provider)
+        self.current_model = None
+        self.current_speech_provider = "Google Cloud Text-to-Speech"
+        self.switch_llm_provider(self.current_llm_provider)
+        self.switch_speech_provider(self.current_speech_provider)
 
-    def switch_provider(self, llm_provider):
+    def switch_llm_provider(self, llm_provider):
         if llm_provider == "OpenAI":
             from modules.Providers.OpenAI.OA_gen_response import generate_response
         elif llm_provider == "Mistral":
@@ -29,4 +30,20 @@ class ProviderManager:
 
         self.current_llm_provider = llm_provider
         self.generate_response = generate_response
-        logger.info(f"Switched to provider: {self.current_llm_provider}")
+        logger.info(f"Switched to LLM provider: {self.current_llm_provider}")
+
+    def switch_speech_provider(self, speech_provider):
+        self.current_speech_provider = speech_provider
+        logger.info(f"Switched to speech provider: {self.current_speech_provider}")
+
+    def set_current_model(self, model):
+        self.current_model = model
+
+    def get_current_llm_provider(self):
+        return self.current_llm_provider
+
+    def get_current_speech_provider(self):
+        return self.current_speech_provider
+
+    def get_current_model(self):
+        return self.current_model

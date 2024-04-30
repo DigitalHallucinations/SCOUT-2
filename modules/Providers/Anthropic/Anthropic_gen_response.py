@@ -1,9 +1,8 @@
-# modules/Providers/Anthropic/Anthropic_gen_response.py
-
 import json
-import re
 from .Anthropic_api import AnthropicAPI
-from modules.speech_services.GglCldSvcs import tts
+#from modules.speech_services.GglCldSvcs import tts
+from modules.speech_services.Eleven_Labs.tts import tts, get_tts
+
 from datetime import datetime
 from modules.chat_history.convo_manager import ConversationManager
 from modules.logging.logger import setup_logger
@@ -116,13 +115,13 @@ async def generate_response(user, current_persona, message, session_id, conversa
       
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
 
-    #logger.info("Data being sent in HTTP request to AnthropicAPI: %s", data) 
+    logger.debug("Data being sent in HTTP request to AnthropicAPI: %s", data) 
     logger.info("Data being sent in HTTP request to AnthropicAPI.") 
 
     response_data = await api.generate_conversation(data)
 
     if response_data:
-        #logger.info(f"response from Anthropic API: {response_data}")
+        logger.debug(f"response from Anthropic API: {response_data}")
         logger.info("response from Anthropic API.")
         content_blocks = response_data.content 
         text = ''
@@ -140,7 +139,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
                 else:
                     logger.warning(f"A content block of type '{block.type}' was found, which is not handled by this method.")
             
-        #logger.info(f"Extracted response: {text}")
+        logger.debug(f"Extracted response: {text}")
         logger.info("Extracted response")
 
         if text:  
@@ -149,11 +148,11 @@ async def generate_response(user, current_persona, message, session_id, conversa
             logger.info("Assistant message added to conversation history.")
 
         try:
-                if tts.get_tts():
+                if get_tts():
                     if contains_code(text):
                         logger.info("Skipping TTS as the text contains code.")
                     else:
-                        await text_to_speech(text)
+                        await tts(text)
         except Exception as e:
                 logger.error("Error during TTS: %s", e)
 
@@ -164,14 +163,3 @@ async def generate_response(user, current_persona, message, session_id, conversa
 def contains_code(text: str) -> bool:
     """Check if the given text contains code"""
     return "<code>" in text
-
-async def text_to_speech(text):
-    """
-    Convert the given text to speech.
-
-    :param text: The text to convert.
-    """
-    logger.info("Using TTS")  
-    text_without_code = re.sub(r"`[^`]*`", "", text)
-    await tts.text_to_speech(text_without_code)
-

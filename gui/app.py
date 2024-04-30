@@ -12,7 +12,7 @@ from modules.chat_history.convo_manager import ConversationManager
 from modules.user_accounts.login import LoginComponent
 from modules.user_accounts.user_account_db import UserAccountDatabase
 from modules.user_accounts.sign_up import SignUpComponent
-from gui.Settings import chist_functions as cf
+from gui import chist_functions as cf
 from modules.Personas.persona_manager import PersonaManager
 from modules.logging.logger import setup_logger
 from modules.Background_Services.CognitiveBackgroundServices import CognitiveBackgroundServices

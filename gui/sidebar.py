@@ -1,17 +1,215 @@
 # gui/sidebar.py
 
+import asyncio
+import json
 from PySide6 import QtWidgets, QtGui, QtCore
 from gui.tooltip import ToolTip
+from gui import chist_functions as cf
+from gui.fetch_models.OA_fetch_models import fetch_models_openai
+from gui.fetch_models.GG_fetch_models import fetch_models_google, fetch_model_details    
+from modules.Providers.OpenAI.OA_gen_response import set_OA_model, get_OA_model
+from modules.Providers.Mistral.Mistral_gen_response import set_Mistral_model, get_Mistral_model
+from modules.Providers.HuggingFace.HF_gen_response import set_hf_model, get_hf_model
+from modules.Providers.Google.GG_gen_response import set_GG_model, get_GG_model
+from modules.Providers.Anthropic.Anthropic_gen_response import set_Anthropic_model, get_Anthropic_model
+from modules.logging.logger import setup_logger
 
+logger = setup_logger('sidebar.py')
 class Sidebar(QtWidgets.QFrame):
     def __init__(self, parent=None, personas=None, sidebar_frame_bg=None, font_color=None, font_size=None, font_family=None):
         super().__init__(parent)
         self.personas = personas
         self.sidebar_frame_bg = sidebar_frame_bg
+        self.llm_providers = []
+        self.current_llm_provider = 'Anthropic'
+        self.load_providers()
         self.font_color = font_color
         self.font_size = font_size
         self.font_family = font_family
+        self.chat_component = None  
+        self.fetch_models_menu = None
         self.create_sidebar()
+
+    def load_providers(self):
+        """
+        Loads the available providers from the `providers.json` file.
+        """
+        with open('modules/Providers/providers.json') as f:
+            self.llm_providers = json.load(f)
+
+    def set_provider(self, llm_provider):
+        """
+        Sets the current provider, logs the selected provider, switches the provider in the parent window, 
+        and populates the models menu based on the selected provider.
+        """
+        self.current_llm_provider = llm_provider
+        logger.info(f"Selected provider: {self.current_llm_provider}")
+        self.chat_component.provider_manager.switch_provider(llm_provider)
+        self.chat_component.provider_label.setText(f"Provider: {llm_provider}")
+        self.populate_models_menu()     
+
+    def populate_models_menu(self):
+        """
+        Populates the models menu based on the selected provider. 
+        It clears the existing menu items and adds options for OpenAI and Google models. 
+        It then loads the models from the corresponding JSON file based on the current provider. 
+        For each model, it creates a submenu with options to select the model and fetch model details.
+        The model submenus are added as cascading menus to the fetch models menu.
+        """
+        logger.info("Populating models menu for provider: %s", self.current_llm_provider)
+        try:
+            self.fetch_models_menu = QtWidgets.QMenu(self.models_button)
+            self.models_button.setMenu(self.fetch_models_menu)
+
+            self.fetch_models_menu.addAction("OpenAI", self.fetch_models_openai_wrapper)
+            self.fetch_models_menu.addAction("Google", self.fetch_models_google_wrapper)
+
+            models_files = {
+                'OpenAI': 'modules/Providers/OpenAI/OA_models.json',
+                'Mistral': 'modules/Providers/Mistral/Mistral_models.json',
+                'Google': 'modules/Providers/Google/GG_models.json',
+                'HuggingFace': 'modules/Providers/HuggingFace/HF_models.json',
+                'Anthropic': 'modules/Providers/Anthropic/Anthropic_models.json',
+            }
+
+            current_models_file = models_files.get(self.current_llm_provider)
+            logger.info("Loading models from file: %s", current_models_file)
+
+            with open(current_models_file) as json_file:
+                models = json.load(json_file)['models']
+                logger.info("Loaded %d models for provider: %s", len(models), self.current_llm_provider)
+
+            for model in models:
+                logger.info("Adding model to menu: %s", model)
+                model_menu = QtWidgets.QMenu(model, self.fetch_models_menu)
+                model_menu.addAction("Select", lambda m=model: self.set_model_and_update_button(m))
+                model_menu.addAction("Details", lambda m=model: self.fetch_model_details(self.parent.chat_log, m))
+                self.fetch_models_menu.addMenu(model_menu)
+        except Exception as e:
+            logger.error("Failed to populate models menu", exc_info=True)
+
+    def check_current_model(self):
+        """
+        Checks the currently selected model against the model displayed on the fetch models button. 
+        It retrieves the current model based on the selected provider using the corresponding `get_*_model` functions. 
+        It then compares the current model with the text of the fetch models button and logs the result.
+        """
+        logger.info("Checking current model against selected model")
+        try:
+            current_model = None
+            if self.current_llm_provider == 'Google':
+                current_model = get_GG_model()
+                logger.info("Current provider: Google")
+            elif self.current_llm_provider == 'Mistral':
+                current_model = get_Mistral_model()
+                logger.info("Current provider: Mistral")
+            elif self.current_llm_provider == 'HuggingFace':
+                current_model = get_hf_model()
+                logger.info("Current provider: HuggingFace")
+            elif self.current_llm_provider == 'OpenAI':
+                current_model = get_OA_model()
+                logger.info("Current provider: OpenAI")
+            elif self.current_llm_provider == 'Anthropic':
+                current_model = get_Anthropic_model()
+                logger.info("Current provider: OpenAI")    
+
+            if current_model and current_model == self.fetch_models_button.text():
+                logger.info("Model set successfully: %s", current_model)
+            else:
+                logger.error("Failed to set model. Expected: %s, Found: %s", self.fetch_models_button.text(), current_model)
+        except Exception as e:
+            logger.error("Error checking current model", exc_info=True)       
+
+    def set_model_and_update_button(self, model):
+        """
+        Sets the selected model based on the current provider using the corresponding `set_*_model` functions. 
+        It updates the text of the fetch models button to display the selected model and calls the `check_current_model` method to verify the model selection.
+        """
+        logger.info(f"Setting model: {model}")
+        if self.current_llm_provider == 'Google':
+            set_GG_model(model)
+        elif self.current_llm_provider == 'Mistral':
+            set_Mistral_model(model)
+        elif self.current_llm_provider == 'HuggingFace':
+            set_hf_model(model)
+        elif self.current_llm_provider == 'OpenAI':
+            set_OA_model(model)
+        elif self.current_llm_provider == 'Anthropic':
+            set_Anthropic_model(model)    
+        logger.info(f"Model {model} set successfully for {self.current_llm_provider}")
+        
+        logger.info("Updating fetch_models_button text")
+        self.fetch_models_button.setText(model)
+        self.chat_component.model_label.setText(f"Model: {model}")
+        logger.info(f"fetch_models_button text updated to: {model}")
+        
+        self.check_current_model()
+
+    def fetch_models_google_wrapper(self):
+        """
+        The `fetch_models_google_wrapper` and `fetch_models_openai_wrapper` methods are wrapper functions that create asynchronous tasks to fetch models from Google and OpenAI, respectively. 
+        They pass the chat log from the parent window to the corresponding `fetch_models_*` functions.
+        """
+        chat_log = self.parent.chat_log  
+        asyncio.create_task(fetch_models_google(chat_log))
+
+    def fetch_models_openai_wrapper(self):
+        logger.info("Fetching OpenAI models...")
+        try:
+            chat_log = self.parent.chat_log
+            asyncio.create_task(fetch_models_openai(chat_log))
+            logger.info("Asynchronous task to fetch OpenAI models started")
+        except Exception as e:
+            logger.error("Failed to start task for fetching OpenAI models", exc_info=True)
+ 
+    def show_model_context_menu(self, pos):
+        """
+        The `show_model_context_menu` method shows a context menu for the selected model when right-clicking on a model in the fetch models menu. 
+        It identifies the selected model based on the mouse event position and displays the context menu at the mouse position.
+        """
+        try:
+            action = self.fetch_models_menu.actionAt(pos)
+            if action:
+                self.selected_model = action.text()
+                logger.info("Showing context menu for model: %s", self.selected_model)
+                self.model_context_menu.popup(self.fetch_models_button.mapToGlobal(pos))
+            else:
+                logger.info("No model selected for context menu")
+        except Exception as e:
+            logger.error("Failed to show model context menu", exc_info=True)
+
+    def fetch_model_details(self, chat_log, model_name):
+        """
+        Fetches the details of a selected model. 
+        It retrieves the selected model from the fetch models button and creates an asynchronous task to fetch the model details using the `fetch_model_details` function from the `GG_fetch_models.py` module. 
+        It passes the chat log and the model name to the function.
+        """
+        logger.info("Fetching details for model: %s", model_name)
+        try:
+            selected_model = self.fetch_models_button.text()
+            logger.info("Selected model for details: %s", selected_model)
+            asyncio.create_task(fetch_model_details(chat_log, model_name))
+            logger.info("Asynchronous task to fetch model details started for: %s", model_name)
+        except Exception as e:
+            logger.error("Failed to start task for fetching model details for: %s", model_name, exc_info=True)
+
+    def do_nothing(self):
+        pass
+
+    def show_providers_menu(self):
+        self.providers_menu = QtWidgets.QMenu(self.providers_button)
+        self.providers_button.setMenu(self.providers_menu)
+
+        for llm_provider in self.llm_providers:       
+            action = self.providers_menu.addAction(llm_provider)
+            action.triggered.connect(lambda checked, p=llm_provider: self.set_provider(p))
+        self.providers_menu.exec(QtGui.QCursor.pos())
+
+    def show_fetch_models_menu(self):
+        self.fetch_models_button.setMenu(self.fetch_models_menu)
+        self.populate_models_menu()
+        self.fetch_models_menu.exec(QtGui.QCursor.pos())
+
 
     def apply_font_settings(self):
         font = QtGui.QFont(self.font_family, self.font_size, QtGui.QFont.Normal)
@@ -35,7 +233,7 @@ class Sidebar(QtWidgets.QFrame):
         self.settings_button.setStyleSheet(f"QPushButton {{ background-color: transparent; border: none; color: {self.font_color}; font-size: {self.font_size}px; }}")
         
     def create_sidebar(self):
-        self.setStyleSheet(f"background-color: {self.sidebar_frame_bg}; border-right: 2px solid black;")
+        self.setStyleSheet(f"background-color: {self.sidebar_frame_bg}; border: none;")
         self.setFixedWidth(40)
         sidebar_layout = QtWidgets.QVBoxLayout(self)
         sidebar_layout.setContentsMargins(5, 13, 5, 10)
@@ -54,7 +252,7 @@ class Sidebar(QtWidgets.QFrame):
         self.providers_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/providers_wt.png"))
         self.providers_button.setIconSize(icon_size)
         self.providers_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.providers_button.clicked.connect(self.handle_providers_button)
+        self.providers_button.clicked.connect(self.show_providers_menu)
         providers_button_layout.addWidget(self.providers_button)
         self.providers_button.enterEvent = self.on_providers_button_hover
         self.providers_button.leaveEvent = self.on_providers_button_leave
@@ -72,10 +270,14 @@ class Sidebar(QtWidgets.QFrame):
         self.models_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/models_wt.png"))
         self.models_button.setIconSize(icon_size)
         self.models_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.models_button.clicked.connect(self.handle_models_button)
+        self.models_button.clicked.connect(self.show_fetch_models_menu)
         models_button_layout.addWidget(self.models_button)
         self.models_button.enterEvent = self.on_models_button_hover
         self.models_button.leaveEvent = self.on_models_button_leave
+
+        self.fetch_models_button = QtWidgets.QPushButton(models_button_frame)
+        self.fetch_models_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
+        models_button_layout.addWidget(self.fetch_models_button)
 
         sidebar_layout.addWidget(models_button_frame)
 
@@ -167,26 +369,12 @@ class Sidebar(QtWidgets.QFrame):
     def on_providers_button_leave(self, event):
         self.providers_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/providers_wt.png"))
 
-    def handle_providers_button(self):
-        providers_menu = QtWidgets.QMenu(self)
-        for provider in self.llm_providers:
-            action = providers_menu.addAction(provider)
-            action.triggered.connect(lambda checked, p=provider: self.set_provider(p))
-        providers_menu.exec(QtGui.QCursor.pos())
-
     def on_models_button_hover(self, event):
         self.models_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/models_bl.png"))
         ToolTip.setToolTip(self, "Models")
 
     def on_models_button_leave(self, event):
         self.models_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/models_wt.png"))
-
-    def handle_models_button(self):
-        models_menu = QtWidgets.QMenu(self)
-        for model in self.available_models:
-            action = models_menu.addAction(model)
-            action.triggered.connect(lambda checked, m=model: self.set_model(m))
-        models_menu.exec(QtGui.QCursor.pos())
 
     def on_history_button_hover(self, event):
         self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_bl.png"))
@@ -196,9 +384,7 @@ class Sidebar(QtWidgets.QFrame):
         self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
 
     def handle_history_button(self):
-        history_dialog = QtWidgets.QDialog(self)
-        history_dialog.setWindowTitle("Chat History")
-        history_dialog.exec()
+        cf.load_chat_popup(self.parent())
 
     def on_chat_button_hover(self, event):
         self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_bl.png"))

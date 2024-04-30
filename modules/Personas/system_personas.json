@@ -9,8 +9,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     }, 
     {
       "name": "MathGenius",
@@ -20,8 +20,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "CodeGenius",
@@ -97,8 +97,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "WeatherGenius",
@@ -108,8 +108,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "NewsManager",
@@ -119,8 +119,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "MEDIC",
@@ -130,8 +130,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "MEDIC JR",
@@ -141,8 +141,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Phys.I.C",
@@ -152,8 +152,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Nurse Jackie",
@@ -163,8 +163,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Dr. Phil Good",
@@ -174,8 +174,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "LifeCoach",
@@ -185,8 +185,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Freud",
@@ -196,8 +196,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Einstein",
@@ -207,8 +207,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Carl Sagan",
@@ -218,8 +218,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
 
     },
     {
@@ -230,8 +230,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Leonardo da Vinci",
@@ -241,8 +241,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Ada Lovelace",
@@ -252,8 +252,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Nikola Tesla",
@@ -263,8 +263,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",      
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Carl Friedrich Gauss",
@@ -274,8 +274,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Hypatia of Alexandria",
@@ -285,8 +285,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Alan Turing",
@@ -296,8 +296,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Stephen Hawking",
@@ -307,8 +307,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     },
     {
       "name": "Richard Feynman",
@@ -318,8 +318,8 @@
       "Mistral_model": "mistral-large-latest",
       "Google_model": "gemini-1.0-pro-latest",
       "Anthropic_model": "claude-3-opus-20240229",
-      "Speech_provider": "Google",
-          "voice": ""
+      "Google_speech_provider": "EN-US-journey-D",
+      "Eleven_Labs_speech_provider": ""
     }
   ]
 }

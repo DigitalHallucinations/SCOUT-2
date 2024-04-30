@@ -2,23 +2,17 @@
 
 import asyncio 
 import time
-from datetime import datetime
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtCore import QRunnable
 import configparser
 from gui import chist_functions as cf
 from gui.Settings.appearance_settings import AppearanceSettings
 from gui.sidebar import Sidebar
-from PySide6.QtWidgets import QMessageBox
 from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
-from modules.speech_services.GglCldSvcs.stt import SpeechToText
 from modules.Providers.provider_manager import ProviderManager
-from google.cloud import texttospeech
-#from modules.speech_services.GglCldSvcs.tts import set_voice, set_tts, get_tts
-from modules.speech_services.Eleven_Labs.tts import set_voice, set_tts, get_tts
-
 from modules.logging.logger import setup_logger
+from gui.speech_bar import SpeechBar
 
 logger = setup_logger('chat_component.py') 
 
@@ -51,11 +45,6 @@ class ChatComponent(QtWidgets.QWidget):
         self.current_persona = self.persona_manager.current_persona
         self.personas = self.persona_manager.personas
         self.typing_indicator_index = None
-        self.speech_to_text = SpeechToText()
-        self.is_listening = False
-        self.message_frame = QtWidgets.QFrame(self)
-        self.message_frame.setStyleSheet("background-color: #000000;")
-        self.prompt = QtCore.QStringListModel()
         self.system_name = "SCOUT"
         self.system_name_color = "#00BFFF"
         self.system_name_tag = "SCOUT"
@@ -117,9 +106,7 @@ class ChatComponent(QtWidgets.QWidget):
             font_family = config.get("Font", "family")
             font_size = config.getint("Font", "size")
             font_color = config.get("Font", "color")
-            titlebar_color = config.get("Colors", "titlebar")
-
-            chatlog_frame_bg = config.get("ChatlogSettings", "frame_bg")
+            titlebar_color = configchatlog_frame_bg = config.get("ChatlogSettings", "frame_bg")
             chatlog_font_color = config.get("ChatlogSettings", "font_color")
             chatlog_font_family = config.get("ChatlogSettings", "font_family")
             chatlog_font_size = config.getint("ChatlogSettings", "font_size")
@@ -248,9 +235,6 @@ class ChatComponent(QtWidgets.QWidget):
         self.message_entry.setFont(QtGui.QFont(self.message_entry_font_family, self.message_entry_font_size))
         self.message_entry.setStyleSheet(f"background-color: {self.message_entry_frame_bg}; color: {self.message_entry_font_color}; font-size: {self.message_entry_font_size}px;")
         
-        if hasattr(self, 'microphone_button'):
-            self.microphone_button.setFont(font)
-        
         if hasattr(self, 'send_button'):
             self.send_button.setFont(font)
         
@@ -328,10 +312,14 @@ class ChatComponent(QtWidgets.QWidget):
 
         self.create_appearance_settings_page()
 
-        speech_bar_frame = QtWidgets.QFrame(self)
-        speech_bar_frame.setObjectName("SpeechBarFrame")
-        self.create_speech_bar(speech_bar_frame)
-        right_layout.addWidget(speech_bar_frame)
+        self.speech_bar = SpeechBar(
+            parent=self,
+            speechbar_frame_bg=self.speechbar_frame_bg,
+            speechbar_font_color=self.speechbar_font_color,
+            speechbar_font_family=self.speechbar_font_family,
+            speechbar_font_size=self.speechbar_font_size
+        )
+        right_layout.addWidget(self.speech_bar)
 
         content_layout.addLayout(right_layout)
 
@@ -405,7 +393,6 @@ class ChatComponent(QtWidgets.QWidget):
         message_entry_frame = QtWidgets.QFrame(self)
         message_entry_frame.setLayout(message_entry_layout)
         splitter.addWidget(message_entry_frame)
-
         chat_layout.addWidget(splitter)
 
         self.stacked_widget.addWidget(self.chat_page)
@@ -481,158 +468,6 @@ class ChatComponent(QtWidgets.QWidget):
 
         main_layout.addWidget(entry_sidebar)
 
-    
-    def create_speech_bar(self, speech_bar_frame):
-        logger.info("Creating speech bar")
-        speech_bar_frame.setObjectName("SpeechBarFrame")
-        speech_bar_frame.setStyleSheet(f"""
-            QFrame {{
-                background-color: {self.speechbar_frame_bg};
-                border: none;
-                border-radius: 10px;
-                margin-left: 5px;
-                margin-right: 5px;
-            }}
-        """)
-        speech_bar_frame.setFixedHeight(40)
-        buttons_layout = QtWidgets.QHBoxLayout(speech_bar_frame)
-        buttons_layout.setContentsMargins(5, 5, 5, 5)
-        buttons_layout.setSpacing(10)
-
-        self.toggle_tts_button = QtWidgets.QPushButton("TTS", self)
-        self.toggle_tts_button.setStyleSheet("background-color: #000000; color: white;")
-        self.toggle_tts_button.clicked.connect(self.toggle_tts)
-        if get_tts():
-            self.toggle_tts_button.setStyleSheet("background-color: green; color: white;")
-        else:
-            self.toggle_tts_button.setStyleSheet("background-color: #000000; color: white;")
-        buttons_layout.addWidget(self.toggle_tts_button, alignment=QtCore.Qt.AlignLeft)
-
-        self.speech_provider_button = QtWidgets.QPushButton("Speech Provider", self)
-        self.speech_provider_button.setStyleSheet("background-color: #000000; color: white;")
-        self.speech_provider_menu = QtWidgets.QMenu(self.speech_provider_button)
-        self.speech_provider_button.clicked.connect(self.show_speech_provider_menu)
-        buttons_layout.addWidget(self.speech_provider_button, alignment=QtCore.Qt.AlignLeft)
-
-        self.voice_button = QtWidgets.QPushButton("Voice", self)
-        self.voice_button.setStyleSheet("background-color: #000000; color: white;")
-        self.voice_menu = QtWidgets.QMenu(self.voice_button)
-        self.voice_button.clicked.connect(self.show_voice_menu)
-        buttons_layout.addWidget(self.voice_button, alignment=QtCore.Qt.AlignLeft)
-
-        buttons_layout.addStretch(1)
-
-        self.microphone_button = QtWidgets.QPushButton(speech_bar_frame)
-        self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_wt.png"))
-        self.microphone_button.setIconSize(QtCore.QSize(32, 32))
-        self.microphone_button.setFixedSize(QtCore.QSize(32, 32))
-        self.microphone_button.setStyleSheet(f"QPushButton {{ background-color: transparent; border: none; color: {self.speechbar_font_color}; font-family: {self.speechbar_font_family}; font-size: {self.speechbar_font_size}px; }}")
-        self.microphone_button.clicked.connect(self.toggle_listen)
-        self.microphone_button.enterEvent = self.on_microphone_button_hover
-        self.microphone_button.leaveEvent = self.on_microphone_button_leave
-        buttons_layout.addWidget(self.microphone_button, alignment=QtCore.Qt.AlignRight)
-
-        self.populate_voice_menu()
-
-    def show_speech_provider_menu(self):
-        self.speech_provider_menu.clear()
-        speech_providers = ["Google Cloud Text-to-Speech", "Eleven Labs"]
-        for provider in speech_providers:
-            action = self.speech_provider_menu.addAction(provider)
-            action.triggered.connect(lambda checked, p=provider: self.on_speech_provider_selection(p))
-        self.speech_provider_menu.exec(QtGui.QCursor.pos())
-
-    def on_speech_provider_selection(self, speech_provider):
-        self.provider_manager.switch_speech_provider(speech_provider)
-        self.speech_provider_button.setText(speech_provider)
-        self.populate_voice_menu()
-
-    def toggle_tts(self):
-        """
-        The `toggle_tts` method toggles the text-to-speech (TTS) functionality on or off. It updates the state of the TTS button and logs the corresponding action.
-        """
-        logger.info("Entering toggle_tts")
-        if get_tts():
-            set_tts(False)
-            self.toggle_tts_button.setStyleSheet("background-color: #000000; color: white; font-size: 16px;")
-            logger.info("TTS turned off")
-        else:
-            set_tts(True)
-            self.toggle_tts_button.setStyleSheet("background-color: green; color: white; font-size: 16px;")
-            logger.info("TTS turned on")
-        logger.info("Exiting toggle_tts")
-
-    def populate_voice_menu(self):
-        """
-        Populates the voice menu with available voices based on the selected provider (Google Cloud Text-to-Speech or Eleven Labs).
-        """
-        logger.info(f"{datetime.now()}: Populating voice menu...")
-        self.voice_menu = QtWidgets.QMenu(self.voice_button)
-        self.voice_button.setMenu(self.voice_menu)
-
-        provider = self.provider_manager.get_current_speech_provider()
-
-        if provider == "Google Cloud Text-to-Speech":
-            self.populate_google_voice_menu()
-        elif provider == "Eleven Labs":
-            self.populate_eleven_labs_voice_menu()
-        else:
-            logger.warning(f"{datetime.now()}: Unsupported provider: {provider}")
-
-    def populate_google_voice_menu(self):
-        """
-        Populates the voice menu with available English voices using the Google Cloud Text-to-Speech API.
-        """
-        logger.info(f"{datetime.now()}: Populating Google Cloud Text-to-Speech voice menu...")
-        client = texttospeech.TextToSpeechClient()
-        english_language_codes = ["en-GB", "en-US"]
-
-        for language_code in english_language_codes:
-            try:
-                logger.info(f"{datetime.now()}: Getting voices for {language_code}...")
-                response = client.list_voices(language_code=language_code)
-                logger.info(f"{datetime.now()}: Received response for {language_code}.")
-
-                for voice in response.voices:
-                    voice_name = voice.name
-                    action = self.voice_menu.addAction(voice_name)
-                    action.triggered.connect(lambda checked, v=voice_name: self.on_voice_selection(v))
-            except Exception as e:
-                logger.error(f"{datetime.now()}: Error while getting voices for {language_code}: {e}")
-
-    def populate_eleven_labs_voice_menu(self):
-        """
-        Populates the voice menu with available voices from Eleven Labs.
-        """
-        logger.info(f"{datetime.now()}: Populating Eleven Labs voice menu...")
-        from modules.speech_services.Eleven_Labs.tts import get_voices
-
-        try:
-            voices = get_voices()
-            for voice in voices:
-                voice_name = voice['name']
-                action = self.voice_menu.addAction(voice_name)
-                action.triggered.connect(lambda checked, v=voice_name: self.on_voice_selection(v))
-        except Exception as e:
-            logger.error(f"{datetime.now()}: Error while getting voices from Eleven Labs: {e}")
-
-    def show_voice_menu(self):
-        self.populate_voice_menu()
-        self.voice_menu.exec(QtGui.QCursor.pos())    
-
-    def on_voice_selection(self, voice_name):
-        """
-        Called when a voice is selected from the menu, and it sets the selected voice.
-        """
-        logger.info("Voice selection started: %s", voice_name)
-        try:
-            from modules.speech_services.Eleven_Labs.tts import set_voice
-            set_voice(voice_name)
-            self.voice_button.setText(voice_name)
-            logger.info("Voice selected and applied: %s", voice_name)
-        except Exception as e:
-            logger.error("Failed to select voice: %s", voice_name, exc_info=True)
-
     def create_chat_log(self, main_layout):
         logger.info("Creating chat log")
         chat_log_container = QtWidgets.QFrame(self)
@@ -706,50 +541,6 @@ class ChatComponent(QtWidgets.QWidget):
     def send_button_leave(self, event):
         self.send_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/send_wt.png"))
 
-    def toggle_listen(self):
-        if self.is_listening:
-            logger.info("Stopping speech-to-text listening")
-            self.speech_to_text.stop_listening()
-            
-            try:
-                transcript = self.speech_to_text.transcribe('output.wav')
-                existing_text = self.message_entry.toPlainText()
-                updated_text = existing_text.strip() + " " + transcript
-                self.message_entry.setPlainText(updated_text)
-            except Exception as e:
-                logger.error(f"Error transcribing audio: {str(e)}")
-                error_message = str(e)
-                QMessageBox.critical(self, "Transcription Error", f"An error occurred during transcription:\n\n{error_message}")
-            
-            self.is_listening = False
-            self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_wt.png"))
-        else:
-            logger.info("Starting speech-to-text listening")
-            self.speech_to_text.listen()
-            self.is_listening = True
-            self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_gn.png"))
-
-        logger.info(f'Listening state toggled: Now listening: {self.is_listening}')
-
-    def on_microphone_button_hover(self, event):
-        if not self.is_listening:
-            self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_bl.png"))
-            tooltip_style = f"""
-                QToolTip {{
-                    background-color: {self.speechbar_frame_bg};
-                    color: {self.speechbar_font_color};
-                    border: none;
-                    font-family: {self.speechbar_font_family};
-                    font-size: {self.speechbar_font_size}px;
-                }}
-            """
-            self.microphone_button.setStyleSheet(tooltip_style)
-            ToolTip.setToolTip(self.microphone_button, "Speech-to-Text")
-
-    def on_microphone_button_leave(self, event):
-        if not self.is_listening:
-            self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_wt.png"))
-    
     def show_persona_menu(self):
         self.persona_menu.exec_(QtGui.QCursor.pos())
 
@@ -758,7 +549,6 @@ class ChatComponent(QtWidgets.QWidget):
         self.apply_font_settings()
     
     def set_font_family(self, font_family):
-        """Sets the font family for the chat log."""
         self.font_family = font_family
         self.apply_font_settings()
 
@@ -840,5 +630,3 @@ class ChatComponent(QtWidgets.QWidget):
         """
         self.chat_log.insertHtml(code_block)
         self.chat_log.insertPlainText("\n")
-
-   

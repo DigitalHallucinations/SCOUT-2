@@ -142,10 +142,13 @@ class ConversationManager:
                     query += ' AND conversation_id = ?'
                     params.append(conversation_id)
 
-                logger.info(f"Executing query: {query} with params: {params}")
+                logger.info(f"Executing query")    
+                logger.debug(f"Executing query: {query} with params: {params}")
+
                 cursor.execute(query, params)
                 results = cursor.fetchall()
-                logger.info(f"Query results: {results}")
+                logger.info(f"Query results")
+                logger.debug(f"Query results: {results}")
                 return results
             except sqlite3.Error as e:
                 logger.error(f"Error fetching conversation: {e}")

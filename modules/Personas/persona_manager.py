@@ -28,48 +28,28 @@ class PersonaManager:
         try:
             self.load_personas(self.PERSONAS_FILE_NAME, self.user)
             self.default_persona = next((persona for persona in self.personas if persona["name"] == self.default_persona_name), None)
-            self.current_persona = self.personalize_persona(self.default_persona) if self.default_persona else None
+            self.current_persona = self.personalize_persona(self.default_persona, self.user) if self.default_persona else None
         except Exception as e:
             logger.error(f"Error initializing PersonaManager: {e}")
-                         
-    def updater(self, selected_persona_name):
-        """
-        Updates the system name and persona based on the selected persona name and generates a new conversation ID.
-
-        This method updates the master application object with the new system name, tag, and current persona. If a database
-        instance is present, it also generates a new conversation ID.
-
-        Parameters:
-            selected_persona_name (str): The name of the persona to switch to.
-
-        Returns:
-            None
-        """
+                            
+    def updater(self, selected_persona_name, user):
         logger.info("Attempting to update persona.")
 
         self.master.system_name = selected_persona_name
         self.master.system_name_tag = selected_persona_name
 
-        selected_persona = next((persona for persona in self.personas if persona["name"] == selected_persona_name), None)
-        if selected_persona:
-            personalized_persona = self.personalize_persona(selected_persona)
-            self.master.current_persona = personalized_persona
-            self.show_message("system", f"Persona switched to {selected_persona_name} and personalized")
-        else:
-            self.show_message("system", f"Persona {selected_persona_name} not found")
- 
         if hasattr(self.master, 'database'):
             self.master.database.generate_new_conversation_id()
             logger.info(f"Conversation ID updated due to persona change to {selected_persona_name}")
         else:
             logger.warning("ConversationHistory instance not found in master.")
 
-        logger.info(f"Persona switched to {selected_persona_name} and personalized")
-
-    def personalize_persona(self, persona):
+        logger.info(f"Persona switched to {selected_persona_name}")
+    
+    def personalize_persona(self, persona, user):
         logger.info("Attempting to personalize persona with user content.")
-        self.user_name = self.user
-        user_data_manager = UserDataManager(self.user)
+        self.user_name = user
+        user_data_manager = UserDataManager(user)
         self.user_profile = user_data_manager.get_profile_text()
         self.user_emr = user_data_manager.get_emr()
         self.system_info = user_data_manager.get_system_info()  

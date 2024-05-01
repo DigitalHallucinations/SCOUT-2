@@ -1,10 +1,11 @@
-# modules/chat_history/CognitiveBackgroundServices.py
+# modules/Background_Services/CognitiveBackgroundServices.py
 
 import os
 import json
 import sqlite3
 from modules.Providers.OpenAI.openai_api import OpenAIAPI
 from modules.Providers.Mistral.Mistral_api import MistralAPI
+from modules.Providers.Anthropic.Anthropic_api import AnthropicAPI
 from modules.chat_history.DatabaseContextManager import DatabaseContextManager
 from modules.logging.logger import setup_logger
 
@@ -53,20 +54,26 @@ class CognitiveBackgroundServices:
         """
         if chat_log:
             conversation_data = [{"role": "user", "content": chat_log}]
-            response = await self.generate_conversation_name(conversation_data) 
-            #logger.info(f"Provider API response for conversation name: {response}")
+            response = await self.generate_conversation_name(conversation_data)
+            logger.debug(f"Provider API response for conversation name: {response}")
             logger.info("Provider API response for conversation name")
 
-            if response and 'choices' in response and len(response['choices']) > 0 and 'message' in response['choices'][0]:
+            conversation_name = None
+
+            if response and hasattr(response, 'content') and len(response.content) > 0:
+                text_block = response.content[0]
+                if hasattr(text_block, 'text'):
+                    conversation_name = text_block.text.strip()
+            elif response and 'choices' in response and len(response['choices']) > 0 and 'message' in response['choices'][0]:
                 conversation_name = response['choices'][0]['message'].get('content', '').strip()
-                if conversation_name:
-                    self.update_conversation_name(user, conversation_id, conversation_name)
-                    logger.info(f"Model named the conversation: {conversation_name}")
-                    await self.update_user_profile(user, conversation_data)
-                else:
-                    logger.error("Received an empty conversation name from the API.")
+
+            if conversation_name:
+                self.update_conversation_name(user, conversation_id, conversation_name)
+                logger.info(f"Model named the conversation: {conversation_name}")
+                await self.update_user_profile(user, conversation_data)
             else:
-                logger.error("Failed to generate conversation name or invalid response format.")      
+                logger.error("Failed to generate conversation name or invalid response format.")
+
 
     def update_conversation_name(self, user, conversation_id, name):
         """
@@ -127,7 +134,7 @@ class CognitiveBackgroundServices:
         await generate_conversation_name(conversation_data)
         
         Dependencies:
-        - OpenAIAPI class
+        - Provider specific API classes
         
         Error Handling:
         None
@@ -139,74 +146,71 @@ class CognitiveBackgroundServices:
         The response from the OpenAI API containing the generated conversation name.
         """
         payload = { 
-            "model": "gpt-4-1106-preview",
+            #"model": "gpt-4-1106-preview",
             #"model": "mistral-large-latest",
+            "model": "claude-3-haiku-20240307",
             "messages": [{"role": "system", "content": "You are ConversationManager. You accel at examining conversations and finding creative names for them. You pay close attention to details, if a conversation is strictly a story and it has a name use it. The following conversation does not currently have a name. You are to output a conversationally relevant name for this conversation in up to 3 words."}] + conversation_data
         }
-        return await OpenAIAPI().generate_cognitive_background_service(payload)
+        #return await OpenAIAPI().generate_cognitive_background_service(payload)
         #return await MistralAPI().generate_cognitive_background_service(payload)
+        return await AnthropicAPI().generate_cognitive_background_service(payload)
     
     async def update_user_profile(self, user, conversation_data):
-        """
-        Description:
-        Determines the type of update required for the user profile and calls the appropriate method.
-
-        When a user selects a persona from the persona menu, this method is called to update the user profile based on the latest conversation data.
-        
-        Side Effects:
-        - Calls the generate_profile_update method to generate the profile update instructions.
-        - Calls the append_content_by_field or add_field method based on the update instructions.
-        
-        Thread Safety:
-        This method is asynchronous and should be called with the 'await' keyword to ensure proper execution.
-        
-        Usage:
-        await update_user_profile(user, conversation_data)
-        
-        Dependencies:
-        - generate_profile_update method
-        - append_content_by_field method
-        - add_field method
-        
-        Error Handling:
-        - Logs an error if the ProfileManager response is invalid or cannot be parsed.
-        - Logs an error if an unsupported operation is specified in the update instructions.
-        
-        Parameters:
-        - user (str): The user associated with the profile.
-        - conversation_data (list): The conversation data used to generate the profile update instructions.
-        
-        Returns:
-        None
-        """
         logger.info("Initiated update_user_profile method.")
         response = await self.generate_profile_update(conversation_data)
         logger.info("ProfileManager responded")
 
-        if response and 'choices' in response and len(response['choices']) > 0:
-            update_instructions = response['choices'][0]['message']['content']
-            try:
-                update_data_list = json.loads(update_instructions)
-                
-                for update_data in update_data_list:
-                    operation = update_data.get("operation")
-                    fieldName = update_data.get("fieldName")
-                    content = update_data.get("content")
-                    observations = update_data.get("observations", "")
+        update_instructions = None
 
-                    if operation == "appendContentByField":
-                        self.append_content_by_field(user, fieldName, content, observations)
-                    elif operation == "addfield":
-                        self.add_field(user, fieldName, content, observations)
-                    elif operation == "None":
-                        logger.info("No update required for the user profile based on the latest conversation.")
-                    else:
-                        logger.error("Unsupported operation.")
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to parse ProfileManager response: {e}")
+        if response and hasattr(response, 'content') and len(response.content) > 0:
+            # Handle Anthropic API response format
+            text_block = response.content[0]
+            if hasattr(text_block, 'text'):
+                # Extract the JSON array string from the text block
+                json_array_string = text_block.text.strip()
+                # Find the start and end indices of the JSON array
+                start_index = json_array_string.find('[')
+                end_index = json_array_string.rfind(']') + 1
+                if start_index != -1 and end_index != -1:
+                    # Extract the JSON array string
+                    json_string = json_array_string[start_index:end_index]
+                    try:
+                        update_instructions = json.loads(json_string)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Failed to parse ProfileManager response: {e}")
+                else:
+                    logger.error("Invalid JSON array format in ProfileManager response.")
+        elif response and 'choices' in response and len(response['choices']) > 0:
+            # Handle previous response format used by other providers
+            update_instructions = response['choices'][0]['message']['content']
+
+        if update_instructions:
+            if isinstance(update_instructions, str):
+                try:
+                    update_data_list = json.loads(update_instructions)
+                except json.JSONDecodeError as e:
+                    logger.error(f"Failed to parse ProfileManager response: {e}")
+                    return
+            else:
+                update_data_list = update_instructions
+
+            for update_data in update_data_list:
+                operation = update_data.get("operation")
+                fieldName = update_data.get("fieldName")
+                content = update_data.get("content")
+                observations = update_data.get("observations", "")
+
+                if operation == "appendContentByField":
+                    self.append_content_by_field(user, fieldName, content, observations)
+                elif operation == "addfield":
+                    self.add_field(user, fieldName, content, observations)
+                elif operation == "None":
+                    logger.info("No update required for the user profile based on the latest conversation.")
+                else:
+                    logger.error("Unsupported operation.")
         else:
             logger.error("Invalid response format or no response from ProfileManager.")
-
+        
     def append_content_by_field(self, user, field_name, content, observations):
         """
         Description:
@@ -363,7 +367,7 @@ class CognitiveBackgroundServices:
         Returns:
         The response from the API containing the generated profile update instructions.
         """
-        #logger.info(f"Initiated generate_profile_update method. {conversation_data}")
+        logger.debug(f"Initiated generate_profile_update method. {conversation_data}")
         logger.info("Initiated generate_profile_update method.")
         profile = self.get_profile()
             
@@ -373,16 +377,18 @@ class CognitiveBackgroundServices:
         system_message_content = system_message_content.replace('<<Profile>>', profile_string)
 
         payload = {
-            "model": "gpt-4-turbo-preview",
+            #"model": "gpt-4-turbo-preview",
             #"model": "mistral-large-latest",
+            "model": "claude-3-haiku-20240307",
             "messages": [{"role": "system","content": system_message_content}] + conversation_data
         }
             
-        #logger.info(f"Payload being sent to API: {json.dumps(payload, indent=2, ensure_ascii=False)}")
+        logger.debug(f"Payload being sent to API: {json.dumps(payload, indent=2, ensure_ascii=False)}")
         logger.info("Payload being sent to API")
-        return await OpenAIAPI().generate_cognitive_background_service(payload)
+        #return await OpenAIAPI().generate_cognitive_background_service(payload)
         #return await MistralAPI().generate_cognitive_background_service(payload)
- 
+        return await AnthropicAPI().generate_cognitive_background_service(payload)
+
     def get_profile(self):
         """
         Description:

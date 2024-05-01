@@ -44,7 +44,7 @@ class Sidebar(QtWidgets.QFrame):
         """
         self.current_llm_provider = llm_provider
         logger.info(f"Selected provider: {self.current_llm_provider}")
-        self.chat_component.provider_manager.switch_provider(llm_provider)
+        self.chat_component.provider_manager.switch_llm_provider(llm_provider)
         self.chat_component.provider_label.setText(f"Provider: {llm_provider}")
         self.populate_models_menu()     
 
@@ -336,8 +336,8 @@ class Sidebar(QtWidgets.QFrame):
         self.persona_menu = QtWidgets.QMenu(self.persona_button)
         for persona in self.personas:
             action = self.persona_menu.addAction(persona["name"])
-            action.triggered.connect(lambda checked, p=persona["name"]: self.on_persona_selection(p))
-
+            action.triggered.connect(lambda checked, p=persona["name"]: asyncio.ensure_future(self.on_persona_selection(p)))
+        
         sidebar_layout.addWidget(persona_button_frame)
 
         sidebar_layout.addStretch(1)
@@ -384,7 +384,7 @@ class Sidebar(QtWidgets.QFrame):
         self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
 
     def handle_history_button(self):
-        cf.load_chat_popup(self.parent())
+        cf.load_chat_history(self.parent())
 
     def on_chat_button_hover(self, event):
         self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_bl.png"))
@@ -406,8 +406,8 @@ class Sidebar(QtWidgets.QFrame):
     def show_persona_menu(self):
         self.persona_menu.exec_(QtGui.QCursor.pos())
 
-    def on_persona_selection(self, persona_name):
-        self.parent().on_persona_selection(persona_name)
+    async def on_persona_selection(self, persona_name):
+        await self.parent().on_persona_selection(persona_name)
 
     def on_settings_button_hover(self, event):
         self.settings_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/settings_bl.png"))

@@ -68,7 +68,7 @@ async def load_chat(chat_component, selected_chat_log=None, provider_manager=Non
 
     logger.info(f"Updated conversation_id in ChatComponent: {conversation_id}")
 
-    await clear_chat_log(chat_component)
+    await clear_chat_log(chat_component, provider_manager)
 
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")

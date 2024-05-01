@@ -10,7 +10,7 @@ class ProviderManager:
         self.current_llm_provider = "Anthropic"
         self.current_background_provider = "Anthropic"
         self.current_model = None
-        self.current_speech_provider = "Eleven_Labs"
+        self.current_speech_provider = "Eleven Labs"
         self.switch_llm_provider(self.current_llm_provider)
         self.switch_speech_provider(self.current_speech_provider)
         self.switch_background_provider(self.current_background_provider) 

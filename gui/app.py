@@ -62,10 +62,10 @@ class SCOUT(QtWidgets.QMainWindow):
         title_layout.setContentsMargins(0, 0, 0, 0)
         title_layout.setSpacing(0)
 
-        title_label = QtWidgets.QLabel(f"SCOUT - {self.user}", title_bar)
+        title_label = QtWidgets.QLabel("SCOUT", title_bar)
         title_label.setAlignment(qtc.Qt.AlignCenter)
-        title_label.setStyleSheet("color: white;")
-
+        title_label.setStyleSheet("color: white; font-size: 18pt; font-weight: bold; font-family: Consolas;") 
+        
         title_layout.addStretch(1)
         title_layout.addWidget(title_label)
         title_layout.addStretch(1)

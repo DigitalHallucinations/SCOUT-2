@@ -12,6 +12,7 @@ from modules.Providers.Mistral.Mistral_gen_response import set_Mistral_model, ge
 from modules.Providers.HuggingFace.HF_gen_response import set_hf_model, get_hf_model
 from modules.Providers.Google.GG_gen_response import set_GG_model, get_GG_model
 from modules.Providers.Anthropic.Anthropic_gen_response import set_Anthropic_model, get_Anthropic_model
+
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('sidebar.py')
@@ -26,7 +27,7 @@ class Sidebar(QtWidgets.QFrame):
         self.font_color = font_color
         self.font_size = font_size
         self.font_family = font_family
-        self.chat_component = None  
+        self.chat_component = parent  
         self.fetch_models_menu = None
         self.create_sidebar()
 
@@ -116,8 +117,7 @@ class Sidebar(QtWidgets.QFrame):
         logger.info(f"Model {model} set successfully for {self.current_llm_provider}")
         
         logger.info("Updating fetch_models_button text")
-        self.fetch_models_button.setText(model)
-        self.chat_component.model_label.setText(f"Model: {model}")
+        self.chat_component.model_label.setText(f"Model: {model}") # not the button label
         logger.info(f"fetch_models_button text updated to: {model}")
         
         self.check_current_model()
@@ -239,10 +239,6 @@ class Sidebar(QtWidgets.QFrame):
         self.models_button.enterEvent = self.on_models_button_hover
         self.models_button.leaveEvent = self.on_models_button_leave
 
-        self.fetch_models_button = QtWidgets.QPushButton(models_button_frame)
-        self.fetch_models_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        models_button_layout.addWidget(self.fetch_models_button)
-
         sidebar_layout.addWidget(models_button_frame)
 
         history_button_frame = QtWidgets.QFrame(self)
@@ -348,7 +344,7 @@ class Sidebar(QtWidgets.QFrame):
         self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
 
     def handle_history_button(self):
-        cf.load_chat_history(self, self.provider_manager)
+        cf.load_chat_history(self.chat_component, self.chat_component.provider_manager)
 
     def on_chat_button_hover(self, event):
         self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_bl.png"))

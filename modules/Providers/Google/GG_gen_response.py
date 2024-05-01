@@ -74,7 +74,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     return data
 
 
-async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None):
+async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None, provider_manager=None):
     """
     Generates a response using the specified Gemini model.
 
@@ -92,7 +92,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
     
     if "name" in current_persona: 
-        conversation_history = ConversationManager(user, current_persona["name"])
+        conversation_history = ConversationManager(user, current_persona["name"], provider_manager)
     else:
         conversation_history = None
 

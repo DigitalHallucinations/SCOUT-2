@@ -9,7 +9,6 @@ from gui.Settings.appearance_settings import AppearanceSettings
 from gui.sidebar import Sidebar
 from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
-from modules.Providers.provider_manager import ProviderManager
 from modules.logging.logger import setup_logger
 from gui.speech_bar import SpeechBar
 
@@ -28,7 +27,7 @@ class SendMessageTask(QRunnable):
         asyncio.run(send_message_module.send_message(self.chat_component, self.user, self.message, self.session_id, self.conversation_id))
 
 class ChatComponent(QtWidgets.QWidget):
-    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None):
+    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None):
         super().__init__(parent)
         logger.info("Initializing ChatComponent")
         self.persona = persona
@@ -38,7 +37,7 @@ class ChatComponent(QtWidgets.QWidget):
         self.conversation_id = conversation_id
         self.logout_callback = logout_callback
         self.user = user 
-        self.provider_manager = ProviderManager(self)
+        self.provider_manager = provider_manager
         self.send_message = send_message_module.send_message
         self.persona_manager = persona_manager
         self.current_persona = self.persona_manager.current_persona

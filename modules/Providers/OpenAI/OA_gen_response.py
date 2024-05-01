@@ -276,7 +276,7 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
             return new_text
     return None
 
-async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var):
+async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager=None):
     """
     Generates a response using the specified GPT model.
 
@@ -295,7 +295,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
     function_map = load_function_map_from_current_persona(current_persona)
 
     if "name" in current_persona: 
-        conversation_history = ConversationManager(user, current_persona["name"])
+        conversation_history = ConversationManager(user, current_persona["name"], provider_manager)
     else:
         conversation_history = None
     

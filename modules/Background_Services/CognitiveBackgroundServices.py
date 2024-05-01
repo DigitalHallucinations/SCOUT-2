@@ -3,18 +3,16 @@
 import os
 import json
 import sqlite3
-from modules.Providers.OpenAI.openai_api import OpenAIAPI
-from modules.Providers.Mistral.Mistral_api import MistralAPI
-from modules.Providers.Anthropic.Anthropic_api import AnthropicAPI
 from modules.chat_history.DatabaseContextManager import DatabaseContextManager
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('CognitiveBackgroundServices.py')
 
 class CognitiveBackgroundServices:
-    def __init__(self, db_file, user):
+    def __init__(self, db_file, user, provider_manager):
         self.user = user
         self.db_file = db_file
+        self.provider_manager = provider_manager
 
 
     async def generate_and_update_conversation_name(self, user, conversation_id, chat_log):
@@ -151,9 +149,7 @@ class CognitiveBackgroundServices:
             "model": "claude-3-haiku-20240307",
             "messages": [{"role": "system", "content": "You are ConversationManager. You accel at examining conversations and finding creative names for them. You pay close attention to details, if a conversation is strictly a story and it has a name use it. The following conversation does not currently have a name. You are to output a conversationally relevant name for this conversation in up to 3 words."}] + conversation_data
         }
-        #return await OpenAIAPI().generate_cognitive_background_service(payload)
-        #return await MistralAPI().generate_cognitive_background_service(payload)
-        return await AnthropicAPI().generate_cognitive_background_service(payload)
+        return await self.provider_manager.generate_cognitive_background_service(payload)
     
     async def update_user_profile(self, user, conversation_data):
         logger.info("Initiated update_user_profile method.")
@@ -385,10 +381,8 @@ class CognitiveBackgroundServices:
             
         logger.debug(f"Payload being sent to API: {json.dumps(payload, indent=2, ensure_ascii=False)}")
         logger.info("Payload being sent to API")
-        #return await OpenAIAPI().generate_cognitive_background_service(payload)
-        #return await MistralAPI().generate_cognitive_background_service(payload)
-        return await AnthropicAPI().generate_cognitive_background_service(payload)
-
+        return await self.provider_manager.generate_cognitive_background_service(payload)
+    
     def get_profile(self):
         """
         Description:

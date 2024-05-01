@@ -72,7 +72,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     logger.info("request body created.")
     return data
 
-async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var):
+async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager):
     """
     Generates a response using the specified Anthropic model.
 
@@ -90,7 +90,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
     functions = None
 
     if "name" in current_persona: 
-        conversation_history = ConversationManager(user, current_persona["name"])
+        conversation_history = ConversationManager(user, current_persona["name"], provider_manager)
     else:
         conversation_history = None
     

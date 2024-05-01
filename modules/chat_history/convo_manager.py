@@ -13,7 +13,7 @@ from modules.logging.logger import setup_logger
 logger = setup_logger('convo_manager.py')
 
 class ConversationManager:   
-    def __init__(self, user, persona_name):
+    def __init__(self, user, persona_name, provider_manager):
         if not isinstance(persona_name, str):
             raise ValueError("persona_name must be a string")
         self.persona_name = persona_name
@@ -23,7 +23,7 @@ class ConversationManager:
         self.function_call_id = None
         self.loaded_conversations = set()
         self.db_file = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
-        self.cognitive_services = CognitiveBackgroundServices(self.db_file, user)
+        self.cognitive_services = CognitiveBackgroundServices(self.db_file, user, provider_manager)        
         self.schema = DatabaseSchema()
         self.create_all_tables()
 

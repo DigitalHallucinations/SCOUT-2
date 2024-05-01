@@ -14,6 +14,7 @@ from modules.user_accounts.user_account_db import UserAccountDatabase
 from modules.user_accounts.sign_up import SignUpComponent
 from gui import chist_functions as cf
 from modules.Personas.persona_manager import PersonaManager
+from modules.Providers.provider_manager import ProviderManager
 from modules.logging.logger import setup_logger
 from modules.Background_Services.CognitiveBackgroundServices import CognitiveBackgroundServices
 
@@ -129,7 +130,9 @@ class SCOUT(QtWidgets.QMainWindow):
             self.persona_handler = PersonaManager(self, self.user)
             current_persona = self.persona_handler.current_persona
 
-            self.database = ConversationManager(self.user, current_persona['name'])
+            self.provider_manager = ProviderManager(self)
+
+            self.database = ConversationManager(self.user, current_persona['name'], self.provider_manager)
             logger.info("Database instantiated successfully.")
 
             self.conversation_id = self.database.init_conversation_id()
@@ -140,7 +143,7 @@ class SCOUT(QtWidgets.QMainWindow):
 
             persona_name = current_persona['name']
             db_file = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
-            self.cognitive_services = CognitiveBackgroundServices(db_file, self.user)
+            self.cognitive_services = CognitiveBackgroundServices(db_file, self.user, self.provider_manager)
 
             logger.info("Creating ChatComponent")
             self.chat_component = ChatComponent(
@@ -148,7 +151,8 @@ class SCOUT(QtWidgets.QMainWindow):
                 user=self.user, session_id=self.session_id, 
                 conversation_id=self.conversation_id,
                 persona_manager=self.persona_handler,
-                titlebar_color=self.titlebar_color  
+                titlebar_color=self.titlebar_color,
+                provider_manager=self.provider_manager  
             )
             self.setCentralWidget(self.chat_component)
             self.chat_component.show()

@@ -21,7 +21,7 @@ async def process_message(chat_component, user, message, session_id, conversatio
 
     chat_component.show_message("system", "is typing...")
 
-    response = await asyncio.create_task(chat_component.provider_manager.generate_response(user, chat_component.current_persona, message, session_id, conversation_id, chat_component.temperature, chat_component.top_p, chat_component.top_k))
+    response = await asyncio.create_task(chat_component.provider_manager.generate_response(user, chat_component.current_persona, message, session_id, conversation_id, chat_component.temperature, chat_component.top_p, chat_component.top_k, chat_component.provider_manager))
   
     logger.info("Response received")
     

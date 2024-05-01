@@ -80,7 +80,7 @@ class ChatComponent(QtWidgets.QWidget):
     async def on_persona_selection(self, persona_name):
         logger.info(f"Persona selected: {persona_name}")
 
-        await cf.clear_chat_log(self)
+        await cf.clear_chat_log(self, self.provider_manager)
 
         selected_persona_name = persona_name
         for persona in self.personas:

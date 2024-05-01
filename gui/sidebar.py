@@ -31,31 +31,17 @@ class Sidebar(QtWidgets.QFrame):
         self.create_sidebar()
 
     def load_providers(self):
-        """
-        Loads the available providers from the `providers.json` file.
-        """
         with open('modules/Providers/providers.json') as f:
             self.llm_providers = json.load(f)
 
     def set_provider(self, llm_provider):
-        """
-        Sets the current provider, logs the selected provider, switches the provider in the parent window, 
-        and populates the models menu based on the selected provider.
-        """
         self.current_llm_provider = llm_provider
         logger.info(f"Selected provider: {self.current_llm_provider}")
         self.chat_component.provider_manager.switch_llm_provider(llm_provider)
         self.chat_component.provider_label.setText(f"Provider: {llm_provider}")
         self.populate_models_menu()     
 
-    def populate_models_menu(self):
-        """
-        Populates the models menu based on the selected provider. 
-        It clears the existing menu items and adds options for OpenAI and Google models. 
-        It then loads the models from the corresponding JSON file based on the current provider. 
-        For each model, it creates a submenu with options to select the model and fetch model details.
-        The model submenus are added as cascading menus to the fetch models menu.
-        """
+    def populate_models_menu(self): 
         logger.info("Populating models menu for provider: %s", self.current_llm_provider)
         try:
             self.fetch_models_menu = QtWidgets.QMenu(self.models_button)
@@ -89,11 +75,6 @@ class Sidebar(QtWidgets.QFrame):
             logger.error("Failed to populate models menu", exc_info=True)
 
     def check_current_model(self):
-        """
-        Checks the currently selected model against the model displayed on the fetch models button. 
-        It retrieves the current model based on the selected provider using the corresponding `get_*_model` functions. 
-        It then compares the current model with the text of the fetch models button and logs the result.
-        """
         logger.info("Checking current model against selected model")
         try:
             current_model = None
@@ -121,10 +102,6 @@ class Sidebar(QtWidgets.QFrame):
             logger.error("Error checking current model", exc_info=True)       
 
     def set_model_and_update_button(self, model):
-        """
-        Sets the selected model based on the current provider using the corresponding `set_*_model` functions. 
-        It updates the text of the fetch models button to display the selected model and calls the `check_current_model` method to verify the model selection.
-        """
         logger.info(f"Setting model: {model}")
         if self.current_llm_provider == 'Google':
             set_GG_model(model)
@@ -146,10 +123,6 @@ class Sidebar(QtWidgets.QFrame):
         self.check_current_model()
 
     def fetch_models_google_wrapper(self):
-        """
-        The `fetch_models_google_wrapper` and `fetch_models_openai_wrapper` methods are wrapper functions that create asynchronous tasks to fetch models from Google and OpenAI, respectively. 
-        They pass the chat log from the parent window to the corresponding `fetch_models_*` functions.
-        """
         chat_log = self.parent.chat_log  
         asyncio.create_task(fetch_models_google(chat_log))
 
@@ -163,10 +136,6 @@ class Sidebar(QtWidgets.QFrame):
             logger.error("Failed to start task for fetching OpenAI models", exc_info=True)
  
     def show_model_context_menu(self, pos):
-        """
-        The `show_model_context_menu` method shows a context menu for the selected model when right-clicking on a model in the fetch models menu. 
-        It identifies the selected model based on the mouse event position and displays the context menu at the mouse position.
-        """
         try:
             action = self.fetch_models_menu.actionAt(pos)
             if action:
@@ -179,11 +148,6 @@ class Sidebar(QtWidgets.QFrame):
             logger.error("Failed to show model context menu", exc_info=True)
 
     def fetch_model_details(self, chat_log, model_name):
-        """
-        Fetches the details of a selected model. 
-        It retrieves the selected model from the fetch models button and creates an asynchronous task to fetch the model details using the `fetch_model_details` function from the `GG_fetch_models.py` module. 
-        It passes the chat log and the model name to the function.
-        """
         logger.info("Fetching details for model: %s", model_name)
         try:
             selected_model = self.fetch_models_button.text()
@@ -384,7 +348,7 @@ class Sidebar(QtWidgets.QFrame):
         self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
 
     def handle_history_button(self):
-        cf.load_chat_history(self.parent())
+        cf.load_chat_history(self, self.provider_manager)
 
     def on_chat_button_hover(self, event):
         self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_bl.png"))

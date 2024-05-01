@@ -8,12 +8,7 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('chist_functions.py')
 
-def load_chat_history(chat_component):
-    """Open the chat history page.
-    
-    Parameters:
-    - chat_component: The chat component instance.
-    """
+def load_chat_history(chat_component, provider_manager):
     logger.info("Opening chat history")
     chat_component.popup = QtWidgets.QDialog(chat_component)
     chat_component.popup.setWindowTitle("Chat History")
@@ -26,7 +21,7 @@ def load_chat_history(chat_component):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = ConversationManager(user, persona_name)
+    conversation_manager = ConversationManager(user, persona_name, provider_manager)
 
     chat_logs = conversation_manager.get_conversations(user, persona=persona_name)
     logger.debug(f"Chat logs fetched for {persona_name}: {chat_logs}")
@@ -60,13 +55,7 @@ def load_chat_history(chat_component):
     chat_component.popup.setModal(False)  
     chat_component.popup.show()  
 
-async def load_chat(chat_component, selected_chat_log=None):
-    """Load the selected chat log into the chat component.
-    
-    Parameters:
-    - chat_component: The chat component instance.
-    - selected_chat_log (optional): The selected chat log entry from the listbox.
-    """
+async def load_chat(chat_component, selected_chat_log=None, provider_manager=None):
     if not selected_chat_log:
         logger.warning("No chat log entry selected.")
         return
@@ -84,7 +73,7 @@ async def load_chat(chat_component, selected_chat_log=None):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = ConversationManager(user, persona_name)
+    conversation_manager = ConversationManager(user, persona_name, provider_manager)
 
     actual_chat_log = conversation_manager.get_chat_log(user, conversation_id)
 
@@ -98,12 +87,7 @@ async def load_chat(chat_component, selected_chat_log=None):
     else:
         logger.error(f"No chat log found for Conversation ID: {conversation_id}")
 
-def delete_conversation(chat_component):
-    """Delete the selected conversation from the chat history.
-    
-    Parameters:
-    - chat_component: The chat component instance.
-    """
+def delete_conversation(chat_component, provider_manager):
     selected_item = chat_component.chat_log_listbox.currentItem()
     if not selected_item:
         logger.error("No chat log selected for deletion")        
@@ -120,7 +104,7 @@ def delete_conversation(chat_component):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = ConversationManager(user, persona_name)
+    conversation_manager = ConversationManager(user, persona_name, provider_manager)
 
     conversation_manager.delete_conversation(user, conversation_id)
 
@@ -129,24 +113,14 @@ def delete_conversation(chat_component):
     logger.info(f"Chat log deleted: {selected_chat_log}")
 
 
-async def clear_chat_log(chat_component):
-    """Clear the chat log in the chat component.
-    
-    Parameters:
-    - chat_component: The chat component instance.
-    """
+async def clear_chat_log(chat_component, provider_manager):
     logger.info("Clearing chat log in the chat component")
     
-    await save_chat_log(chat_component)
+    await save_chat_log(chat_component, provider_manager)
     
     chat_component.chat_log.clear()
 
-async def save_chat_log(chat_component):
-    """Save the current chat log.
-    
-    Parameters:
-    - chat_component: The chat component instance.
-    """
+async def save_chat_log(chat_component, provider_manager):
     current_chat_log = chat_component.chat_log.toPlainText().strip()
     if current_chat_log:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -156,8 +130,8 @@ async def save_chat_log(chat_component):
         persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
         logger.info(f"Current persona_name: {persona_name}")
 
-        conversation_manager = ConversationManager(user, persona_name)
-    
+        conversation_manager = ConversationManager(user, persona_name, provider_manager)
+
         await conversation_manager.insert_conversation(user, conversation_id, current_chat_log, timestamp, chat_component.current_persona["name"])
 
     logger.info(f"Chat log saved")

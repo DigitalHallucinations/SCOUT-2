@@ -2,11 +2,13 @@
 
 import re
 from datetime import datetime
-from modules.speech_services.GglCldSvcs import tts
+#from modules.speech_services.GglCldSvcs import tts
+from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 from modules.chat_history.convo_manager import ConversationManager
 from modules.Providers.Google.genai_api import GenAIAPI
 from modules.Tools.Tool_Manager import ToolManager
 from modules.logging.logger import setup_logger
+
 
 logger = setup_logger('GG_gen_response.py')
 

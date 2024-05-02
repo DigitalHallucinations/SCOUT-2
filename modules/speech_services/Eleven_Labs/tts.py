@@ -10,7 +10,7 @@ import re
 import os
 from dotenv import load_dotenv
 from modules.logging.logger import setup_logger
-
+#from logger import setup_logger
 logger = setup_logger('tts.py')
 
 CHUNK_SIZE = 1024 
@@ -109,6 +109,9 @@ async def text_to_speech(text):
         logger.info(f"Sending TTS request to Eleven Labs API with text: {text}")
         response = requests.post(tts_url, headers=headers, json=data, stream=True)
 
+        logger.info(f"Eleven Labs API response status code: {response.status_code}")
+        logger.info(f"Eleven Labs API response headers: {response.headers}")
+
         if response.ok:
             logger.info("TTS response received successfully.")
             with open(OUTPUT_PATH, "wb") as f:
@@ -121,14 +124,26 @@ async def text_to_speech(text):
     except Exception as e:
         logger.error(f"Error during TTS: {e}")
         
-def set_voice(voice_name):
+def set_voice(voice):
     global VOICE_IDS
-    for voice in VOICE_IDS:
-        if voice['name'] == voice_name:
-            VOICE_IDS[0] = voice['voice_id']
-            logger.info(f"Voice set to: {voice_name}")
+    for i, v in enumerate(VOICE_IDS):
+        if v['name'] == voice['name'] and v['voice_id'] == voice['voice_id']:
+            new_voice = {
+                'voice_id': voice['voice_id'],
+                'name': voice['name']
+            }
+            VOICE_IDS[i] = new_voice
+            logger.info(f"Voice set to: {voice['name']} with voice ID: {voice['voice_id']}")
             return
-    logger.error(f"Voice name {voice_name} not found in the list of available voices.")
+    logger.error(f"Voice name {voice['name']} not found in the list of available voices.")
+
+def load_voices():
+    global VOICE_IDS
+    VOICE_IDS = get_voices()
+    if VOICE_IDS:
+        logger.info(f"Loaded {len(VOICE_IDS)} voices.")
+    else:
+        logger.warning("No voices loaded.")
 
 def get_voice():
     logger.info(f"Current voice ID: {VOICE_IDS[0]}")
@@ -145,3 +160,23 @@ def get_tts():
 
 async def tts(text):
     await text_to_speech(text)
+
+async def test_tts():
+    test_text = "Hello World!"
+    
+    # Load the voices
+    load_voices()
+    
+    # Set the desired voice
+    test_voice = {'voice_id': 'iP95p4xoKVk53GoZ742B', 'name': 'Chris'}
+    set_voice(test_voice)
+    
+    # Enable TTS
+    set_tts(True)
+    
+    # Call the text_to_speech function
+    await text_to_speech(test_text)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(test_tts())

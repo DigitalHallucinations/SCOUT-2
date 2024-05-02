@@ -4,33 +4,7 @@ API that converts text into lifelike speech with best-in-class latency & uses th
 
 POST/v1/text-to-speech/{voice_id}
 ​
-# Introduction
 
-    Our AI model produces the highest-quality AI voices in the industry. Here is an example of one of our default voices Grace in action:
-
-
-    Our text to speech API allows you to convert text into audio in 29 languages and 1000s of voices. Integrate our realistic text to speech voices into your react app, use our Python library or our websockets guide to get started.
-
-​
-# API Features
-
-    High-quality voices
-    1000s of voices, in 29 languages, for every use-case, at 128kbps
-
-    Ultra-low latency
-    Achieve ~400ms audio generation times with our Turbo model.
-
-    Contextual awareness
-    Understands text nuances for appropriate intonation and resonance.
-
-
-# Visit profile
-
-    Next click on the eye icon on your profile to access your xi-api-key. Do not show your account to anyone else. If someone gains access to your xi-api-key he can use your account as he could if he knew your password.
-
-    You can generate a new xi-api-key at any time by clicking on the spinning arrows next to the text field. This will invalidate your old xi-api-key.
-
-​
 # Audio generation
 
     Generate spoken audio from text with a simple request like the following Python example:
@@ -122,8 +96,6 @@ POST/v1/text-to-speech/{voice_id}
     A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request
 
 
-    Show child attributes
-
     text
     string
     required
@@ -134,8 +106,6 @@ POST/v1/text-to-speech/{voice_id}
     object
     Voice settings overriding stored setttings for the given voice. They are applied only on the given request.
 
-
-    Show child attributes
 
     Response
     200 - audio/mpeg

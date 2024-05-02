@@ -1,0 +1,501 @@
+{"voices":
+    [
+        {
+            "voice_id":"21m00Tcm4TlvDq8ikWAM",
+            "name":"Rachel",
+                "labels":
+                    {"accent":"american",
+                    "description":"calm",
+                    "age":"young",
+                    "gender":"female"
+                }
+        },
+        {
+            "voice_id":"29vD33N1CtxCmqQRPOHJ",
+            "name":"Drew",
+            "labels":
+                {"accent":"american",
+                "description":"well-rounded",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"news"
+            }
+        },
+        {
+            "voice_id":"2EiwWnXFnvU5JabPnv8n",
+            "name":"Clyde",
+            "labels":{
+                "accent":"american",
+                "description":"war veteran",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"video games"
+            }
+        },
+        {
+            "voice_id":"5Q0t7uMcjvnagumLfvZi",
+            "name":"Paul",
+            "labels":{
+                "accent":"american",
+                "description":"ground reporter",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"news"
+            }
+        },
+        {
+            "voice_id":"AZnzlk1XvdvUeBnXmlld",
+            "name":"Domi",
+            "labels":{
+                "accent":"american",
+                "description":"strong",
+                "age":"young",
+                "gender":"female",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"CYw3kZ02Hs0563khs1Fj",
+            "name":"Dave",
+            "labels":{
+                "accent":"british-essex",
+                "description":"conversational",
+                "age":"young",
+                "gender":"male",
+                "use case":"video games"
+            }
+        },
+        {
+            "voice_id":"D38z5RcWu1voky8WS1ja",
+            "name":"Fin",
+            "labels":{
+                "accent":"irish",
+                "description":"sailor",
+                "age":"old",
+                "gender":"male",
+                "use case":"video games"
+            }
+        },
+        {
+            "voice_id":"EXAVITQu4vr4xnSDxMaL",
+            "name":"Sarah",
+            "labels":{
+                "accent":"american",
+                "description":"soft",
+                "age":"young",
+                "gender":"female",
+                "use case":"news"
+            }
+        },
+        {
+            "voice_id":"ErXwobaYiN019PkySvjV",
+            "name":"Antoni",
+            "labels":{
+                "accent":"american",
+                "description":"well-rounded",
+                "age":"young",
+                "gender":"male",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"GBv7mTt0atIp3Br8iCZE",
+            "name":"Thomas",
+            "labels":{
+                "accent":"american",
+                "description":"calm",
+                "age":"young",
+                "gender":"male",
+                "use case":"meditation"
+            }
+        },
+        {
+            "voice_id":"IKne3meq5aSn9XLyUdCD",
+            "name":"Charlie",
+            "labels":{
+                "accent":"australian",
+                "description":"casual",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"conversational"
+            }
+        },
+        {
+            "voice_id":"JBFqnCBsd6RMkjVDRZzb",
+            "name":"George",
+            "labels":{
+                "accent":"british",
+                "description":"raspy",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"LcfcDJNUP1GQjkzn1xUU",
+            "name":"Emily",
+            "labels":{
+                "accent":"american",
+                "description":"calm",
+                "age":"young",
+                "gender":"female",
+                "use case":"meditation"
+            }
+        },
+        {
+            "voice_id":"MF3mGyEYCl7XYWbV9V6O",
+            "name":"Elli",
+            "labels":{
+                "accent":"american",
+                "description":"emotional",
+                "age":"young",
+                "gender":"female",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"N2lVS1w4EtoT3dr4eOWO",
+            "name":"Callum",
+                "labels":
+                    {"accent":"american",
+                        "description":"hoarse",
+                        "age":"middle aged",
+                        "gender":"male",
+                        "use case":"video games"
+                    }
+        },
+        {
+            "voice_id":"ODq5zmih8GrVes37Dizd",
+            "name":"Patrick",
+                "labels":
+                    {"accent":"american",
+                        "age":"middle aged",
+                        "gender":"male",
+                        "use case":"video games",
+                        "description":"shouty"
+                    }
+        },
+        {
+            "voice_id":"SOYHLrjzK2X1ezoPC6cr",
+            "name":"Harry",
+                "labels":  
+                    {"accent":"american",
+                        "age":"young",
+                        "gender":"male",
+                        "use case":"video games",
+                        "description":"anxious"
+                    }
+        },
+        {
+            "voice_id":"TX3LPaxmHKxFdv7VOQHJ",
+            "name":"Liam",
+                "labels":
+                    {"accent":"american",
+                        "age":"young",
+                        "gender":"male",
+                        "use case":"narration",
+                        "description ":"neutral"
+                    }
+        },
+        {
+            "voice_id":"ThT5KcBeYPX3keUQqHPh",
+            "name":"Dorothy",
+                "labels":
+                    {"accent":"british",
+                        "age":"young",
+                        "gender":"female",
+                        "use case":"children's stories",
+                        "description":"pleasant"
+                    }
+        },
+        {
+            "voice_id":"TxGEqnHWrfWFTfGW9XjX",
+            "name":"Josh",
+            "labels":{
+                "accent":"american",
+                "description":"deep",
+                "age":"young",
+                "gender":"male",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"VR6AewLTigWG4xSOukaG",
+            "name":"Arnold",
+            "labels":{
+                "accent":"american",
+                "description":"crisp",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"XB0fDUnXU5powFXDhCwa",
+            "name":"Charlotte",
+            "labels":{
+                "accent":"english-swedish",
+                "description":"seductive",
+                "age":"middle aged",
+                "gender":"female",
+                "use case":"video games"
+            }
+        },
+        {
+            "voice_id":"Xb7hH8MSUJpSbSDYk0k2",
+            "name":"Alice",
+            "labels":{
+                "accent":"british",
+                "description":"confident",
+                "age":"middle aged",
+                "gender":"female",
+                "featured":"new",
+                "use case":"news"
+            }
+        },
+        {
+            "voice_id":"XrExE9yKIg1WjnnlVkGX",
+            "name":"Matilda",
+            "labels":{
+                "accent":"american",
+                "description":"warm",
+                "age":"young",
+                "gender":"female",
+                "use case":"audiobook"
+            }
+        },
+        {
+            "voice_id":"ZQe5CZNOzWyzPSCn5a3c",
+            "name":"James",
+            "labels":{
+                "accent":"australian",
+                "description":"calm ",
+                "age":"old",
+                "gender":"male",
+                "use case":"news"
+            }
+        },
+        {
+            "voice_id":"Zlb1dXrM653N07WRdFW3",
+            "name":"Joseph",
+            "labels":{
+                "accent":"british",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"news",
+                "description":"ground reporter "
+            }
+        },
+        {
+            "voice_id":"bVMeCyTHy58xNoL34h3p",
+            "name":"Jeremy",
+            "labels":{
+                "accent":"american-irish",
+                "description":"excited",
+                "age":"young",
+                "gender":"male",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"flq6f7yk4E4fJM5XTYuZ",
+            "name":"Michael",
+            "labels":{
+                "accent":"american",
+                "age":"old",
+                "gender":"male",
+                "use case":"audiobook",
+                "description":"orotund"
+            }
+        },
+        {
+            "voice_id":"g5CIjZEefAph4nQFvHAz",
+            "name":"Ethan",
+            "labels":{
+                "accent":"american",
+                "age":"young",
+                "gender":"male",
+                "use case":"ASMR",
+                "description":"whisper"
+            }
+        },
+        {
+            "voice_id":"iP95p4xoKVk53GoZ742B",
+            "name":"Chris",
+            "labels":{
+                "accent":"american",
+                "description":"casual",
+                "age":"middle aged",
+                "gender":"male",
+                "featured":"new",
+                "use case":"conversational"
+            }
+        },
+        {
+            "voice_id":"jBpfuIE2acCO8z3wKNLl",
+            "name":"Gigi",
+            "labels":{
+                "accent":"american",
+                "description":"childlish",
+                "age":"young",
+                "gender":"female",
+                "use case":"animation"
+            }
+        },
+        {
+            "voice_id":"jsCqWAovK2LkecY7zXl4",
+            "name":"Freya",
+            "labels":{
+                "accent":"american",
+                "age":"young",
+                "gender":"female",
+                "description":"overhyped",
+                "usecase":"video games"
+            }
+        },
+        {
+            "voice_id":"nPczCjzI2devNBz1zQrb",
+            "name":"Brian",
+            "labels":{
+                "accent":"american",
+                "description":"deep",
+                "age":"middle aged",
+                "gender":"male",
+                "featured":"new",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"oWAxZDx7w5VEj9dCyTzz",
+            "name":"Grace",
+            "labels":{
+                "accent":"american-southern",
+                "age":"young",
+                "gender":"female",
+                "use case":"audiobook ",
+                "description":"gentle"
+            }
+        },
+        {
+            "voice_id":"onwK4e9ZLuTAKqWW03F9",
+            "name":"Daniel",
+            "labels":{
+                "accent":"british",
+                "description":"deep",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"news presenter"
+            }
+        },
+        {
+            "voice_id":"pFZP5JQG7iQjIQuC4Bku",
+            "name":"Lily",
+            "labels":{
+                "accent":"british",
+                "description":"raspy",
+                "age":"middle aged",
+                "gender":"female",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"pMsXgVXv3BLzUgSXRplE",
+            "name":"Serena",
+            "labels":{
+                "accent":"american",
+                "description":"pleasant",
+                "age":"middle aged",
+                "gender":"female",
+                "use case":"interactive"
+            }
+        },
+        {
+            "voice_id":"pNInz6obpgDQGcFmaJgB",
+            "name":"Adam",
+            "labels":{
+                "accent":"american",
+                "description":"deep",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"piTKgcLEGmPE4e6mEKli",
+            "name":"Nicole",
+            "labels":{
+                "accent":"american",
+                "description":"whisper",
+                "age":"young",
+                "gender":"female",
+                "use case":"audiobook"
+            }
+        },
+        {
+            "voice_id":"pqHfZKP75CvOlQylNhV4",
+            "name":"Bill",
+            "labels":{
+                "accent":"american",
+                "description":"strong",
+                "age":"middle aged",
+                "gender":"male",
+                "use case":"documentary"
+            }
+        },
+        {
+            "voice_id":"t0jbNlBVZ17f02VDIeMI",
+            "name":"Jessie",
+            "labels":{
+                "accent":"american",
+                "description":"raspy ",
+                "age":"old",
+                "gender":"male",
+                "use case":"video games"
+            }
+        },
+        {
+            "voice_id":"yoZ06aMxZJJ28mfd3POQ",
+            "name":"Sam",
+            "labels":{
+                "accent":"american",
+                "description":"raspy",
+                "age":"young",
+                "gender":"male",
+                "use case":"narration"
+            }
+        },
+        {
+            "voice_id":"z9fAnlkpzviPz146aGWa",
+            "name":"Glinda",
+            "labels":{
+                "accent":"american",
+                "description":"witch",
+                "age":"middle aged",
+                "gender":"female",
+                "use case":"video games"
+            }
+        },
+        {
+            "voice_id":"zcAOhNBS3c14rBihAFp1",
+            "name":"Giovanni",
+            "labels":{
+                "accent":"english-italian",
+                "description":"foreigner",
+                "age":"young",
+                "gender":"male",
+                "use case":"audiobook"
+            }
+        },
+        {
+            "voice_id":"zrHiDhphv9ZnVXBqCLjz",
+            "name":"Mimi",
+            "labels":{
+                "accent":"english-swedish",
+                "description":"childish",
+                "age":"young",
+                "gender":"female",
+                "use case":"animation"
+            }
+        }
+    ]
+}

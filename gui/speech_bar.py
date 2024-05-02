@@ -5,7 +5,7 @@ from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtWidgets import QMessageBox
 from gui.tooltip import ToolTip
 from modules.speech_services.GglCldSvcs.stt import SpeechToText
-from modules.speech_services.Eleven_Labs.tts import set_voice, set_tts, get_tts, get_voices
+from modules.speech_services.Eleven_Labs.tts import set_voice, set_tts, get_tts, get_voices, load_voices
 from google.cloud import texttospeech
 from modules.logging.logger import setup_logger
 
@@ -22,6 +22,7 @@ class SpeechBar(QtWidgets.QFrame):
         self.speech_to_text = SpeechToText()
         self.is_listening = False
         self.create_speech_bar()
+        load_voices()
 
     def create_speech_bar(self):
         logger.info("Creating speech bar")
@@ -144,23 +145,34 @@ class SpeechBar(QtWidgets.QFrame):
             for voice in voices:
                 voice_name = voice['name']
                 action = self.voice_menu.addAction(voice_name)
-                action.triggered.connect(lambda checked, v=voice_name: self.on_voice_selection(v))
+                action.triggered.connect(lambda checked, v=voice: self.on_voice_selection(v))
         except Exception as e:
             logger.error(f"{datetime.now()}: Error while getting voices from Eleven Labs: {e}")
-
+            
     def show_voice_menu(self):
         self.populate_voice_menu()
         self.voice_menu.exec(QtGui.QCursor.pos())    
 
-    def on_voice_selection(self, voice_name):
-        logger.info("Voice selection started: %s", voice_name)
+    def on_voice_selection(self, voice):
+        logger.info("Voice selection started: %s", voice)
         try:
-            set_voice(voice_name)
+            provider = self.parent.provider_manager.get_current_speech_provider()
+            if provider == "Eleven Labs":
+                if 'voice_id' in voice and 'name' in voice:
+                    set_voice(voice)
+                    voice_name = voice['name']
+                else:
+                    logger.error("Voice dictionary does not contain 'voice_id' or 'name' key: %s", voice)
+                    return
+            else:
+                set_voice(voice)
+                voice_name = voice
+            
             self.voice_button.setText(voice_name)
             logger.info("Voice selected and applied: %s", voice_name)
         except Exception as e:
-            logger.error("Failed to select voice: %s", voice_name, exc_info=True)
-
+            logger.error("Failed to select voice: %s", e)
+                
     def toggle_listen(self):
         if self.is_listening:
             logger.info("Stopping speech-to-text listening")

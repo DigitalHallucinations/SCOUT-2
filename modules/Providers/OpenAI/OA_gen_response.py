@@ -40,9 +40,6 @@ current_username = None
 api = OpenAIAPI()
 
 def set_OA_model(model_name):
-    """
-    Used in chat_settings.py sets the OpenAI Model
-    """
     global MODEL, MAX_TOKENS
     MODEL = model_name
     if MODEL in ["gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k"]:
@@ -53,23 +50,12 @@ def set_OA_model(model_name):
         MAX_TOKENS = 2000 
 
 def get_OA_model():
-    """
-    Used in chat_settings.py
-    retrieves the current model in use
-    """
     return MODEL
 
 def is_model_allowed():
-    """
-    Checks to see if model is allowed to use tools.
-    Some models do not have the capability.
-    """
     return MODEL in ALLOWED_MODELS
 
 def get_required_args(function):
-    """
-    retrieves arguments for the function call.
-    """
     logger.info("getting required args")
     sig = inspect.signature(function)
 
@@ -77,15 +63,6 @@ def get_required_args(function):
             if param.default == param.empty and param.name != 'self']
 
 def load_function_map_from_current_persona(current_persona):
-    """
-    Dynamically imports the function_map module based on the current persona's name.
-    
-    Parameters:
-    - current_persona (dict): The current persona dictionary, expected to have a "name" key.
-    
-    Returns:
-    - A reference to the function_map variable from the dynamically imported module.
-    """
     persona_name = current_persona["name"]  
     maps_path = MAPS_PATH_TEMPLATE.format(persona_name)  
     module_name = f'persona_{persona_name}_maps' 
@@ -98,15 +75,6 @@ def load_function_map_from_current_persona(current_persona):
     return module.function_map
 
 def load_functions_from_json(current_persona):
-    """
-    Dynamically loads functions definitions from a JSON file based on the current persona's name.
-    
-    Parameters:
-    - current_persona (dict): The current persona dictionary, expected to have a "name" key.
-    
-    Returns:
-    - The functions definitions as a Python dictionary.
-    """
     persona_name = current_persona["name"]  
     functions_json_path = FUNCTIONS_JSON_PATH_TEMPLATE.format(persona_name)  
     
@@ -144,23 +112,6 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, f
     return data
 
 async def handle_function_call(user, conversation_id, message, conversation_history, function_map):
-    """
-    Executes a function call based on the message received from the user.
-
-    This method decodes the function call arguments, checks for required arguments, and then
-    executes the function if it is found in the function map. It handles any errors that occur
-    during the function call and logs the response.
-
-    Parameters:
-    - user: The user for whom the function call is being handled.
-    - conversation_id: The conversation ID for this interaction.
-    - message: The message from the user containing the function call details.
-    - conversation_history: The ConversationManager instance managing the conversation history.
-    - function_map: A dictionary mapping function names to their corresponding callable objects.
-
-    Returns:
-    - A tuple containing the function response as a string and a boolean indicating whether an error occurred.
-    """
     entry_time = datetime.now()
     logger.info(f"Entering handle_function_call at {entry_time.isoformat()}")
     
@@ -207,25 +158,6 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
     return None, True
 
 async def use_tool(user, conversation_id, message, conversation_history, function_map, functions, current_persona, temperature_var, top_p_var):
-    """
-    Handles the logic for using a tool (function call) when the AI model's response is None.
-
-    This method is responsible for executing a function call, logging the response, and then
-    generating a follow-up response from the AI model based on the function call's results.
-
-    Parameters:
-    - user: The user for whom the response is being generated.
-    - conversation_id: The conversation ID for this interaction.
-    - message: The message from the user that may contain a function call.
-    - conversation_history: The ConversationManager instance managing the conversation history.
-    - function_map: A dictionary mapping function names to their corresponding callable objects.
-    - current_persona: The current persona of the chatbot.
-    - temperature_var: The temperature parameter for the generation.
-    - top_p_var: The top_p parameter for the generation.
-
-    Returns:
-    - The generated text response after handling the function call, or None if no response could be generated.
-    """
     if message.get("function_call"):
         function_response, error_occurred = await handle_function_call(user, conversation_id, message, conversation_history, function_map)
 
@@ -277,18 +209,6 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
     return None
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager=None):
-    """
-    Generates a response using the specified GPT model.
-
-    :param user: The user for whom the response is being generated.
-    :param current_persona: The current persona of the chatbot.
-    :param message: The message from the user.
-    :param session_id: The session ID for this interaction.
-    :param conversation_id: The conversation ID for this interaction.
-    :param temperature_var: The temperature parameter for the generation.
-    :param top_p_var: The top_p parameter for the generation.
-    :return: The generated text response.
-    """
     logger.info(f"generate_response called with user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
 
     functions = load_functions_from_json(current_persona)
@@ -359,11 +279,6 @@ def contains_code(text: str) -> bool:
     return "<code>" in text
 
 async def text_to_speech(text):
-    """
-    Convert the given text to speech.
-
-    :param text: The text to convert.
-    """
     logger.info("Skipping TTS as the text contains code.")  
     text_without_code = re.sub(r"`[^`]*`", "", text)
     await tts.text_to_speech(text_without_code)

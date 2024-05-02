@@ -12,3 +12,7 @@ providers and models dont show at app start in staus bar
 11 Labs tts only works with Anthropic
 google tts broken from adding 11 labs get tts
 11 labs voice selection doesnt work???
+
+tools only work with openai
+Feed portal must be reintegrated in RSSManager with pyside6 version https://github.com/DigitalHallucinations/Feed-Portal
+

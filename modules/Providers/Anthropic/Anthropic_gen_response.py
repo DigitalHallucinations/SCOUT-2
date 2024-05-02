@@ -28,9 +28,6 @@ FUNCTIONS_JSON_PATH_TEMPLATE = 'modules/Personas/{}/Toolbox/functions.json'
 current_username = None
 
 def set_Anthropic_model(model_name):
-    """
-    Used in chat_settings.py sets the Anthropic Model
-    """
     global MODEL, MAX_TOKENS
     MODEL = model_name
     if MODEL in ["claude-3-opus-20240229"]:
@@ -43,10 +40,6 @@ def set_Anthropic_model(model_name):
         MAX_TOKENS = 2000 
 
 def get_Anthropic_model():
-    """
-    Used in chat_settings.py
-    retrieves the current model in use
-    """
     return MODEL
 
 def create_request_body(current_persona, messages, temperature_var, top_p_var, top_k_var, funtions=None):
@@ -73,18 +66,6 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     return data
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager):
-    """
-    Generates a response using the specified Anthropic model.
-
-    :param user: The user for whom the response is being generated.
-    :param current_persona: The current persona of the chatbot.
-    :param message: The message from the user.
-    :param session_id: The session ID for this interaction.
-    :param conversation_id: The conversation ID for this interaction.
-    :param temperature_var: The temperature parameter for the generation.
-    :param top_p_var: The top_p parameter for the generation.
-    :return: The generated text response.
-    """
     logger.info(f"generate_response called with user: {user}, current persona: {current_persona["name"]}, session_id: {session_id}, conversation_id: {conversation_id}")
     
     functions = None
@@ -163,5 +144,4 @@ async def generate_response(user, current_persona, message, session_id, conversa
         return "Sorry, I couldn't generate a response. Please try again."
 
 def contains_code(text: str) -> bool:
-    """Check if the given text contains code"""
     return "<code>" in text

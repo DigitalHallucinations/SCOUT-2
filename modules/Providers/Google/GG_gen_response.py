@@ -12,40 +12,18 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('GG_gen_response.py')
 
-"""
- Default model
-"""
+
 GG_MODEL = 'gemini-1.5-pro-latest' 
 
 def set_GG_model(model_name):
-    """
-    Set the Gemini model to be used for generating responses.
-
-    :param model_name: The name of the model to use.
-    """
     global GG_MODEL
     logger.info(f"Changing GG model from {GG_MODEL} to {model_name}")
     GG_MODEL = model_name
 
 def get_GG_model():
-    """
-    Get the current Gemini model being used.
-
-    :return: The name of the current model.
-    """
     return GG_MODEL
 
 def create_request_body(current_persona, messages, temperature_var, top_p_var, top_k_var, functions = None, safety_settings = None):
-    """
-    Create the request body for the generative AI model.
-
-    :param current_persona: The current persona of the chatbot.
-    :param messages: The chat history messages.
-    :param temperature_var: The temperature parameter for the generation.
-    :param top_p_var: The top_p parameter for the generation.
-    :param top_k_var: The top_k parameter for the generation (optional).
-    :return: The request data object.
-    """
     parts = []
     if current_persona.get("content"):
         parts.append({
@@ -76,21 +54,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     return data
 
 
-async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None, provider_manager=None):
-    """
-    Generates a response using the specified Gemini model.
-
-    :param user: The user for whom the response is being generated.
-    :param current_persona: The current persona of the chatbot.
-    :param message: The message from the user.
-    :param session_id: The session ID for this interaction.
-    :param conversation_id: The conversation ID for this interaction.
-    :param temperature_var: The temperature parameter for the generation.
-    :param top_p_var: The top_p parameter for the generation.
-    :param top_k_var: The top_k parameter for the generation (optional).
-    :return: The generated text response.
-    """
-    
+async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None, provider_manager=None):  
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
     
     if "name" in current_persona: 

@@ -13,28 +13,21 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('Mistral_gen_response.py')
 
-""" Default model """
+
 MODEL = "mistral-medium-latest"
 
-""" 
-Model Constants 
-"""
+
 MODEL_MISTRAL_TINY = "open-mistral-7b"
 MODEL_MISTRAL_SMALL = "open-mixtral-8x7b"
 MODEL_MISTRAL_SMALL_LATEST = "mistral-small-latest"
 MODEL_MISTRAL_MEDIUM_LATEST = "mistral-medium-latest"
 MODEL_MISTRAL_LARGE_LATEST = "mistral-large-latest"
 
-""" 
-Models that can use tools. Models not on this list will not be sent tools in the request. 
-"""
+
 #ALLOWED_MODELS = [MODEL_MISTRAL_TINY, MODEL_MISTRAL_SMALL, MODEL_MISTRAL_SMALL_LATEST, MODEL_MISTRAL_MEDIUM_LATEST, MODEL_MISTRAL_LARGE_LATEST]
 ALLOWED_MODELS = [MODEL_MISTRAL_LARGE_LATEST]
 
 
-""" 
-Update the FUNCTIONS_JSON_PATH_TEMPLATE and MAPS_PATH_TEMPLATE to use the dynamic path based on the current_persona 
-"""
 FUNCTIONS_JSON_PATH_TEMPLATE = 'modules/Personas/{}/Toolbox/functions.json'
 MAPS_PATH_TEMPLATE = 'modules/Personas/{}/Toolbox/maps.py'
 
@@ -42,9 +35,6 @@ current_username = None
 api = MistralAPI()
 
 def set_Mistral_model(model_name):
-    """
-    Used in chat_settings.py sets the OpenAI Model
-    """
     global MODEL, MAX_TOKENS
     MODEL = model_name
     if MODEL in ["mistral-small-latest", "mistral-medium-latest", "mistral-large-latest"]:
@@ -53,38 +43,18 @@ def set_Mistral_model(model_name):
         MAX_TOKENS = 2000 
 
 def get_Mistral_model():
-    """
-    Used in chat_settings.py
-    retrieves the current model in use
-    """
     return MODEL
 
 def is_model_allowed():
-    """
-    Checks to see if model is allowed to use tools.
-    Some models do not have the capability.
-    """
     return MODEL in ALLOWED_MODELS
 
 def get_required_args(function):
-    """
-    retrieves arguments for the function call.
-    """
     sig = inspect.signature(function)
 
     return [param.name for param in sig.parameters.values() 
             if param.default == param.empty and param.name != 'self']
 
 def load_function_map_from_current_persona(current_persona):
-    """
-    Dynamically imports the function_map module based on the current persona's name.
-    
-    Parameters:
-    - current_persona (dict): The current persona dictionary, expected to have a "name" key.
-    
-    Returns:
-    - A reference to the function_map variable from the dynamically imported module.
-    """
     persona_name = current_persona["name"] 
     maps_path = MAPS_PATH_TEMPLATE.format(persona_name)  
     module_name = f'persona_{persona_name}_maps'  
@@ -97,15 +67,6 @@ def load_function_map_from_current_persona(current_persona):
     return module.function_map
 
 def load_functions_from_json(current_persona):
-    """
-    Dynamically loads functions definitions from a JSON file based on the current persona's name.
-    
-    Parameters:
-    - current_persona (dict): The current persona dictionary, expected to have a "name" key.
-    
-    Returns:
-    - The functions definitions as a Python dictionary.
-    """
     persona_name = current_persona["name"]  
     functions_json_path = FUNCTIONS_JSON_PATH_TEMPLATE.format(persona_name)  
     
@@ -186,18 +147,6 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
     return None, True
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager=None):
-    """
-    Generates a response using the specified Mistral model.
-
-    :param user: The user for whom the response is being generated.
-    :param current_persona: The current persona of the chatbot.
-    :param message: The message from the user.
-    :param session_id: The session ID for this interaction.
-    :param conversation_id: The conversation ID for this interaction.
-    :param temperature_var: The temperature parameter for the generation.
-    :param top_p_var: The top_p parameter for the generation.
-    :return: The generated text response.
-    """
     logger.info(f"generate_response called with user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
 
     functions = load_functions_from_json(current_persona)
@@ -258,27 +207,21 @@ async def generate_response(user, current_persona, message, session_id, conversa
         if message.get("function_call"):
             function_response, error_occurred = await handle_function_call(user, conversation_id, message, conversation_history, function_map)
 
-            # Log the raw function call response
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             conversation_history.add_response(user, conversation_id, function_response, current_time)
             logger.info("Function call response added to responses table.")
 
-            # Format the function call response for the AI model
             formatted_function_response = f"System Message: The function call was executed successfully with the following results: {message['function_call']['name']}: {function_response} Provide the answer ['user'] question, a summary or ask for further details?"
 
-            # Adding the formatted function call response to messages for further processing
             data["messages"].append({"role": "user", "content": formatted_function_response})
             response_data = await api.generate_conversation(data)
 
-            # Handle the new response_data
             if response_data:
                 new_message = response_data["choices"][0]["message"]
                 new_text = new_message["content"]
 
                 if new_text is None:
-                    # Prepare a new prompt for the model based on the function results
                     new_prompt = f"System Message: The function call was executed successfully with the following results: {function_response}. Provide the answer to the user question, a summary or ask for further details."
-                    # Send this new_prompt to the model to get a response
                     new_text = await call_model_with_new_prompt(new_prompt, current_persona, temperature_var, top_p_var)
                     if not new_text:
                         new_text = "Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
@@ -290,7 +233,6 @@ async def generate_response(user, current_persona, message, session_id, conversa
                     conversation_history.add_message(user, conversation_id, "assistant", new_text, current_time)                    
                     logger.info("Assistant message added to conversation history.")
 
-                # TTS call for function response
                 try:
                     if tts.get_tts():
                         if contains_code(new_text):

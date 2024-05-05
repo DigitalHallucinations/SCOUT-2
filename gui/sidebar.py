@@ -17,16 +17,16 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('sidebar.py')
 class Sidebar(QtWidgets.QFrame):
-    def __init__(self, parent=None, personas=None, sidebar_frame_bg=None, font_color=None, font_size=None, font_family=None):
+    def __init__(self, parent=None, personas=None, sidebar_frame_bg=None, sidebar_font_color=None, sidebar_font_size=None, sidebar_font_family=None):
         super().__init__(parent)
         self.personas = personas
         self.sidebar_frame_bg = sidebar_frame_bg
+        self.font_color = sidebar_font_color
+        self.font_size = sidebar_font_size
+        self.font_family = sidebar_font_family
         self.llm_providers = []
         self.current_llm_provider = 'Anthropic'
         self.load_providers()
-        self.font_color = font_color
-        self.font_size = font_size
-        self.font_family = font_family
         self.chat_component = parent  
         self.fetch_models_menu = None
         self.create_sidebar()
@@ -117,7 +117,7 @@ class Sidebar(QtWidgets.QFrame):
         logger.info(f"Model {model} set successfully for {self.current_llm_provider}")
         
         logger.info("Updating fetch_models_button text")
-        self.chat_component.model_label.setText(f"Model: {model}") # not the button label
+        self.chat_component.model_label.setText(f"Model: {model}") 
         logger.info(f"fetch_models_button text updated to: {model}")
         
         self.check_current_model()

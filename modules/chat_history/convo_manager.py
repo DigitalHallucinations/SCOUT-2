@@ -60,6 +60,14 @@ class ConversationManager:
         self.conversation_id = new_conversation_id
         logger.info(f"Conversation ID updated to: {new_conversation_id}")        
 
+    def close_connection(self):
+        """Close the connection to the SQLite database."""
+        try:
+            self.conn.close()
+        except sqlite3.Error as e:
+            logger.info(f"Error closing connection: {e}")
+            raise 
+
     def conversation_exists(self, user, conversation_id):
         """
         Check if a conversation with the given conversation_id already exists for the user.

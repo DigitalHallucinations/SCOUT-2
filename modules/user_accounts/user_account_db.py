@@ -1,20 +1,21 @@
 
 import sqlite3
 import os
+from modules.logging.logger import setup_logger
+
+logger = setup_logger('convo_manager.py')
+
 class UserAccountDatabase:
     def __init__(self, db_name="User.db"):
         
         root_dir = os.path.dirname(os.path.abspath(__file__)) 
         user_profiles_dir = os.path.join(root_dir, 'user_profiles')  
 
-        # Create the user_profiles directory if it doesn't exist
         if not os.path.exists(user_profiles_dir):
             os.makedirs(user_profiles_dir)
 
-        # Define the full path for the database file within the user_profiles folder
         db_path = os.path.join(user_profiles_dir, db_name)
 
-        # Connect to the database using the new path
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.cursor = self.conn.cursor()
 
@@ -57,7 +58,6 @@ class UserAccountDatabase:
         self.cursor.execute(query, (username,))
         result = self.cursor.fetchone()
         
-        # Convert the result into a desired format or string representation
         return result
 
     def close_connection(self):
@@ -65,7 +65,7 @@ class UserAccountDatabase:
         try:
             self.conn.close()
         except sqlite3.Error as e:
-            print(f"Error closing connection: {e}")
+            logger.info(f"Error closing connection: {e}")
             raise 
 
     def update_user(self, username, password=None, email=None, name=None, dob=None):

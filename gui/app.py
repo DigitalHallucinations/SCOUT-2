@@ -132,10 +132,10 @@ class SCOUT(QtWidgets.QMainWindow):
 
             self.provider_manager = ProviderManager(self)
 
-            self.database = ConversationManager(self.user, current_persona['name'], self.provider_manager)
-            logger.info("Database instantiated successfully.")
+            self.chat_history_database = ConversationManager(self.user, current_persona['name'], self.provider_manager)
+            logger.info("Conversation History Database instantiated successfully.")
 
-            self.conversation_id = self.database.init_conversation_id()
+            self.conversation_id = self.chat_history_database.init_conversation_id()
             logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Current Persona: {current_persona['name'] if current_persona else 'None'}")
 
             if hasattr(self, 'login_component'):
@@ -182,8 +182,7 @@ class SCOUT(QtWidgets.QMainWindow):
             keyring.delete_password("SCOUT", current_user)
         except PasswordDeleteError as e:
             logger.debug(f"Caught PasswordDeleteError while deleting password (password still cleared): {str(e)}")        
-        self.close()
-        QtWidgets.QApplication.quit()
+        self.cleanup_on_exit(event)
 
     def safe_update(self, command, *args, **kwargs):
         """Safely update the application.
@@ -205,29 +204,7 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         message_box.setDefaultButton(QtWidgets.QMessageBox.No)
 
-        font_family = self.chat_component.font_family
-        font_size = self.chat_component.font_size
-        font_color = self.chat_component.font_color
-
-        message_box.setStyleSheet(f"""
-            QMessageBox {{
-                background-color: #000000;
-                color: {font_color};
-                font-family: {font_family};
-                font-size: {font_size}pt;
-            }}
-            QPushButton {{
-                background-color: #000000;
-                color: {font_color};
-                font-family: {font_family};
-                font-size: {font_size}pt;
-                border: 1px solid {font_color};
-                padding: 5px;
-            }}
-            QPushButton:hover {{
-                background-color: #333333;
-            }}
-        """)
+        self.chat_component.appearance_settings_instance.apply_message_box_style(message_box)
 
         reply = message_box.exec()
 
@@ -236,10 +213,12 @@ class SCOUT(QtWidgets.QMainWindow):
             self.cleanup_on_exit(event)
         else:
             event.ignore()
+            logger.info("button click ignored")
 
     def cleanup_on_exit(self, event):
         logger.info("Cleaning up resources")
         self.user_database.close_connection()
+        self.chat_history_database.close_connection()
         logger.info("Application closed by the user.")
         self.close()
 

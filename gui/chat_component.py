@@ -162,7 +162,7 @@ class ChatComponent(QtWidgets.QWidget):
 
     def create_sidebar(self):
         logger.info("Creating sidebar")
-        sidebar = Sidebar(self, self.personas, self.appearance_settings_instance.sidebar_frame_bg, self.appearance_settings_instance.font_color, self.appearance_settings_instance.font_size, self.appearance_settings_instance.font_family)
+        sidebar = Sidebar(self, self.personas, self.appearance_settings_instance.sidebar_frame_bg, self.appearance_settings_instance.sidebar_font_color, self.appearance_settings_instance.sidebar_font_size, self.appearance_settings_instance.sidebar_font_family)
         sidebar.chat_component = self  
         return sidebar 
 

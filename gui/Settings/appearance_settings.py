@@ -65,7 +65,12 @@ class AppearanceSettings(QtWidgets.QDialog):
             self.history_frame_bg,
             self.history_font_color,
             self.history_font_family,
-            self.history_font_size
+            self.history_font_size,
+            self.message_box_frame_bg,
+            self.message_box_font_color ,
+            self.message_box_font_family,
+            self.message_box_font_size 
+                
         ) = font_settings
 
 
@@ -260,6 +265,11 @@ class AppearanceSettings(QtWidgets.QDialog):
         history_font_color = config.value("HistorySettings/font_color", "#ffffff")
         history_font_family = config.value("HistorySettings/font_family", "Sitka")
         history_font_size = config.value("HistorySettings/font_size", 15, type=int)
+        message_box_frame_bg = config.value("MessageBoxSettings/frame_bg", "#2d2d2d")
+        message_box_font_color = config.value("MessageBoxSettings/font_color", "#ffffff")
+        message_box_font_family = config.value("MessageBoxSettings/font_family", "Sitka")
+        message_box_font_size = config.value("MessageBoxSettings/font_size", 15, type=int)
+
 
         logger.info(f"Loaded font settings: Family: {font_family}, Size: {font_size}, Color: {font_color}")
 
@@ -304,7 +314,11 @@ class AppearanceSettings(QtWidgets.QDialog):
             history_frame_bg,
             history_font_color,
             history_font_family,
-            history_font_size
+            history_font_size,
+            message_box_frame_bg,
+            message_box_font_color,
+            message_box_font_family,
+            message_box_font_size
         )
 
 
@@ -371,6 +385,26 @@ class AppearanceSettings(QtWidgets.QDialog):
         self.update_window_font(self.font_family, self.font_size, selected_font_color)
         self.save_font_settings(self.font_family, self.font_size, selected_font_color)
 
+    def apply_message_box_style(self, message_box):
+        message_box.setStyleSheet(f"""
+            QMessageBox {{
+                background-color: {self.message_box_frame_bg};
+                color: {self.message_box_font_color};
+                font-family: {self.message_box_font_family};
+                font-size: {self.message_box_font_size}pt;
+            }}
+            QPushButton {{
+                background-color: #000000;
+                color: {self.message_box_font_color};
+                font-family: {self.message_box_font_family};
+                font-size: {self.message_box_font_size}pt;
+                border: 1px solid {self.message_box_font_color};
+                padding: 5px;
+            }}
+            QPushButton:hover {{
+                background-color: #333333;
+            }}
+        """)
 
     def update_chat_component(self):
         """

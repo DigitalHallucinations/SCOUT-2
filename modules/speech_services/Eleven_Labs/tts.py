@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 from modules.logging.logger import setup_logger
 #from logger import setup_logger
-logger = setup_logger('tts.py')
+logger = setup_logger('11_tts.py')
 
 CHUNK_SIZE = 1024 
 OUTPUT_PATH = "assets/SCOUT/tts_mp3/output.mp3"  

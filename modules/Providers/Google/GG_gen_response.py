@@ -139,9 +139,9 @@ async def generate_response(user, current_persona, message, session_id, conversa
         raise
 
     conversation_history.add_message(user, conversation_id, "assistant", ChatResponse, current_time)
-    
+     
     try:
-        if tts.get_tts() and not contains_code(ChatResponse):
+        if get_tts() and not contains_code(ChatResponse):
             await text_to_speech(ChatResponse)
     except Exception as e:
         logger.exception("Error during TTS operation: %s", e)

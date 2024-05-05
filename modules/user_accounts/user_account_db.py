@@ -62,6 +62,7 @@ class UserAccountDatabase:
 
     def close_connection(self):
         """Close the connection to the SQLite database."""
+        logger.info("Closing UA database connection.")
         try:
             self.conn.close()
         except sqlite3.Error as e:

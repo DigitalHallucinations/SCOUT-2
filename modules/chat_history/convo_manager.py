@@ -25,6 +25,9 @@ class ConversationManager:
         self.db_file = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
         self.cognitive_services = CognitiveBackgroundServices(self.db_file, user, provider_manager)        
         self.schema = DatabaseSchema()
+        self.background_tasks = []
+        self.conn = None  
+        self.establish_connection() 
         self.create_all_tables()
 
     def init_conversation_id(self):
@@ -60,10 +63,22 @@ class ConversationManager:
         self.conversation_id = new_conversation_id
         logger.info(f"Conversation ID updated to: {new_conversation_id}")        
 
+    def establish_connection(self):
+        """Establish a connection to the SQLite database."""
+        try:
+            self.conn = sqlite3.connect(self.db_file)
+            logger.info(f"Connection to database established: {self.db_file}")
+        except sqlite3.Error as e:
+            logger.error(f"Error connecting to database: {e}")
+            raise
+
     def close_connection(self):
         """Close the connection to the SQLite database."""
+        logger.info("Closing CH database connection.")
         try:
             self.conn.close()
+            for task in self.background_tasks:
+                task.cancel()
         except sqlite3.Error as e:
             logger.info(f"Error closing connection: {e}")
             raise 
@@ -91,7 +106,7 @@ class ConversationManager:
     
     async def insert_conversation(self, user, conversation_id, chat_log, timestamp, persona):
         """
-        Used in chist_ functions, app.py and chist_functions.py to save chat_log by inserting the entire chat_log into the 'conversations' table.
+        Inserts a conversation into the 'conversations' table and manages background tasks.
 
         Args:
         - user: User ID
@@ -122,8 +137,10 @@ class ConversationManager:
                 logger.error(f"Error inserting conversation: {e}")
                 raise
 
-        asyncio.create_task(self.cognitive_services.generate_and_update_conversation_name(user, conversation_id, chat_log))
-
+        # Create and store the background task
+        task = asyncio.create_task(self.cognitive_services.generate_and_update_conversation_name(user, conversation_id, chat_log))
+        self.background_tasks.append(task)
+        
     def get_conversations(self, user, persona=None, conversation_id=None):
         """
         Used in chist_functions to retrieve a list of conversations for a specific user and optionally for a specific persona 

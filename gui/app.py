@@ -7,6 +7,7 @@ import keyring
 from keyring.errors import PasswordDeleteError
 from PySide6 import QtWidgets, QtGui
 from PySide6 import QtCore as qtc
+from PySide6.QtCore import Qt 
 from gui.chat_component import ChatComponent
 from modules.chat_history.convo_manager import ConversationManager
 from modules.user_accounts.login import LoginComponent
@@ -74,7 +75,7 @@ class SCOUT(QtWidgets.QMainWindow):
         self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
         self.power_button.setIconSize(qtc.QSize(24, 24))
         self.power_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-        self.power_button.clicked.connect(self.log_out)
+        self.power_button.clicked.connect(self.on_closing)
         title_layout.addWidget(self.power_button)
 
         self.power_button.enterEvent = self.on_power_button_hover
@@ -182,7 +183,6 @@ class SCOUT(QtWidgets.QMainWindow):
             keyring.delete_password("SCOUT", current_user)
         except PasswordDeleteError as e:
             logger.debug(f"Caught PasswordDeleteError while deleting password (password still cleared): {str(e)}")        
-        self.cleanup_on_exit(event)
 
     def safe_update(self, command, *args, **kwargs):
         """Safely update the application.
@@ -203,20 +203,17 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.setText('Do you want to quit?')
         message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         message_box.setDefaultButton(QtWidgets.QMessageBox.No)
+        message_box.setModal(True)
 
         self.chat_component.appearance_settings_instance.apply_message_box_style(message_box)
 
-        reply = message_box.exec()
+        message_box.accepted.connect(self.cleanup_on_exit(event))  
 
-        if reply == QtWidgets.QMessageBox.Yes:
-            event.accept()
-            self.cleanup_on_exit(event)
-        else:
-            event.ignore()
-            logger.info("button click ignored")
+        message_box.exec()  
 
     def cleanup_on_exit(self, event):
         logger.info("Cleaning up resources")
+        self.log_out(event)
         self.user_database.close_connection()
         self.chat_history_database.close_connection()
         logger.info("Application closed by the user.")

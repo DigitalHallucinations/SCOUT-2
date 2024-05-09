@@ -418,18 +418,41 @@ class ChatComponent(QtWidgets.QWidget):
     @QtCore.Slot(str, str)
     def _show_message(self, role, message):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        self.chat_log.setTextColor(QtGui.QColor(self.timestamp_color))
-        self.chat_log.insertPlainText(f"{timestamp}\n")
-
+        
+        cursor = self.chat_log.textCursor()
+        cursor.movePosition(QtGui.QTextCursor.End)
+        
+        if role == "system":
+            # Remove the timestamp and "is typing..." message if they exist
+            typing_indicator_text = f"{self.system_name}: is typing...\n"
+            chat_log_text = self.chat_log.toPlainText()
+            typing_indicator_index = chat_log_text.rfind(typing_indicator_text)
+            if typing_indicator_index != -1:
+                timestamp_start_index = chat_log_text.rfind("\n", 0, typing_indicator_index)
+                if timestamp_start_index != -1:
+                    timestamp_start_index += 1
+                    cursor.setPosition(timestamp_start_index)
+                    cursor.movePosition(QtGui.QTextCursor.Right, QtGui.QTextCursor.KeepAnchor, typing_indicator_index - timestamp_start_index + len(typing_indicator_text))
+                    cursor.removeSelectedText()
+                else:
+                    cursor.setPosition(typing_indicator_index)
+                    cursor.movePosition(QtGui.QTextCursor.Right, QtGui.QTextCursor.KeepAnchor, len(typing_indicator_text))
+                    cursor.removeSelectedText()
+        
+        cursor.setCharFormat(QtGui.QTextCharFormat())
+        cursor.insertText(f"{timestamp}\n")
+        
         if role == "user":
-            self.chat_log.setTextColor(QtGui.QColor(self.appearance_settings_instance.chatlog_font_color))
-            self.chat_log.insertPlainText(f"{self.user}: {message}\n")
+            cursor.insertText(f"{self.user}: {message}\n")
         elif role == "system":
-            self.chat_log.setTextColor(QtGui.QColor(self.system_name_color))
-            self.chat_log.setFontWeight(QtGui.QFont.Bold)
-            self.chat_log.insertPlainText(f"{self.system_name}: ")
-            self.chat_log.setTextColor(QtGui.QColor(self.appearance_settings_instance.chatlog_font_color))
-            self.chat_log.setFontWeight(QtGui.QFont.Normal)
-            self.chat_log.insertPlainText(f"{message}\n")
-
+            system_format = QtGui.QTextCharFormat()
+            system_format.setForeground(QtGui.QColor(self.system_name_color))
+            system_format.setFontWeight(QtGui.QFont.Bold)
+            cursor.setCharFormat(system_format)
+            cursor.insertText(f"{self.system_name}: ")
+            
+            cursor.setCharFormat(QtGui.QTextCharFormat())
+            cursor.insertText(f"{message}\n")
+        
+        self.chat_log.setTextCursor(cursor)
         self.chat_log.verticalScrollBar().setValue(self.chat_log.verticalScrollBar().maximum())

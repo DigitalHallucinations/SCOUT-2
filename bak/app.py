@@ -24,7 +24,7 @@ logger = setup_logger('app.py')
 
 class SCOUT(QtWidgets.QMainWindow):
     """Initialize the SCOUT application."""
-    def __init__(self, shutdown_event=None):
+    def __init__(self):
         super().__init__()
         self.setStyleSheet("background-color: #000000;")
         self.setWindowFlags(qtc.Qt.FramelessWindowHint) 
@@ -54,7 +54,6 @@ class SCOUT(QtWidgets.QMainWindow):
         self.login_component.show()
         
         self.closeEvent = self.on_closing
-        self.shutdown_event = shutdown_event
 
     def create_custom_title_bar(self):
         title_bar = QtWidgets.QFrame(self)
@@ -214,12 +213,12 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.exec()  
 
     def cleanup_on_exit(self, event):
+        logger.info("Cleaning up resources")
         self.log_out(event)
+        self.user_database.close_connection()
+        self.chat_history_database.close_connection()
         logger.info("Application closed by the user.")
-        if self.shutdown_event:
-            self.shutdown_event.set()
-        self.close
-
+        self.close()
 
     async def async_main(self):
         while True:

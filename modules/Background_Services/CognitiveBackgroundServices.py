@@ -376,7 +376,7 @@ class CognitiveBackgroundServices:
         payload = {
             #"model": "gpt-4-turbo-preview",
             #"model": "mistral-large-latest",
-            "model": "claude-3-haiku-20240307",
+            "model": "claude-3-sonnet-20240229",
             "messages": [{"role": "system","content": system_message_content}] + conversation_data
         }
             

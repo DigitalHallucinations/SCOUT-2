@@ -218,7 +218,6 @@ class SCOUT(QtWidgets.QMainWindow):
         logger.info("Application closed by the user.")
         if self.shutdown_event:
             self.shutdown_event.set()
-        self.close
 
 
     async def async_main(self):

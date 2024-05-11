@@ -1,14 +1,11 @@
 # modules/settings/filter_sort_settings.py
 
 from PySide6 import QtWidgets as qtw
-from PySide6.QtCore import QDate
 import json
 import os
 from datetime import datetime
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
-#from tooltip import ToolTip # not yet implemented
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.tooltip import ToolTip
 from modules.logging.logger import setup_logger
-#from logger import setup_logger
 
 logger = setup_logger('filter_sort_settings')
 

@@ -5,7 +5,6 @@ import chardet
 import requests
 from urllib.parse import urlparse
 from modules.logging.logger import setup_logger
-#from logger import setup_logger
 
 logger = setup_logger('rss_feed_reader')
 

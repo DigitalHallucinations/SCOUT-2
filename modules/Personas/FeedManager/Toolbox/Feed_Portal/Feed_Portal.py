@@ -12,10 +12,10 @@ from PySide6 import QtCore as qtc
 from PySide6 import QtGui as qtg
 from PySide6.QtGui import QDesktopServices
 
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.Search.search_window import SearchWindow
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.Search.search_window import SearchWindow
 from gui.tooltip import ToolTip
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.settings import settings, filter_sort_settings
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.settings import settings, filter_sort_settings
 from modules.logging.logger import setup_logger
 
 import os

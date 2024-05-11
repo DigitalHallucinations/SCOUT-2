@@ -5,7 +5,7 @@ import configparser
 from PySide6 import QtWidgets as qtw
 from PySide6 import QtCore as qtc
 from dotenv import load_dotenv, set_key
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.Search.feedly_api import FeedlyAPI
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.Search.feedly_api import FeedlyAPI
 
 class SearchWindow(qtw.QDialog):
     def __init__(self, parent=None):

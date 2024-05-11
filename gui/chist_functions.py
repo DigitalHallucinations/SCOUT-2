@@ -40,10 +40,16 @@ def load_chat_history(chat_component, provider_manager):
     layout = QtWidgets.QVBoxLayout(chat_component.popup)
     layout.addWidget(chat_component.chat_log_listbox)
 
+    save_chat_button = QtWidgets.QPushButton("Save Current Chat", chat_component.popup)
+    save_chat_button.setFont(font)
+    save_chat_button.setStyleSheet(f"background-color: #7289da; color: {chat_component.appearance_settings_instance.history_font_color};")
+    save_chat_button.clicked.connect(lambda: asyncio.create_task(save_and_start_new_conversation(chat_component, chat_component.provider_manager, chat_component.cognitive_services)))
+    layout.addWidget(save_chat_button)
+
     load_chat_button = QtWidgets.QPushButton("Load Selected Chat", chat_component.popup)
     load_chat_button.setFont(font)
     load_chat_button.setStyleSheet(f"background-color: #7289da; color: {chat_component.appearance_settings_instance.history_font_color};")
-    load_chat_button.clicked.connect(lambda: asyncio.create_task(load_chat(chat_component, chat_component.chat_log_listbox.currentItem().text())))
+    load_chat_button.clicked.connect(lambda: asyncio.create_task(load_chat(chat_component, chat_component.chat_log_listbox.currentItem().text(), chat_component.provider_manager, chat_component.cognitive_services)))
     layout.addWidget(load_chat_button)   
 
     delete_button = QtWidgets.QPushButton("Delete", chat_component.popup)
@@ -53,9 +59,15 @@ def load_chat_history(chat_component, provider_manager):
     layout.addWidget(delete_button)
 
     chat_component.popup.setModal(False)  
-    chat_component.popup.show()  
+    chat_component.popup.show() 
 
-async def load_chat(chat_component, selected_chat_log=None, provider_manager=None):
+async def save_and_start_new_conversation(chat_component, provider_manager, cognitive_services):
+    await clear_chat_log(chat_component, provider_manager, cognitive_services)
+    chat_component.conversation_id = chat_component.conversation_manager.init_conversation_id()
+    logger.info(f"Started a new conversation with ID: {chat_component.conversation_id}")
+    chat_component.show_message("system", chat_component.current_persona["message"])
+
+async def load_chat(chat_component, selected_chat_log=None, provider_manager=None, cognitive_services=None):
     if not selected_chat_log:
         logger.warning("No chat log entry selected.")
         return
@@ -68,7 +80,7 @@ async def load_chat(chat_component, selected_chat_log=None, provider_manager=Non
 
     logger.info(f"Updated conversation_id in ChatComponent: {conversation_id}")
 
-    await clear_chat_log(chat_component, provider_manager)
+    await clear_chat_log(chat_component, provider_manager, cognitive_services)
 
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
@@ -80,10 +92,7 @@ async def load_chat(chat_component, selected_chat_log=None, provider_manager=Non
     if actual_chat_log:
         chat_component.chat_log.setPlainText(actual_chat_log)
         chat_component.chat_log.verticalScrollBar().setValue(chat_component.chat_log.verticalScrollBar().maximum())
-
-        font = QtGui.QFont(chat_component.appearance_settings_instance.history_font_family, int(chat_component.appearance_settings_instance.history_font_size), QtGui.QFont.Normal)
-        chat_component.chat_log.setFont(font)
-        chat_component.chat_log.setStyleSheet(f"background-color: {chat_component.appearance_settings_instance.history_frame_bg}; color: {chat_component.appearance_settings_instance.history_font_color};")
+        chat_component.apply_font_settings()
     else:
         logger.error(f"No chat log found for Conversation ID: {conversation_id}")
 

@@ -27,7 +27,7 @@ class SendMessageTask(QRunnable):
         asyncio.run(send_message_module.send_message(self.chat_component, self.user, self.message, self.session_id, self.conversation_id))
 
 class ChatComponent(QtWidgets.QWidget):
-    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None, cognitive_services=None):
+    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None, cognitive_services=None, conversation_manager=None):
         super().__init__(parent)
         logger.info("Initializing ChatComponent")
         self.persona = persona
@@ -43,6 +43,7 @@ class ChatComponent(QtWidgets.QWidget):
         self.persona_manager = persona_manager
         self.current_persona = self.persona_manager.current_persona
         self.personas = self.persona_manager.personas
+        self.conversation_manager = conversation_manager
         
         self.typing_indicator_index = None
         self.system_name = "SCOUT"
@@ -77,7 +78,7 @@ class ChatComponent(QtWidgets.QWidget):
             widget.setFont(font)
             if isinstance(widget, QtWidgets.QPushButton):
                 widget.setStyleSheet(f"background-color: #000000; color: {self.appearance_settings_instance.font_color}; font-size: {self.appearance_settings_instance.font_size}px;") 
-
+                
     async def on_persona_selection(self, persona_name):
         logger.info(f"Persona selected: {persona_name}")
 

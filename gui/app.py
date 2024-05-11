@@ -156,7 +156,8 @@ class SCOUT(QtWidgets.QMainWindow):
                 persona_manager=self.persona_handler,
                 titlebar_color=self.titlebar_color,
                 provider_manager=self.provider_manager,
-                cognitive_services=self.cognitive_services  
+                cognitive_services=self.cognitive_services,
+                conversation_manager=self.chat_history_database  
             )
             self.setCentralWidget(self.chat_component)
             self.chat_component.show()

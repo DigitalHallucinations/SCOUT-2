@@ -151,6 +151,4 @@ async def save_chat_log(chat_component, provider_manager, cognitive_services):
 
         await conversation_manager.insert_conversation(user, conversation_id, current_chat_log, timestamp, chat_component.current_persona["name"])
 
-        await cognitive_services.process_conversation(user, conversation_id, current_chat_log)
-
     logger.info(f"Chat log saved")

@@ -1,7 +1,7 @@
 # Feed portal/main.py
 
-from modules.logging.logger import setup_logger, set_logging_level, logging
-from modules.Feed_Portal import RSSFeedReaderUI
+from logger import setup_logger, set_logging_level, logging
+from Feed_Portal import RSSFeedReaderUI
 from PySide6 import QtWidgets as qtw
 
 set_logging_level(logging.INFO)  

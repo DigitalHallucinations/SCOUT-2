@@ -3,8 +3,10 @@
 from PySide6 import QtWidgets as qtw
 import configparser
 import os
-from modules.tooltip import ToolTip
-from modules.logging.logger import setup_logger
+#from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
+from tooltip import ToolTip
+#from modules.logging.logger import setup_logger
+from logger import setup_logger
 
 logger = setup_logger('settings')
 

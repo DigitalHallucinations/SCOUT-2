@@ -1,4 +1,4 @@
-# modules/Search/feedly_api.py
+# Search/feedly_api.py
 
 import requests
 
@@ -14,7 +14,7 @@ class FeedlyAPI:
         }
         params = {
            "query": query,
-           "count": 20  # Adjust the count as needed
+           "count": 20  
         }
 
         response = requests.get(url, headers=headers, params=params)

@@ -2,7 +2,7 @@
 
 import asyncio
 from contextlib import asynccontextmanager
-from gui.app import SCOUT  # Assuming you've updated app.py with the shutdown_event attribute
+from gui.app import SCOUT  # update app.py with the shutdown_event attribute
 from modules.logging.logger import setup_logger, set_logging_level, logging
 from PySide6.QtWidgets import QApplication
 import importlib

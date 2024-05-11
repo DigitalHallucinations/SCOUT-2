@@ -1,4 +1,4 @@
-#modules/RSSFeedReaderUI.py
+# Feed portal/RSSFeedReaderUI.py
 
 import os
 import threading
@@ -10,13 +10,16 @@ import json
 import configparser
 import feedparser
 import webbrowser
-from modules.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
-from modules.Search.search_window import SearchWindow
-from modules.tooltip import ToolTip
-from modules.settings import settings
-from modules.settings import filter_sort_settings
-from modules.logging.logger import setup_logger
-from dotenv import load_dotenv
+#from modules.Personas.RSSManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
+from rss_feed_reader import RSSFeedReader, RSSFeedReaderError
+from Search.search_window import SearchWindow
+#from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
+from tooltip import ToolTip
+
+from settings import settings, filter_sort_settings
+#from modules.logging.logger import setup_logger
+from logger import setup_logger
+
 import os
 
 logger = setup_logger('RSSFeedReaderUI')

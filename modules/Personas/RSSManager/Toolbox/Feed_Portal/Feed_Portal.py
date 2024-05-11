@@ -10,25 +10,25 @@ import json
 import configparser
 import feedparser
 import webbrowser
-#from modules.Personas.RSSManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
-from rss_feed_reader import RSSFeedReader, RSSFeedReaderError
-from Search.search_window import SearchWindow
-#from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
-from tooltip import ToolTip
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
+#from rss_feed_reader import RSSFeedReader, RSSFeedReaderError
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.Search.search_window import SearchWindow
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
+#from tooltip import ToolTip
 
-from settings import settings, filter_sort_settings
-#from modules.logging.logger import setup_logger
-from logger import setup_logger
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.settings import settings, filter_sort_settings
+from modules.logging.logger import setup_logger
+#from logger import setup_logger
 
 import os
 
 logger = setup_logger('RSSFeedReaderUI')
 
-class RSSFeedReaderUI(qtw.QMainWindow):
+class RSSFeedReaderUI(qtw.QFrame):
     def __init__(self):
         super().__init__()
         logger.info("Initializing RSS Feed Reader...")
-        self.setWindowTitle("Feed Portal")
+        #self.setWindowTitle("Feed Portal")
         self.rss_feed_reader = RSSFeedReader()
         logger.info("Loading feeds and configuration...")
         self.load_feeds()
@@ -37,8 +37,8 @@ class RSSFeedReaderUI(qtw.QMainWindow):
         filter_sort_settings.load_filter_sort_settings(self)
         self.url_cooldown = False
 
-        width, height = 450, 800
-        self.resize(width, height)
+        #width, height = 450, 800
+        #self.resize(width, height)
 
         self.create_widgets()
 
@@ -92,8 +92,8 @@ class RSSFeedReaderUI(qtw.QMainWindow):
 
             central_widget = qtw.QWidget(self)
             central_widget.setStyleSheet(f"background-color: {self.main_window_color};")
-            self.setCentralWidget(central_widget)
             layout = qtw.QVBoxLayout(central_widget)
+            self.setLayout(layout)
 
             settings_frame = qtw.QFrame(central_widget)
             settings_frame.setStyleSheet(f"background-color: {self.window_bg};")

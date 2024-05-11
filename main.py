@@ -11,7 +11,7 @@ import tracemalloc
 
 tracemalloc.start()
 
-set_logging_level(logging.DEBUG)
+set_logging_level(logging.INFO)
 
 logger = setup_logger('main')
 

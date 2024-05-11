@@ -1,5 +1,5 @@
-
 # gui/app.py
+
 
 import os
 import time
@@ -8,7 +8,6 @@ import keyring
 from keyring.errors import PasswordDeleteError
 from PySide6 import QtWidgets, QtGui
 from PySide6 import QtCore as qtc
-from PySide6.QtCore import Qt 
 from gui.chat_component import ChatComponent
 from modules.chat_history.convo_manager import ConversationManager
 from modules.user_accounts.login import LoginComponent
@@ -19,8 +18,11 @@ from modules.Personas.persona_manager import PersonaManager
 from modules.Providers.provider_manager import ProviderManager
 from modules.logging.logger import setup_logger
 from modules.Background_Services.CognitiveBackgroundServices import CognitiveBackgroundServices
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeedReaderUI
+
 
 logger = setup_logger('app.py')
+
 
 class SCOUT(QtWidgets.QMainWindow):
     """Initialize the SCOUT application."""
@@ -29,21 +31,29 @@ class SCOUT(QtWidgets.QMainWindow):
         self.setStyleSheet("background-color: #000000;")
         self.setWindowFlags(qtc.Qt.FramelessWindowHint) 
 
-        width, height = 600, 800
+
+        width, height = 1200, 800
         self.resize(width, height)
+
 
         icon_path = os.path.join("assets", "SCOUT", "SCOUT_icon.ico")
         self.setWindowIcon(QtGui.QIcon(icon_path))
 
+
         self.user_database = UserAccountDatabase()
+
 
         self.user = None
 
+
         self.session_id = None
+
 
         self.conversation_id = None
 
+
         self.titlebar_color = "#2d2d2d"  
+
 
         logger.info("Creating LoginComponent")
         self.login_component = LoginComponent(parent=self, 
@@ -56,14 +66,17 @@ class SCOUT(QtWidgets.QMainWindow):
         self.closeEvent = self.on_closing
         self.shutdown_event = shutdown_event
 
+
     def create_custom_title_bar(self):
         title_bar = QtWidgets.QFrame(self)
         title_bar.setStyleSheet(f"background-color: {self.titlebar_color}; color: white; border-bottom: 2px solid black;")
         title_bar.setFixedHeight(30)
 
+
         title_layout = QtWidgets.QHBoxLayout(title_bar)
         title_layout.setContentsMargins(0, 0, 0, 0)
         title_layout.setSpacing(0)
+
 
         title_label = QtWidgets.QLabel("SCOUT", title_bar)
         title_label.setAlignment(qtc.Qt.AlignCenter)
@@ -73,6 +86,7 @@ class SCOUT(QtWidgets.QMainWindow):
         title_layout.addWidget(title_label)
         title_layout.addStretch(1)
 
+
         self.power_button = QtWidgets.QPushButton(title_bar)
         self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
         self.power_button.setIconSize(qtc.QSize(24, 24))
@@ -80,13 +94,17 @@ class SCOUT(QtWidgets.QMainWindow):
         self.power_button.clicked.connect(self.on_closing)
         title_layout.addWidget(self.power_button)
 
+
         self.power_button.enterEvent = self.on_power_button_hover
         self.power_button.leaveEvent = self.on_power_button_leave
 
+
         self.setMenuWidget(title_bar)
+
 
         self.draggable = False
         self.drag_position = qtc.QPoint()
+
 
         def mousePressEvent(event):
             if event.button() == qtc.Qt.LeftButton:
@@ -94,28 +112,35 @@ class SCOUT(QtWidgets.QMainWindow):
                 self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
                 event.accept()
 
+
         def mouseMoveEvent(event):
             if event.buttons() == qtc.Qt.LeftButton and self.draggable:
                 self.move(event.globalPos() - self.drag_position)
                 event.accept()
 
+
         def mouseReleaseEvent(event):
             if event.button() == qtc.Qt.LeftButton:
                 self.draggable = False
+
 
         title_bar.mousePressEvent = mousePressEvent
         title_bar.mouseMoveEvent = mouseMoveEvent
         title_bar.mouseReleaseEvent = mouseReleaseEvent
 
+
     def on_power_button_hover(self, event):
         self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_rd.png"))
+
 
     def on_power_button_leave(self, event):
         self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
 
+
     def set_current_user_username(self, username):
         """Set the current user's username."""
         self.current_username = username
+
 
     def session_manager(self, user):
         """Manage the user session.
@@ -130,25 +155,32 @@ class SCOUT(QtWidgets.QMainWindow):
             self.session_id = f"{self.user}_{int(time.time())}"
             self.set_current_user_username(self.user)
 
+
             self.persona_handler = PersonaManager(self, self.user)
             current_persona = self.persona_handler.current_persona
 
+
             self.provider_manager = ProviderManager(self)
+
 
             self.chat_history_database = ConversationManager(self.user, current_persona['name'], self.provider_manager)
             logger.info("Conversation History Database instantiated successfully.")
 
+
             self.conversation_id = self.chat_history_database.init_conversation_id()
             logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Current Persona: {current_persona['name'] if current_persona else 'None'}")
+
 
             self.database = self.chat_history_database
             
             if hasattr(self, 'login_component'):
                 self.login_component.close()
 
+
             persona_name = current_persona['name']
             db_file = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
             self.cognitive_services = CognitiveBackgroundServices(db_file, self.user, self.provider_manager)
+
 
             logger.info("Creating ChatComponent")
             self.chat_component = ChatComponent(
@@ -161,13 +193,58 @@ class SCOUT(QtWidgets.QMainWindow):
                 cognitive_services=self.cognitive_services,
                 conversation_manager=self.chat_history_database  
             )
-            self.setCentralWidget(self.chat_component)
-            self.chat_component.show()
+
+
+            logger.info("Creating RSSFeedReaderUI")
+            self.feed_portal = RSSFeedReaderUI()
+
+
+            central_widget = QtWidgets.QWidget(self)
+            central_layout = QtWidgets.QHBoxLayout(central_widget)
+            central_layout.setContentsMargins(0, 0, 0, 0)
+            central_layout.setSpacing(0)
+
+
+            splitter = QtWidgets.QSplitter(qtc.Qt.Horizontal, central_widget)
+            splitter.setHandleWidth(1)
+            splitter.setStyleSheet("QSplitter::handle { background-color: #2d2d2d; }")
+
+
+            chat_frame = QtWidgets.QFrame(splitter)
+            chat_frame.setFrameShape(QtWidgets.QFrame.NoFrame)
+            chat_frame.setFrameShadow(QtWidgets.QFrame.Plain)
+            chat_frame.setStyleSheet("background-color: #1e1e1e;")
+            chat_layout = QtWidgets.QVBoxLayout(chat_frame)
+            chat_layout.setContentsMargins(0, 0, 0, 0)
+            chat_layout.setSpacing(0)
+            chat_layout.addWidget(self.chat_component)
+
+
+            tool_ui_frame = QtWidgets.QFrame(splitter)
+            tool_ui_frame.setFrameShape(QtWidgets.QFrame.NoFrame)
+            tool_ui_frame.setFrameShadow(QtWidgets.QFrame.Plain)
+            tool_ui_frame.setStyleSheet("background-color: #2d2d2d;")
+            tool_ui_layout = QtWidgets.QVBoxLayout(tool_ui_frame)
+            tool_ui_layout.setContentsMargins(0, 0, 0, 0)
+            tool_ui_layout.setSpacing(0)
+            tool_ui_layout.addWidget(self.feed_portal)
+
+
+            splitter.addWidget(chat_frame)
+            splitter.addWidget(tool_ui_frame)
+            splitter.setSizes([600, 600])
+
+
+            central_layout.addWidget(splitter)
+            self.setCentralWidget(central_widget)
+
+
             self.show()    
         else:
             QtWidgets.QMessageBox.critical(self, "Login Error", "Invalid username or password.")
             self.session_id = None
             self.conversation_id = None
+
 
     def show_signup_component(self):
         """Show the sign-up component."""
@@ -177,6 +254,7 @@ class SCOUT(QtWidgets.QMainWindow):
                                                 database=self.user_database)
         self.signup_component.setModal(True)
         self.signup_component.show()
+
 
     def log_out(self, event):
         logger.info("Logging out user")
@@ -189,6 +267,7 @@ class SCOUT(QtWidgets.QMainWindow):
             keyring.delete_password("SCOUT", current_user)
         except PasswordDeleteError as e:
             logger.debug(f"Caught PasswordDeleteError while deleting password (password still cleared): {str(e)}")        
+
 
     def safe_update(self, command, *args, **kwargs):
         """Safely update the application.
@@ -204,6 +283,7 @@ class SCOUT(QtWidgets.QMainWindow):
     def on_closing(self, event):
         logger.info("Application closing")
 
+
         message_box = QtWidgets.QMessageBox(self)
         message_box.setWindowTitle('Quit')
         message_box.setText('Do you want to quit?')
@@ -211,17 +291,22 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.setDefaultButton(QtWidgets.QMessageBox.No)
         message_box.setModal(True)
 
+
         self.chat_component.appearance_settings_instance.apply_message_box_style(message_box)
+
 
         message_box.accepted.connect(self.cleanup_on_exit(event))  
 
+
         message_box.exec()  
+
 
     def cleanup_on_exit(self, event):
         self.log_out(event)
         logger.info("Application closed by the user.")
         if self.shutdown_event:
             self.shutdown_event.set()
+
 
 
     async def async_main(self):

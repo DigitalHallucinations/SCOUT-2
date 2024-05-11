@@ -5,10 +5,10 @@ from PySide6.QtCore import QDate
 import json
 import os
 from datetime import datetime
-#from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
-from tooltip import ToolTip # not yet implemented
-#from modules.logging.logger import setup_logger
-from logger import setup_logger
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
+#from tooltip import ToolTip # not yet implemented
+from modules.logging.logger import setup_logger
+#from logger import setup_logger
 
 logger = setup_logger('filter_sort_settings')
 

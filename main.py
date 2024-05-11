@@ -2,7 +2,7 @@
 
 import asyncio
 from contextlib import asynccontextmanager
-from gui.app import SCOUT  # update app.py with the shutdown_event attribute
+from gui.app import SCOUT  
 from modules.logging.logger import setup_logger, set_logging_level, logging
 from PySide6.QtWidgets import QApplication
 import importlib
@@ -20,7 +20,6 @@ global_tasks = set()
 dynamically_loaded_modules = []
 task_lock = threading.Lock()
 
-# Create the shutdown event object
 shutdown_event = asyncio.Event()
 
 @asynccontextmanager
@@ -91,27 +90,20 @@ async def run_app():
             try:
                 importlib.unload(module)
             except Exception as e:
-                logger.error(f"Error unloading module {module.__name__}: {e}")  # More specific error message
+                logger.error(f"Error unloading module {module.__name__}: {e}")  
 
-        # Task Cancellation Options
-        # Option 1: Cancel tasks (potentially forceful)
-        # for task in global_tasks:
-        #     task.cancel()
-
-        # Option 2: Wait for tasks to complete (graceful shutdown)
         await asyncio.gather(*global_tasks, return_exceptions=True)
-        logger.debug("All tasks completed. Exiting application loop")  # Added logging here
+        logger.debug("All tasks completed. Exiting application loop")  
 
 async def shutdown():
     """Handles all cleanup and shutdown tasks."""
     global should_exit
     should_exit = True
-    # Signal the GUI to close (if necessary)
+    # Signal the GUI to close
     if SCOUT_app:
         SCOUT_app.close()  # Close the GUI window
     # Cancel and await asyncio tasks
     await asyncio.gather(*global_tasks, return_exceptions=True)
-    # Close database connections and release resources
     if SCOUT_app:
         SCOUT_app.user_database.close_connection()
         SCOUT_app.chat_history_database.close_connection()
@@ -121,11 +113,10 @@ async def main():
     """Initialize and start the application."""
     global app, SCOUT_app
     app = QApplication([])
-    SCOUT_app = SCOUT(shutdown_event=shutdown_event)  # Pass the event object
+    SCOUT_app = SCOUT(shutdown_event=shutdown_event)  
     logger.info("SCOUT application started")
     await run_app()
 
-    # Wait for the shutdown event to be set
     await shutdown_event.wait()
 
     loop = asyncio.get_running_loop()

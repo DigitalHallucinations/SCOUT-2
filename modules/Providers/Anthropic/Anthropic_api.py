@@ -50,7 +50,9 @@ class AnthropicAPI:
                 payload["system"] = system_message
 
             response = self.client.messages.create(**payload)
-            logger.info(f"CBS response received from Anthropic API. {response}")
+            logger.info("CBS response received from Anthropic API.")
+            logger.debug(f"CBS response: {response}")
+
             return response
         except Exception as e:
             logger.error(f"An error occurred while generating CBS response: {e}")

@@ -30,11 +30,11 @@ class MistralAPI:
             async with session.post(API_ENDPOINT, headers=self.headers, json=data) as response:
                 if response.status == 200:
                     response_data = await response.json()
-                    logger.info(f"Conversation response received from API. {response}")
+                    logger.debug(f"Conversation response received from API. {response}")
                     return response_data
                 else:
                     error_message = await response.text()
-                    logger.erroe("Error generating conversation from API: %s: %s", response.status, error_message)
+                    logger.error("Error generating conversation from API: %s: %s", response.status, error_message)
                     return None
 
     async def generate_cognitive_background_service(self, data):
@@ -49,7 +49,7 @@ class MistralAPI:
                     return response_data
                 else:
                     error_message = await response.text()
-                    logger.erroe("Error generating CBS response from API: %s: %s", response.status, error_message)
+                    logger.error("Error generating CBS response from API: %s: %s", response.status, error_message)
                     return None
 
                   

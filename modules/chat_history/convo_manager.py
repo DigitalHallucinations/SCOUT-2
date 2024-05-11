@@ -33,7 +33,8 @@ class ConversationManager:
     def init_conversation_id(self):
         """Initialize the conversation ID for the session."""
         self.conversation_id = f"{self.user}_{int(time.time())}_{uuid.uuid4()}"
-        logger.info(f"Conversation ID initialized: {self.conversation_id}")
+        logger.info("Conversation ID initialized")
+        logger.info(f"ID: {self.conversation_id}")
         return self.conversation_id
 
     def create_all_tables(self):
@@ -56,25 +57,30 @@ class ConversationManager:
     def generate_new_conversation_id(self):
         """Generate a new conversation ID for the current session."""
         self.conversation_id = f"{self.user}_{int(time.time())}_{uuid.uuid4()}"
-        logger.info(f"New Conversation ID generated: {self.conversation_id}")
+        logger.info("New Conversation ID generated")
+        logger.debug(f"ID: {self.conversation_id}")
 
     def update_conversation_id(self, new_conversation_id):
         """Update the conversation ID with a new value."""
         self.conversation_id = new_conversation_id
-        logger.info(f"Conversation ID updated to: {new_conversation_id}")        
+        logger.info("Conversation ID updated")        
+        logger.debug(f"to: {new_conversation_id}")        
+
 
     def establish_connection(self):
-        """Establish a connection to the SQLite database."""
+        """Establish a connection to the Chat History SQLite database."""
         try:
             self.conn = sqlite3.connect(self.db_file)
-            logger.info(f"Connection to database established: {self.db_file}")
+            logger.info("Connection to Chat History database established")
+            logger.debug(f": {self.db_file}")
+
         except sqlite3.Error as e:
             logger.error(f"Error connecting to database: {e}")
             raise
 
     def close_connection(self):
         """Close the connection to the SQLite database."""
-        logger.info("Closing CH database connection.")
+        logger.info("Closing Chat History database connection.")
         try:
             self.conn.close()
             for task in self.background_tasks:
@@ -117,14 +123,17 @@ class ConversationManager:
         """
         logger.info(f"insert_conversation called with user: {user}, conversation_id: {conversation_id}, persona: {persona}")
         if conversation_id in self.loaded_conversations:
-            logger.info(f"Continuing conversation_id {conversation_id} for user {user}. Deleting old conversation.")
+            logger.info("Continuing conversation_id and Deleting old conversation.")
+            logger.debug(f"{conversation_id} for user {user}.")
             self.delete_conversation(user, conversation_id)
             self.loaded_conversations.remove(conversation_id)
         elif self.conversation_exists(user, conversation_id):
             logger.info(f"Conversation with ID {conversation_id} already exists for user {user}. Skipping insertion.")
             return
 
-        logger.info(f"Inserting Conversation for user: {user}, conversation_id: {conversation_id}")
+        logger.info("Inserting Conversation")
+        logger.debug(f"for user: {user}, conversation_id: {conversation_id}")
+
         with DatabaseContextManager(self.db_file) as cursor:    
             try:
                 current_time = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -137,7 +146,6 @@ class ConversationManager:
                 logger.error(f"Error inserting conversation: {e}")
                 raise
 
-        # Create and store the background task
         task = asyncio.create_task(self.cognitive_services.process_conversation(user, conversation_id, chat_log))
         self.background_tasks.append(task)
          
@@ -167,12 +175,12 @@ class ConversationManager:
                     query += ' AND conversation_id = ?'
                     params.append(conversation_id)
 
-                logger.info(f"Executing query")    
+                logger.info("Executing query")    
                 logger.debug(f"Executing query: {query} with params: {params}")
 
                 cursor.execute(query, params)
                 results = cursor.fetchall()
-                logger.info(f"Query results")
+                
                 logger.debug(f"Query results: {results}")
                 return results
             except sqlite3.Error as e:
@@ -192,7 +200,9 @@ class ConversationManager:
                 cursor.execute('DELETE FROM conversations WHERE user = ? AND conversation_id = ?;', (user, conversation_id))
                 cursor.execute('DELETE FROM messages WHERE user = ? AND conversation_id = ?;', (user, conversation_id))
                 cursor.execute('DELETE FROM function_calls WHERE user = ? AND conversation_id = ?;', (user, conversation_id))
-                logger.info(f"All related data deleted successfully for conversation_id: {conversation_id}")
+                logger.info("All related data deleted successfully")
+                logger.debug(f"for conversation_id: {conversation_id}")
+
             except sqlite3.Error as e:
                 logger.error(f"Error deleting conversation and related data: {e}")
                 raise          
@@ -248,7 +258,7 @@ class ConversationManager:
                         UPDATE responses SET function_call_id = ? WHERE id = ?;
                     ''', (self.function_call_id, response_id))
 
-                logger.info("Response inserted and updated successfully with function_call_id")
+                logger.info("Response inserted and updated successfully")
                 return response_id
             except sqlite3.Error as e:
                 logger.error(f"Error inserting response: {e}")
@@ -286,7 +296,8 @@ class ConversationManager:
                 cursor.execute('''
                     UPDATE function_calls SET arguments = ? WHERE id = ?;
                 ''', (updated_arguments, function_call_id))
-                logger.info(f"Function call inserted with ID: {function_call_id}")
+                logger.info("Function call inserted ")
+                logger.debug(f"with ID: {function_call_id}")
                 return function_call_id
             except sqlite3.Error as e:
                 logger.error(f"Error inserting function call: {e}")
@@ -329,7 +340,8 @@ class ConversationManager:
                 cursor.execute('''
                     UPDATE messages SET content = ? WHERE id = ?;
                 ''', (updated_message, message_id))
-                logger.info(f"Message inserted with ID: {message_id}")
+                logger.info("Message inserted ")
+                logger.debug(f"with ID: {message_id}")
 
                 return message_id
             except sqlite3.Error as e:

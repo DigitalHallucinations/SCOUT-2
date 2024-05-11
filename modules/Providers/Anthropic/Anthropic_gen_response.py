@@ -97,15 +97,15 @@ async def generate_response(user, current_persona, message, session_id, conversa
                               )
       
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
-
-    logger.debug("Data being sent in HTTP request to AnthropicAPI: %s", data) 
-    logger.info("Data being sent in HTTP request to AnthropicAPI.") 
+    logger.info("Data being sent in HTTP request to AnthropicAPI.")
+    logger.debug("Data: %s", data) 
+     
 
     response_data = await api.generate_conversation(data)
 
     if response_data:
-        logger.debug(f"response from Anthropic API: {response_data}")
         logger.info("response from Anthropic API.")
+        logger.debug(f"response: {response_data}")
         content_blocks = response_data.content 
         text = ''
         if not content_blocks:
@@ -123,12 +123,13 @@ async def generate_response(user, current_persona, message, session_id, conversa
                     logger.warning(f"A content block of type '{block.type}' was found, which is not handled by this method.")
             
         logger.debug(f"Extracted response: {text}")
-        logger.info("Extracted response")
+        
 
         if text:  
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
             conversation_history.add_message(user, conversation_id, "assistant", text, current_time)
             logger.info("Assistant message added to conversation history.")
+            logger.debug(f"Message: {text}")
 
         try:
                 if get_tts():

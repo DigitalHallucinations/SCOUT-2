@@ -105,7 +105,7 @@ def delete_conversation(chat_component, provider_manager):
     selected_chat_log = selected_item.text()
 
     parts = selected_chat_log.split("@@")
-    persona_timestamp, conversation_id = parts[0], parts[1]  
+    conversation_id = parts[0], parts[1]  
     user = chat_component.user
 
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
@@ -119,7 +119,6 @@ def delete_conversation(chat_component, provider_manager):
 
     logger.info(f"Chat log deleted: {selected_chat_log}")
 
-    # Refresh the chat history window
     chat_component.chat_log_listbox.clear()
     chat_logs = conversation_manager.get_conversations(user, persona=persona_name)
     for chat_log_tuple in chat_logs:

@@ -51,7 +51,8 @@ class CognitiveBackgroundServices:
         Returns:
         None
         """
-        logger.info(f"process_conversation called with user: {user}, conversation_id: {conversation_id}")
+        logger.info("Processing conversation")
+        logger.debug(f"with user: {user}, conversation_id: {conversation_id}")
         if chat_log:
             conversation_data = [{"role": "user", "content": chat_log}]
             
@@ -68,8 +69,8 @@ class CognitiveBackgroundServices:
                 "model": "claude-3-sonnet-20240229",
                 "messages": [{"role": "system","content": system_message_content}] + conversation_data
             }
-            
-            logger.debug(f"Payload being sent to API: {json.dumps(payload, indent=2, ensure_ascii=False)}")
+            logger.info("Payload being sent")
+            logger.debug(f"to API: {json.dumps(payload, indent=2, ensure_ascii=False)}")
             logger.info("Payload being sent to API")
             
             response = await self.provider_manager.generate_cognitive_background_service(payload)
@@ -96,7 +97,8 @@ class CognitiveBackgroundServices:
             
             if conversation_name:
                 self.update_conversation_name(user, conversation_id, conversation_name)
-                logger.info(f"Model named the conversation: {conversation_name}")
+                logger.info("Conversation Named.")
+                logger.debug(f": {conversation_name}")
             else:
                 logger.error("Failed to generate conversation name.")
             
@@ -201,7 +203,6 @@ class CognitiveBackgroundServices:
         Returns:
         None
         """
-        # Remove the double quotation marks from the conversation name
         name = name.strip('"')
         
         with DatabaseContextManager(self.db_file) as cursor:    
@@ -404,7 +405,7 @@ class CognitiveBackgroundServices:
                 f"{self.user}.json"
             ))
 
-            logger.info(f"Profile path: {profile_path}")
+            logger.debug(f"Profile path: {profile_path}")
 
             if not os.path.exists(profile_path):
                 logger.error(f"Profile file does not exist: {profile_path}")
@@ -412,8 +413,8 @@ class CognitiveBackgroundServices:
 
             with open(profile_path, 'r', encoding='utf-8') as file:
                 profile = json.load(file)
-               # logger.info(f"Profile found: {profile}")
                 logger.info("Profile found")
+                logger.debug(f": {profile}")
                 return profile
 
         except Exception as e:

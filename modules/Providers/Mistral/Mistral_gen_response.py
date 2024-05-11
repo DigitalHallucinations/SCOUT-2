@@ -79,9 +79,9 @@ def load_functions_from_json(current_persona):
 
             return tools_with_type
     except FileNotFoundError:
-        print(f"Functions JSON file not found for persona: {persona_name}")
+        logger.error(f"Functions JSON file not found for persona: {persona_name}")
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON from {functions_json_path}: {e}")
+        logger.error(f"Error decoding JSON from {functions_json_path}: {e}")
 
     return []
 

@@ -2,23 +2,21 @@
 
 import os
 import threading
-from PySide6 import QtWidgets as qtw
-from PySide6 import QtCore as qtc
-from PySide6 import QtGui as qtg
-from PySide6.QtGui import QDesktopServices
 import json
 import configparser
 import feedparser
 import webbrowser
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
-#from rss_feed_reader import RSSFeedReader, RSSFeedReaderError
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.Search.search_window import SearchWindow
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.tooltip import ToolTip
-#from tooltip import ToolTip
 
+from PySide6 import QtWidgets as qtw
+from PySide6 import QtCore as qtc
+from PySide6 import QtGui as qtg
+from PySide6.QtGui import QDesktopServices
+
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
+from modules.Personas.RSSManager.Toolbox.Feed_Portal.Search.search_window import SearchWindow
+from gui.tooltip import ToolTip
 from modules.Personas.RSSManager.Toolbox.Feed_Portal.settings import settings, filter_sort_settings
 from modules.logging.logger import setup_logger
-#from logger import setup_logger
 
 import os
 
@@ -28,7 +26,7 @@ class RSSFeedReaderUI(qtw.QFrame):
     def __init__(self):
         super().__init__()
         logger.info("Initializing RSS Feed Reader...")
-        #self.setWindowTitle("Feed Portal")
+        self.setWindowTitle("Feed Portal")
         self.rss_feed_reader = RSSFeedReader()
         logger.info("Loading feeds and configuration...")
         self.load_feeds()
@@ -36,9 +34,6 @@ class RSSFeedReaderUI(qtw.QFrame):
         settings.load_settings(self)  
         filter_sort_settings.load_filter_sort_settings(self)
         self.url_cooldown = False
-
-        #width, height = 450, 800
-        #self.resize(width, height)
 
         self.create_widgets()
 

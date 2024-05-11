@@ -55,7 +55,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
 
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None, provider_manager=None):  
-    logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
+    logger.info("Starting response generation")
     
     if "name" in current_persona: 
         conversation_history = ConversationManager(user, current_persona["name"], provider_manager)
@@ -83,8 +83,9 @@ async def generate_response(user, current_persona, message, session_id, conversa
 
     data = create_request_body(current_persona, messages, temperature_var, top_p_var, top_k_var)
 
-    logger.info(f"Sending request to Google API with data: {data}")
-    
+    logger.info("Sending request to Google API.")
+    logger.debug(f"Data: {data}")
+
     genai_api = GenAIAPI(GG_MODEL)
     
     # Call the generate_content method asynchronously
@@ -94,48 +95,38 @@ async def generate_response(user, current_persona, message, session_id, conversa
 
     if "function_call" in response_data:
         try:
-            # Handle the function call using the loaded function map
             function_response, error_occurred = await ToolManager.handle_function_call(user, conversation_id, response_data, conversation_history, function_map)
             
-            # Process the function response (e.g., by incorporating it into the chat response or taking further actions based on it)
             if not error_occurred:
                 ToolManager.logger.info(f"Function call successful with response: {function_response}")
-                # Integrate the function response into the chatbot's response
             else:
                 ToolManager.logger.error(f"Error occurred in function call: {function_response}")
         except Exception as e:
             ToolManager.logger.error(f"Exception handling function call: {e}", exc_info=True)
-            # Handle exception (e.g., by notifying the user or taking corrective action)
 
 
     try:
         if hasattr(response_data, 'candidates') and len(response_data.candidates) > 0:
-            # Extract the detailed_content from the first candidate
             detailed_content = response_data.candidates[0].content.parts
-            # Initialize an empty string to hold the formatted chat response
             ChatResponse = ""
-            # Iterate through each part of the detailed_content
             for part in detailed_content:
-                # Append each text part to the ChatResponse string
                 ChatResponse += part.text + "\n"
-            logger.info(f"Raw detailed_content: {detailed_content}")
+            logger.debug(f"Raw detailed_content: {detailed_content}")
             
-            # Remove the persona name from the beginning of ChatResponse if present
-            separator = ": "  # Define the separator used in the ChatResponse
+            separator = ": "  
             persona_prefix = f"{current_persona.get('name', '')}{separator}"
             if ChatResponse.startswith(persona_prefix):
-                # Remove the persona name and the separator from the beginning of ChatResponse
                 ChatResponse = ChatResponse[len(persona_prefix):]
             
-            # Log the formatted ChatResponse without the persona's name at the beginning
-            logger.info(f"Formatted ChatResponse: {ChatResponse}")
+            logger.debug(f"ChatResponse: {ChatResponse}")
+
         else:
             logger.warning("Unexpected structure in response_data or candidates list is empty.")
             raise ValueError("Unexpected structure in response_data or candidates list is empty.")
     except Exception as e:
         logger.error(f"Error processing response_data: {e}")
         ChatResponse = "An error occurred while processing the response."
-        logger.info(f"Error response: {ChatResponse}")
+        logger.debug(f"Error response: {ChatResponse}")
         raise
 
     conversation_history.add_message(user, conversation_id, "assistant", ChatResponse, current_time)
@@ -146,7 +137,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
     except Exception as e:
         logger.exception("Error during TTS operation: %s", e)
 
-    logger.info(f"Exiting generate_response function.")
+    logger.info("Exiting generate_response function.")
     return ChatResponse
 
 def contains_code(text: str) -> bool:
@@ -180,27 +171,21 @@ def format_message_history(messages, user_name, assistant_name):
     """
     formatted_messages = []
     for message in messages:
-        # Extract role and content from each message
         role = message['role']
         content = message['content']
-        # Determine the display name based on the role
         display_name = user_name if role == "user" else assistant_name
 
-        # Check if the content needs further processing (e.g., it's a nested message)
         if isinstance(content, str) and content.startswith('['):
             try:
                 nested_messages = eval(content)
                 if isinstance(nested_messages, list):
                     for nested_message in nested_messages:
                         nested_role = nested_message.get('role', 'unknown')
-                        # Use the user_name or assistant_name for nested messages as well
                         nested_display_name = user_name if nested_role == "user" else assistant_name
                         nested_content = nested_message.get('content', '')
                         formatted_messages.append(f"{nested_display_name}: {nested_content}")
             except:
-                # Fallback in case of eval errors, directly use the resolved display name
                 formatted_messages.append(f"{display_name}: {content}")
         else:
             formatted_messages.append(f"{display_name}: {content}")
-    # Join all formatted messages with a comma and space
     return ', '.join(formatted_messages)

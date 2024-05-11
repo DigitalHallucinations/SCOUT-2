@@ -16,10 +16,10 @@ if not GOOGLE_API_KEY:
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-logger.info("Listing available models:")
-for m in genai.list_models():
-    if 'generateContent' in m.supported_generation_methods:
-        logger.info(m.name)
+#logger.info("Listing available models:")
+#for m in genai.list_models():
+    #if 'generateContent' in m.supported_generation_methods:
+        #logger.info(m.name)
 
 class GenAIAPI:
     def __init__(self, model='gemini-pro'):

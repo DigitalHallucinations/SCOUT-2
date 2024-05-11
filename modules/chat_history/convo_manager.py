@@ -115,7 +115,7 @@ class ConversationManager:
         - timestamp: Timestamp of the conversation
         - persona: Persona involved in the conversation
         """
-
+        logger.info(f"insert_conversation called with user: {user}, conversation_id: {conversation_id}, persona: {persona}")
         if conversation_id in self.loaded_conversations:
             logger.info(f"Continuing conversation_id {conversation_id} for user {user}. Deleting old conversation.")
             self.delete_conversation(user, conversation_id)
@@ -138,9 +138,9 @@ class ConversationManager:
                 raise
 
         # Create and store the background task
-        task = asyncio.create_task(self.cognitive_services.generate_and_update_conversation_name(user, conversation_id, chat_log))
+        task = asyncio.create_task(self.cognitive_services.process_conversation(user, conversation_id, chat_log))
         self.background_tasks.append(task)
-        
+         
     def get_conversations(self, user, persona=None, conversation_id=None):
         """
         Used in chist_functions to retrieve a list of conversations for a specific user and optionally for a specific persona 

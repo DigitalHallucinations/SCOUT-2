@@ -33,8 +33,7 @@ class PersonaManager:
             logger.error(f"Error initializing PersonaManager: {e}")
                             
     def updater(self, selected_persona_name, user):
-        logger.info("Attempting to update persona.")
-
+        logger.info(f"Attempting to update persona to {selected_persona_name}.")
         self.master.system_name = selected_persona_name
         self.master.system_name_tag = selected_persona_name
 

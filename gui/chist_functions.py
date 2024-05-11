@@ -1,4 +1,4 @@
-# gui/Settings/chist_functions.py
+# gui/chist_functions.py
 
 import asyncio
 from PySide6 import QtWidgets, QtGui
@@ -113,14 +113,14 @@ def delete_conversation(chat_component, provider_manager):
     logger.info(f"Chat log deleted: {selected_chat_log}")
 
 
-async def clear_chat_log(chat_component, provider_manager):
+async def clear_chat_log(chat_component, provider_manager, cognitive_services):
     logger.info("Clearing chat log in the chat component")
     
-    await save_chat_log(chat_component, provider_manager)
+    await save_chat_log(chat_component, provider_manager, cognitive_services)
     
     chat_component.chat_log.clear()
 
-async def save_chat_log(chat_component, provider_manager):
+async def save_chat_log(chat_component, provider_manager, cognitive_services):
     current_chat_log = chat_component.chat_log.toPlainText().strip()
     if current_chat_log:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -133,5 +133,7 @@ async def save_chat_log(chat_component, provider_manager):
         conversation_manager = ConversationManager(user, persona_name, provider_manager)
 
         await conversation_manager.insert_conversation(user, conversation_id, current_chat_log, timestamp, chat_component.current_persona["name"])
+
+        await cognitive_services.process_conversation(user, conversation_id, current_chat_log)
 
     logger.info(f"Chat log saved")

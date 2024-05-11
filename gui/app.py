@@ -155,11 +155,12 @@ class SCOUT(QtWidgets.QMainWindow):
                 conversation_id=self.conversation_id,
                 persona_manager=self.persona_handler,
                 titlebar_color=self.titlebar_color,
-                provider_manager=self.provider_manager  
+                provider_manager=self.provider_manager,
+                cognitive_services=self.cognitive_services  
             )
             self.setCentralWidget(self.chat_component)
             self.chat_component.show()
-            self.show()  
+            self.show()    
         else:
             QtWidgets.QMessageBox.critical(self, "Login Error", "Invalid username or password.")
             self.session_id = None

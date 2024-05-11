@@ -55,7 +55,7 @@ def load_chat_history(chat_component, provider_manager):
     delete_button = QtWidgets.QPushButton("Delete", chat_component.popup)
     delete_button.setFont(font)
     delete_button.setStyleSheet(f"background-color: #7289da; color: {chat_component.appearance_settings_instance.history_font_color};")
-    delete_button.clicked.connect(lambda: delete_conversation(chat_component))
+    delete_button.clicked.connect(lambda: delete_conversation(chat_component, chat_component.provider_manager))
     layout.addWidget(delete_button)
 
     chat_component.popup.setModal(False)  
@@ -104,10 +104,8 @@ def delete_conversation(chat_component, provider_manager):
 
     selected_chat_log = selected_item.text()
 
-    parts = selected_chat_log.split(": ")
-    persona_convo_id, _ = parts[0], parts[1]  
-    _, conversation_id = persona_convo_id.rsplit(" (", 1)
-    conversation_id = conversation_id.strip(")")
+    parts = selected_chat_log.split("@@")
+    persona_timestamp, conversation_id = parts[0], parts[1]  
     user = chat_component.user
 
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
@@ -120,6 +118,16 @@ def delete_conversation(chat_component, provider_manager):
     chat_component.chat_log_listbox.takeItem(chat_component.chat_log_listbox.row(selected_item))
 
     logger.info(f"Chat log deleted: {selected_chat_log}")
+
+    # Refresh the chat history window
+    chat_component.chat_log_listbox.clear()
+    chat_logs = conversation_manager.get_conversations(user, persona=persona_name)
+    for chat_log_tuple in chat_logs:
+        _, timestamp, persona, conversation_id, name = chat_log_tuple
+        display_name = name if name else persona
+        formatted_timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S").strftime("%b %d, %Y")
+        entry = f"{display_name}: {formatted_timestamp}@@{conversation_id}"
+        chat_component.chat_log_listbox.addItem(entry)
 
 
 async def clear_chat_log(chat_component, provider_manager, cognitive_services):

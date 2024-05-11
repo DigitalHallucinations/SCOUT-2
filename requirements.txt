@@ -24,3 +24,5 @@ selenium
 matplotlib
 pypdf2
 psutil
+feedparser
+chardeturllib.parse

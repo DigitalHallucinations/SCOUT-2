@@ -38,3 +38,6 @@ __pycache__/
 
 # Ignore
 feeds.json
+
+# Ignore
+RSSURLs country category rss-url US gene.md

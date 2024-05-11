@@ -141,6 +141,8 @@ class SCOUT(QtWidgets.QMainWindow):
             self.conversation_id = self.chat_history_database.init_conversation_id()
             logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Current Persona: {current_persona['name'] if current_persona else 'None'}")
 
+            self.database = self.chat_history_database
+            
             if hasattr(self, 'login_component'):
                 self.login_component.close()
 

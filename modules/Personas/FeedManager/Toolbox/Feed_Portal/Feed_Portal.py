@@ -9,13 +9,14 @@ import webbrowser
 
 from PySide6 import QtWidgets as qtw
 from PySide6 import QtCore as qtc
-from PySide6 import QtGui as qtg
 from PySide6.QtGui import QDesktopServices
 
-from modules.Personas.FeedManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.rss_feed_reader import RSSFeedReader, RSSFeedReaderError
 from modules.Personas.FeedManager.Toolbox.Feed_Portal.Search.search_window import SearchWindow
-from gui.tooltip import ToolTip
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.entries_frame import create_entries_frame
 from modules.Personas.FeedManager.Toolbox.Feed_Portal.settings import settings, filter_sort_settings
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.header_frame import create_header_frame
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.feed_entry_frame import create_feed_entry_frame
 from modules.logging.logger import setup_logger
 
 import os
@@ -64,7 +65,7 @@ class RSSFeedReaderUI(qtw.QFrame):
             self.font_size = config.getfloat("Font", "size", fallback=10)
             self.font_color = config.get("Font", "color", fallback="#ffffff")
 
-            self.main_window_color = config.get("Colors", "main_window_color", fallback="#1e1e1e")
+            self.main_window_color = config.get("Colors", "main_window_color", fallback="#000000")
             self.window_bg = config.get("Colors", "window_bg", fallback="#2d2d2d")
             self.spinbox_bg = config.get("Colors", "spinbox_bg", fallback="#3c3c3c")
             self.button_bg = config.get("Colors", "button_bg", fallback="#007acc")
@@ -78,374 +79,17 @@ class RSSFeedReaderUI(qtw.QFrame):
     def create_widgets(self):
         logger.info("Creating UI widgets...")
 
-        icon_size = 32
-        settings_img = qtg.QPixmap("assets/icons/settings_icon.png")
-        settings_img = settings_img.scaled(icon_size, icon_size)
-
         try:
-            font_style = f"{self.font_family}, {self.font_size}pt"
-
             central_widget = qtw.QWidget(self)
-            central_widget.setStyleSheet(f"background-color: {self.main_window_color};")
+            central_widget.setStyleSheet("background-color: transparent;")
             layout = qtw.QVBoxLayout(central_widget)
             self.setLayout(layout)
 
-            settings_frame = qtw.QFrame(central_widget)
-            settings_frame.setStyleSheet(f"background-color: {self.window_bg};")
-            settings_layout = qtw.QHBoxLayout(settings_frame)
-            settings_layout.setContentsMargins(10, 10, 10, 10)
-            layout.addWidget(settings_frame)
+            create_header_frame(self, layout)
 
-            filter_sort_button = qtw.QPushButton("Filter/Sort", settings_frame)
-            filter_sort_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-            """)
-            filter_sort_button.clicked.connect(lambda: filter_sort_settings.open_filter_settings(self))
-            settings_layout.addWidget(filter_sort_button)
-            ToolTip.setToolTip(filter_sort_button, "Open Filter/Sort Settings")
+            create_feed_entry_frame(self, layout)
 
-            self.search_button = qtw.QPushButton("Search", settings_frame)
-            self.search_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-            """)
-            self.search_button.clicked.connect(self.open_search_window)
-            settings_layout.addWidget(self.search_button)
-            ToolTip.setToolTip(self.search_button, "Open Search Window")
-
-            self.settings_button = qtw.QPushButton(settings_frame)
-            self.settings_button.setIcon(settings_img)
-            self.settings_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-            """)
-            self.settings_button.clicked.connect(lambda: settings.open_settings(self))
-            settings_layout.addWidget(self.settings_button)
-            ToolTip.setToolTip(self.settings_button, "Open Settings")
-
-            self.feed_url_label = qtw.QLabel("Feed URL:", central_widget)
-            self.feed_url_label.setStyleSheet(f"color: {self.font_color}; font: {font_style};")
-            layout.addWidget(self.feed_url_label)
-
-            self.feed_url_entry = qtw.QLineEdit(central_widget)
-            self.feed_url_entry.setStyleSheet(f"""
-                QLineEdit {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: 1px solid {self.spinbox_bg};
-                    padding: 6px;
-                    border-radius: 4px;
-                }}
-            """)
-            layout.addWidget(self.feed_url_entry)
-            ToolTip.setToolTip(self.feed_url_entry, "Enter the URL of the RSS feed")
-
-            self.category_label = qtw.QLabel("Category:", central_widget)
-            self.category_label.setStyleSheet(f"color: {self.font_color}; font: {font_style};")
-            layout.addWidget(self.category_label)
-
-            self.category_entry = qtw.QLineEdit(central_widget)
-            self.category_entry.setStyleSheet(f"""
-                QLineEdit {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: 1px solid {self.spinbox_bg};
-                    padding: 6px;
-                    border-radius: 4px;
-                }}
-            """)
-            layout.addWidget(self.category_entry)
-            ToolTip.setToolTip(self.category_entry, "Enter a category for the RSS feed")
-
-            self.add_feed_button = qtw.QPushButton("Add Feed", central_widget)
-            self.add_feed_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-            """)
-            self.add_feed_button.clicked.connect(self.add_feed)
-            layout.addWidget(self.add_feed_button)
-            ToolTip.setToolTip(self.add_feed_button, "Add a new RSS feed")
-
-            self.feeds_listbox = qtw.QListWidget(central_widget)
-            self.feeds_listbox.setStyleSheet(f"""
-                QListWidget {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 6px;
-                    border-radius: 4px;
-                }}
-                QListWidget::item {{
-                    padding: 6px;
-                }}
-                QListWidget::item:selected {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.feeds_listbox.itemClicked.connect(self.on_feed_click)
-            layout.addWidget(self.feeds_listbox)
-
-            button_frame = qtw.QFrame(central_widget)
-            button_frame.setStyleSheet(f"background-color: {self.window_bg};")
-            button_layout = qtw.QHBoxLayout(button_frame)
-            button_layout.setContentsMargins(10, 10, 10, 10)
-            layout.addWidget(button_frame)
-
-            self.start_feed_button = qtw.QPushButton("Start Feed", button_frame)
-            self.start_feed_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-                QPushButton:disabled {{
-                    background-color: {self.spinbox_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.start_feed_button.clicked.connect(self.start_feed)
-            self.start_feed_button.setEnabled(False)
-            button_layout.addWidget(self.start_feed_button)
-            ToolTip.setToolTip(self.start_feed_button, "Start the selected RSS feed")
-
-            self.remove_feed_button = qtw.QPushButton("Remove Feed", button_frame)
-            self.remove_feed_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-                QPushButton:disabled {{
-                    background-color: {self.spinbox_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.remove_feed_button.clicked.connect(self.remove_feed)
-            self.remove_feed_button.setEnabled(False)
-            button_layout.addWidget(self.remove_feed_button)
-            ToolTip.setToolTip(self.remove_feed_button, "Remove the selected RSS feed")
-
-            self.entries_listbox = qtw.QListWidget(central_widget)
-            self.entries_listbox.setStyleSheet(f"""
-                QListWidget {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 6px;
-                    border-radius: 4px;
-                }}
-                QListWidget::item {{
-                    padding: 6px;
-                }}
-                QListWidget::item:selected {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.entries_listbox.itemClicked.connect(self.on_entry_click)
-            layout.addWidget(self.entries_listbox)
-
-            self.entries_detailed_list = qtw.QTreeWidget(central_widget)
-            self.entries_detailed_list.setStyleSheet(f"""
-                QTreeWidget {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 6px;
-                    border-radius: 4px;
-                }}
-                QTreeWidget::item {{
-                    padding: 6px;
-                }}
-                QTreeWidget::item:selected {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.entries_detailed_list.setHeaderLabels(["Title", "Published"])
-            self.entries_detailed_list.itemClicked.connect(self.on_entry_click)
-            layout.addWidget(self.entries_detailed_list)
-            self.entries_detailed_list.hide()
-
-            self.entries_card_view = qtw.QListWidget(central_widget)
-            self.entries_card_view.setStyleSheet(f"""
-                QListWidget {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 6px;
-                    border-radius: 4px;
-                }}
-                QListWidget::item {{
-                    padding: 6px;
-                    border: 1px solid {self.spinbox_bg};
-                    border-radius: 4px;
-                    margin-bottom: 6px;
-                }}
-                QListWidget::item:selected {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.entries_card_view.itemClicked.connect(self.on_entry_click)
-            layout.addWidget(self.entries_card_view)
-            self.entries_card_view.hide()
-
-            entry_button_frame = qtw.QFrame(central_widget)
-            entry_button_frame.setStyleSheet(f"background-color: {self.window_bg};")
-            entry_button_layout = qtw.QHBoxLayout(entry_button_frame)
-            entry_button_layout.setContentsMargins(10, 10, 10, 10)
-            layout.addWidget(entry_button_frame)
-
-            self.show_entry_button = qtw.QPushButton("Show Entry Details", entry_button_frame)
-            self.show_entry_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-                QPushButton:disabled {{
-                    background-color: {self.spinbox_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.show_entry_button.clicked.connect(self.show_entry_details)
-            self.show_entry_button.setEnabled(False)
-            entry_button_layout.addWidget(self.show_entry_button)
-            ToolTip.setToolTip(self.show_entry_button, "Show details of the selected entry")
-
-            self.remove_entry_button = qtw.QPushButton("Remove Entry", entry_button_frame)
-            self.remove_entry_button.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {self.button_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    background-color: {self.button_hover_bg};
-                }}
-                QPushButton:pressed {{
-                    background-color: {self.button_pressed_bg};
-                }}
-                QPushButton:disabled {{
-                    background-color: {self.spinbox_bg};
-                    color: {self.font_color};
-                }}
-            """)
-            self.remove_entry_button.clicked.connect(self.remove_entry)
-            self.remove_entry_button.setEnabled(False)
-            entry_button_layout.addWidget(self.remove_entry_button)
-            ToolTip.setToolTip(self.remove_entry_button, "Remove the selected entry")
-
-            self.entry_details_text = qtw.QTextBrowser(central_widget)
-            self.entry_details_text.setStyleSheet(f"""
-                QTextBrowser {{
-                    background-color: {self.window_bg};
-                    color: {self.font_color};
-                    font: {font_style};
-                    border: none;
-                    padding: 10px;
-                    border-radius: 4px;
-                }}
-                QTextBrowser a {{
-                    color: {self.button_bg};
-                    text-decoration: none;
-                }}
-                QTextBrowser a:hover {{
-                    text-decoration: underline;
-                }}
-            """)
-            self.entry_details_text.setReadOnly(True)
-            self.entry_details_text.setOpenExternalLinks(True)
-            self.entry_details_text.setTextInteractionFlags(qtc.Qt.TextBrowserInteraction | qtc.Qt.LinksAccessibleByMouse)
-            self.entry_details_text.viewport().setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
-            layout.addWidget(self.entry_details_text)
+            create_entries_frame(self, layout)
 
             self.refresh_feeds()
         except Exception as e:
@@ -455,7 +99,7 @@ class RSSFeedReaderUI(qtw.QFrame):
     def open_search_window(self):
         search_window = SearchWindow(self)
         search_window.populate_categories()
-        search_window.exec_()
+        search_window.exec_()        
 
     def on_feed_click(self, item):
         self.start_feed_button.setEnabled(True)
@@ -573,48 +217,6 @@ class RSSFeedReaderUI(qtw.QFrame):
         else:
             qtw.QMessageBox.critical(self, "Error", "Please select a feed to start.")
             
-    def add_feed(self):
-        logger.info("Adding a new feed...")
-        try:
-            feed_url = self.feed_url_entry.text()
-            category = self.category_entry.text()
-
-            if not feed_url:
-                qtw.QMessageBox.critical(self, "Error", "Please enter a feed URL.")
-                return
-
-            self.rss_feed_reader.add_feed(feed_url, category)
-            self.refresh_feeds()
-            self.feed_url_entry.clear()
-            self.category_entry.clear()
-            self.save_feeds()
-        except RSSFeedReaderError as e:
-            logger.exception("Error occurred while adding feed.")
-            qtw.QMessageBox.critical(self, "Error", str(e))
-        except Exception as e:
-            logger.exception("Unexpected error occurred while adding feed.")
-            qtw.QMessageBox.critical(self, "Error", "An unexpected error occurred.")
-
-    def remove_feed(self):
-        try:
-            selected_feed = self.feeds_listbox.currentItem().text()
-
-            if not selected_feed:
-                qtw.QMessageBox.critical(self, "Error", "Please select a feed to remove.")
-                return
-
-            feed_url = selected_feed.split(" - ")[0]
-
-            self.rss_feed_reader.remove_feed(feed_url)
-            self.save_feeds()
-            self.refresh_feeds()
-        except RSSFeedReaderError as e:
-            logger.exception("Error occurred while removing feed.")
-            qtw.QMessageBox.critical(self, "Error", str(e))
-        except Exception as e:
-            logger.exception("Unexpected error occurred while removing feed.")
-            qtw.QMessageBox.critical(self, "Error", "An unexpected error occurred.")
-
     def refresh_feeds(self):
         logger.info("Refreshing feeds...")
         try:

@@ -18,7 +18,7 @@ from modules.Personas.persona_manager import PersonaManager
 from modules.Providers.provider_manager import ProviderManager
 from modules.logging.logger import setup_logger
 from modules.Background_Services.CognitiveBackgroundServices import CognitiveBackgroundServices
-from modules.Personas.RSSManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeedReaderUI
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeedReaderUI
 
 
 logger = setup_logger('app.py')
@@ -178,8 +178,8 @@ class SCOUT(QtWidgets.QMainWindow):
 
 
             persona_name = current_persona['name']
-            db_file = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
-            self.cognitive_services = CognitiveBackgroundServices(db_file, self.user, self.provider_manager)
+            user_db = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
+            self.cognitive_services = CognitiveBackgroundServices(user_db, self.user, self.provider_manager)
 
 
             logger.info("Creating ChatComponent")
@@ -222,8 +222,7 @@ class SCOUT(QtWidgets.QMainWindow):
 
             tool_ui_frame = QtWidgets.QFrame(splitter)
             tool_ui_frame.setFrameShape(QtWidgets.QFrame.NoFrame)
-            tool_ui_frame.setFrameShadow(QtWidgets.QFrame.Plain)
-            tool_ui_frame.setStyleSheet("background-color: #2d2d2d;")
+            tool_ui_frame.setStyleSheet("background-color: #000000;")
             tool_ui_layout = QtWidgets.QVBoxLayout(tool_ui_frame)
             tool_ui_layout.setContentsMargins(0, 0, 0, 0)
             tool_ui_layout.setSpacing(0)

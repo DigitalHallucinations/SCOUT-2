@@ -2,7 +2,7 @@
 
 from modules.Tools.Internet_Tools.internet_search import InternetSearch
 from modules.Tools.Internet_Tools.webpage_retriever import WebpageRetriever
-from modules.Personas.FeedManager.Toolbox.Feed_Portal.rss_feed_reader import RSSFeedReader
+from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.rss_feed_reader import RSSFeedReader
 
 
 internet_search_instance = InternetSearch()

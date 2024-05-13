@@ -4,7 +4,6 @@ from PySide6 import QtWidgets as qtw
 import json
 import os
 from datetime import datetime
-from modules.Personas.FeedManager.Toolbox.Feed_Portal.tooltip import ToolTip
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('filter_sort_settings')

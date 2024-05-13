@@ -101,42 +101,6 @@ class RSSFeedReaderUI(qtw.QFrame):
         search_window.populate_categories()
         search_window.exec_()        
 
-    def on_feed_click(self, item):
-        self.start_feed_button.setEnabled(True)
-        self.remove_feed_button.setEnabled(True)
-
-    def on_entry_click(self, item):
-        self.show_entry_button.setEnabled(True)
-        self.remove_entry_button.setEnabled(True)
-
-        selected_entry = None
-        if self.display_format == "Simple List":
-            selected_entry = self.entries_listbox.currentItem().text()
-        elif self.display_format == "Detailed List":
-            selected_entry = self.entries_detailed_list.currentItem().text(0)
-        elif self.display_format == "Card View":
-            selected_entry = self.entries_card_view.currentItem().text().split("<br>")[0].replace("<b>", "").replace("</b>", "")
-
-        if selected_entry:
-            feed_url = self.feeds_listbox.currentItem().text().split(" - ")[0]
-            entries = self.rss_feed_reader.get_feed_entries(feed_url)
-            for entry in entries:
-                if entry.title == selected_entry:
-                    entry_details = self.rss_feed_reader.get_entry_details(entry)
-                    self.entry_details_text.clear()
-                    self.entry_details_text.append(f"<h3>{entry_details['title']}</h3>")
-
-                    url_link = f"<a href=\"{entry_details['link']}\">{entry_details['link']}</a>"
-                    self.entry_details_text.append(f"<p><strong>Link:</strong> {url_link}</p>")
-
-                    self.entry_details_text.append(f"<p><strong>Published:</strong> {entry_details['published']}</p>")
-                    self.entry_details_text.append(f"<p><strong>Summary:</strong> {entry_details['summary']}</p>")
-
-                    self.entry_details_text.setOpenExternalLinks(False)
-                    self.entry_details_text.anchorClicked.connect(self.open_url)
-
-                    break
-
     def remove_entry(self):
         selected_entry = self.entries_listbox.currentItem().text()
         if selected_entry:
@@ -216,7 +180,7 @@ class RSSFeedReaderUI(qtw.QFrame):
                 self.entries_card_view.show()
         else:
             qtw.QMessageBox.critical(self, "Error", "Please select a feed to start.")
-            
+
     def refresh_feeds(self):
         logger.info("Refreshing feeds...")
         try:

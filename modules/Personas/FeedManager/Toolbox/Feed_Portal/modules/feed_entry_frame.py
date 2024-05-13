@@ -1,6 +1,8 @@
 # modules/Personas/FeedManager/ToolboxFeed_Portal/modules/feed_entry_frame.py
 
 from PySide6 import QtWidgets as qtw
+from PySide6 import QtCore as qtc
+from PySide6 import QtGui as qtg
 
 from gui.tooltip import ToolTip
 from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.rss_feed_reader import RSSFeedReaderError
@@ -12,10 +14,11 @@ def create_feed_entry_frame(self, layout):
     feed_entry_frame = qtw.QFrame(self)
     feed_entry_frame.setStyleSheet(f"background-color: {self.main_window_color}; border-radius: 10px;")
     feed_entry_layout = qtw.QVBoxLayout(feed_entry_frame)
-    feed_entry_layout.setContentsMargins(10, 10, 10, 10)
+    feed_entry_layout.setContentsMargins(5, 5, 5, 5)
     layout.addWidget(feed_entry_frame)
 
     font_style = f"{self.font_family}, {self.font_size}pt"
+    icon_size = 32
 
     self.feed_url_label = qtw.QLabel("Feed URL:", feed_entry_frame)
     self.feed_url_label.setStyleSheet(f"color: {self.font_color}; font: {font_style};")
@@ -39,7 +42,13 @@ def create_feed_entry_frame(self, layout):
     self.category_label.setStyleSheet(f"color: {self.font_color}; font: {font_style};")
     feed_entry_layout.addWidget(self.category_label)
 
-    self.category_entry = qtw.QLineEdit(feed_entry_frame)
+    category_frame = qtw.QFrame(feed_entry_frame)
+    category_frame.setStyleSheet("background-color: transparent;")
+    category_layout = qtw.QHBoxLayout(category_frame)
+    category_layout.setContentsMargins(0, 0, 0, 0)
+    feed_entry_layout.addWidget(category_frame)
+
+    self.category_entry = qtw.QLineEdit(category_frame)
     self.category_entry.setStyleSheet(f"""
         QLineEdit {{
             background-color: {self.window_bg};
@@ -50,29 +59,25 @@ def create_feed_entry_frame(self, layout):
             border-radius: 4px;
         }}
     """)
-    feed_entry_layout.addWidget(self.category_entry)
+    category_layout.addWidget(self.category_entry)
     ToolTip.setToolTip(self.category_entry, "Enter a category for the RSS feed")
 
-    self.add_feed_button = qtw.QPushButton("Add Feed", feed_entry_frame)
-    self.add_feed_button.setStyleSheet(f"""
-        QPushButton {{
-            background-color: {self.button_bg};
-            color: {self.font_color};
-            font: {font_style};
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }}
-        QPushButton:hover {{
-            background-color: {self.button_hover_bg};
-        }}
-        QPushButton:pressed {{
-            background-color: {self.button_pressed_bg};
-        }}
-    """)
+    self.add_feed_button = qtw.QPushButton(category_frame)
+    self.add_feed_button.setIcon(qtg.QIcon("assets/SCOUT/Icons/add_file_wt.png"))
+    self.add_feed_button.setIconSize(qtc.QSize(icon_size, icon_size))
+    self.add_feed_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
     self.add_feed_button.clicked.connect(lambda: add_feed(self))
-    feed_entry_layout.addWidget(self.add_feed_button)
+    category_layout.addWidget(self.add_feed_button)
     ToolTip.setToolTip(self.add_feed_button, "Add a new RSS feed")
+
+    def on_add_feed_button_hover(event):
+        self.add_feed_button.setIcon(qtg.QIcon("assets/SCOUT/Icons/add_file_bl.png"))
+
+    def on_add_feed_button_leave(event):
+        self.add_feed_button.setIcon(qtg.QIcon("assets/SCOUT/Icons/add_file_wt.png"))
+
+    self.add_feed_button.enterEvent = lambda event: on_add_feed_button_hover(event)
+    self.add_feed_button.leaveEvent = lambda event: on_add_feed_button_leave(event)
 
     self.feeds_listbox = qtw.QListWidget(feed_entry_frame)
     self.feeds_listbox.setStyleSheet(f"""
@@ -86,72 +91,39 @@ def create_feed_entry_frame(self, layout):
         }}
         QListWidget::item {{
             padding: 6px;
+            white-space: normal;
+            word-wrap: break-word;
         }}
         QListWidget::item:selected {{
             background-color: {self.button_bg};
             color: {self.font_color};
         }}
+        QListWidget::item:hover {{
+            background-color: {self.button_hover_bg};
+        }}
+        QListWidget::horizontalScrollBar {{
+            height: 0px;
+        }}
     """)
-    self.feeds_listbox.itemClicked.connect(self.on_feed_click)
+    self.feeds_listbox.setHorizontalScrollBarPolicy(qtc.Qt.ScrollBarAlwaysOff)
+    self.feeds_listbox.setWordWrap(True)
+    self.feeds_listbox.setContextMenuPolicy(qtc.Qt.CustomContextMenu)
+    self.feeds_listbox.customContextMenuRequested.connect(lambda pos: show_feed_context_menu(self, pos))
     feed_entry_layout.addWidget(self.feeds_listbox)
 
-    button_frame = qtw.QFrame(feed_entry_frame)
-    button_frame.setStyleSheet(f"background-color: {self.window_bg};")
-    button_layout = qtw.QHBoxLayout(button_frame)
-    button_layout.setContentsMargins(10, 10, 10, 10)
-    feed_entry_layout.addWidget(button_frame)
+def show_feed_context_menu(self, pos):
+    item = self.feeds_listbox.itemAt(pos)
+    if item:
+        menu = qtw.QMenu(self)
+        start_action = menu.addAction("Start Feed")
+        remove_action = menu.addAction("Remove Feed")
 
-    self.start_feed_button = qtw.QPushButton("Start Feed", button_frame)
-    self.start_feed_button.setStyleSheet(f"""
-        QPushButton {{
-            background-color: {self.button_bg};
-            color: {self.font_color};
-            font: {font_style};
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }}
-        QPushButton:hover {{
-            background-color: {self.button_hover_bg};
-        }}
-        QPushButton:pressed {{
-            background-color: {self.button_pressed_bg};
-        }}
-        QPushButton:disabled {{
-            background-color: {self.spinbox_bg};
-            color: {self.font_color};
-        }}
-    """)
-    self.start_feed_button.clicked.connect(self.start_feed)
-    self.start_feed_button.setEnabled(False)
-    button_layout.addWidget(self.start_feed_button)
-    ToolTip.setToolTip(self.start_feed_button, "Start the selected RSS feed")
+        action = menu.exec_(self.feeds_listbox.mapToGlobal(pos))
 
-    self.remove_feed_button = qtw.QPushButton("Remove Feed", button_frame)
-    self.remove_feed_button.setStyleSheet(f"""
-        QPushButton {{
-            background-color: {self.button_bg};
-            color: {self.font_color};
-            font: {font_style};
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }}
-        QPushButton:hover {{
-            background-color: {self.button_hover_bg};
-        }}
-        QPushButton:pressed {{
-            background-color: {self.button_pressed_bg};
-        }}
-        QPushButton:disabled {{
-            background-color: {self.spinbox_bg};
-            color: {self.font_color};
-        }}
-    """)
-    self.remove_feed_button.clicked.connect(lambda: remove_feed(self))
-    self.remove_feed_button.setEnabled(False)
-    button_layout.addWidget(self.remove_feed_button)
-    ToolTip.setToolTip(self.remove_feed_button, "Remove the selected RSS feed")
+        if action == start_action:
+            self.start_feed()
+        elif action == remove_action:
+            remove_feed(self)
 
 def add_feed(self):
     logger.info("Adding a new feed...")

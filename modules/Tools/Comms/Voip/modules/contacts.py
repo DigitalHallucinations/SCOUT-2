@@ -1,3 +1,5 @@
+# modules/Tools/Voip/modules/contacts.py
+
 from PySide6 import QtWidgets as qtw
 from PySide6 import QtGui as qtg
 from PySide6 import QtCore as qtc
@@ -54,6 +56,7 @@ class ContactsFrame(qtw.QWidget):
 
         self.contact_list.setContextMenuPolicy(qtc.Qt.CustomContextMenu)
         self.contact_list.customContextMenuRequested.connect(self.show_context_menu)
+        self.contact_list.itemClicked.connect(self.display_selected_contact)
 
         self.db = ContactsDatabase()
         self.load_contacts()
@@ -120,3 +123,23 @@ class ContactsFrame(qtw.QWidget):
         edit_contact_action.triggered.connect(self.edit_contact)
 
         menu.exec_(self.contact_list.viewport().mapToGlobal(position))
+
+    def display_selected_contact(self, item):
+        contact_name = item.text()
+        if self.parent:
+            self.parent.conversation_frame.update_current_contact(contact_name)
+
+    def get_contact_phone_number(self, contact_name):
+        logger.info(f"Retrieving phone number for contact: {contact_name}")
+        try:
+            contact = self.db.get_contact_by_name(contact_name)
+            if contact:
+                phone_number = contact[2]  
+                logger.debug(f"Phone number for {contact_name} is {phone_number}")
+                return phone_number
+            else:
+                logger.debug(f"No contact found with name: {contact_name}")
+                return None
+        except Exception as e:
+            logger.error(f"An error occurred while retrieving the phone number: {e}")
+            return None

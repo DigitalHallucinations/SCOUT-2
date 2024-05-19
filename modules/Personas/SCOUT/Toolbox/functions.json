@@ -32,5 +32,48 @@
             },
             "required": []
         }
+    },
+    {
+        "name": "terminal_command",
+        "description": "Execute a terminal command and return the output, error, and status code.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The terminal command to execute."
+                },
+                "timeout": {
+                    "type": "integer",
+                    "default": 60,
+                    "description": "The maximum time (in seconds) to wait for the command to complete. This overrides the default_timeout if both are provided."
+                },
+                "default_timeout": {
+                    "type": "integer",
+                    "description": "The default timeout value (in seconds) to use if no specific timeout is provided. This value is used as the fallback timeout."
+                },
+                "encoding": {
+                    "type": "string",
+                    "default": "utf-8",
+                    "description": "The encoding to use for decoding the command's output and error messages."
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable verbose mode to log additional information about the command execution process."
+                },
+                "output_limit": {
+                    "type": "integer",
+                    "default": "1048576, // 1024 * 1024",
+                    "description": "The maximum size (in bytes) of the command's output."
+                },
+                "max_retries": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "The maximum number of retries to attempt if the command fails due to temporary issues."
+                }
+            },
+            "required": ["command"]
+        }
     }
 ]

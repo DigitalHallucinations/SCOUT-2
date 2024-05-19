@@ -97,6 +97,24 @@ class ContactsDatabase:
         finally:
             self.conn.close()
 
+    def get_contact_by_name(self, name):
+        """Retrieves a specific contact by its name."""
+        logger.info(f"Retrieving contact with name: {name}")
+        try:
+            self.conn = sqlite3.connect(self.db_name)
+            self.cursor = self.conn.cursor()
+
+            self.cursor.execute("SELECT * FROM contacts WHERE name = ?", (name,))
+            contact = self.cursor.fetchone()
+            logger.debug(f"Retrieved contact: {contact}")
+
+            return contact
+        except sqlite3.Error as e:
+            logger.error(f"An error occurred while retrieving the contact: {e}")
+            return None
+        finally:
+            self.conn.close()
+
     def update_contact(self, contact_id, name, numbers, email, address, company, position, notes, image):
         """Updates an existing contact in the database."""
         logger.info(f"Updating contact with ID: {contact_id}")

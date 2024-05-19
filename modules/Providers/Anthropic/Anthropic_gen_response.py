@@ -66,8 +66,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     return data
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager):
-    logger.info(f"generate_response called with user: {user}, current persona: {current_persona["name"]}, session_id: {session_id}, conversation_id: {conversation_id}")
-    
+    logger.info(f"generate_response called with user: {user}, current persona: {current_persona['name']}, session_id: {session_id}, conversation_id: {conversation_id}")    
     functions = None
 
     if "name" in current_persona: 

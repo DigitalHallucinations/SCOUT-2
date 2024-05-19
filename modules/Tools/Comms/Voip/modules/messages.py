@@ -1,15 +1,17 @@
-# modules/Tools/Comms/Voip/modules/
+# modules/Tools/Comms/Voip/modules/messages.py
 
 from PySide6.QtWidgets import QWidget, QLabel, QTextEdit, QVBoxLayout, QSpacerItem, QHBoxLayout, QSizePolicy, QFrame, QPushButton
 from PySide6.QtGui import QIcon, QFont
 from PySide6.QtCore import Qt, QDateTime, QSize
-
 from modules.Tools.Comms.Voip.modules.emoji_picker import EmojiPicker
-
+from modules.Tools.Comms.Voip.modules.messaging.Twilio.send_sms_twilio import send_sms
+from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDatabase
 
 class ConversationFrame(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent  
+        self.db = ContactsDatabase()  
 
         rich_text_tool_bar_icon_size = 24
         sidebar_frame_icon_size = 30
@@ -21,6 +23,24 @@ class ConversationFrame(QWidget):
         left_layout = QVBoxLayout()
         left_layout.setSpacing(5)
         main_layout.addLayout(left_layout)
+
+        # Current contact Display
+        self.current_contact = QWidget()
+        self.current_contact.setStyleSheet("""
+            QWidget {
+                background-color: #2d2d2d; 
+                color: #ffffff; 
+                border-radius: 10px; 
+                padding: 5px; 
+                border: 1px solid #ffffff;
+            }
+        """)
+        self.contact_label = QLabel(self.current_contact)
+        self.contact_label.setContentsMargins(0, 0, 0, 0)
+        self.contact_label.setStyleSheet("color: #ffffff;")
+        contact_layout = QVBoxLayout(self.current_contact)
+        contact_layout.addWidget(self.contact_label)
+        left_layout.addWidget(self.current_contact)
 
         # Conversation Area
         self.conversation_area = QLabel("")
@@ -206,12 +226,18 @@ class ConversationFrame(QWidget):
         left_layout.addWidget(input_frame)
 
     def send_message(self):
-        message = self.text_input.toHtml() 
+        message = self.text_input.toPlainText()  # Extract plain text from QTextEdit
         if message:
             timestamp = QDateTime.currentDateTime().toString("hh:mm ap")
             new_message = f"<font color='gray'>{timestamp}</font> <font color='blue'>[Sent]</font> {message}<br>"
             self.conversation_area.setText(self.conversation_area.text() + new_message)
             self.text_input.clear()
+
+            # Send the message via Twilio
+            contact_name = self.contact_label.text()
+            contact_phone_number = self.get_contact_phone_number(contact_name)
+            if contact_phone_number:
+                send_sms(contact_phone_number, message)
 
     def make_text_bold(self):
         self.text_input.setFontWeight(QFont.Bold if self.text_input.fontWeight() != QFont.Bold else QFont.Normal)
@@ -230,3 +256,12 @@ class ConversationFrame(QWidget):
 
     def do_nothing(self):
         pass
+
+    def update_current_contact(self, contact_name):
+        self.contact_label.setText(contact_name)
+
+    def get_contact_phone_number(self, contact_name):
+        contact = self.db.get_contact_by_name(contact_name)
+        if contact:
+            return contact[2]  
+        return None

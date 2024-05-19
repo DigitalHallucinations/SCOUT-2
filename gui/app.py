@@ -162,8 +162,9 @@ class SCOUT(QtWidgets.QMainWindow):
                 conversation_manager=self.chat_history_database  
             )
 
+            
             central_widget = QtWidgets.QWidget(self)
-            central_layout = QtWidgets.QVBoxLayout(central_widget)
+            central_layout = QtWidgets.QHBoxLayout(central_widget)
             central_layout.setContentsMargins(0, 0, 0, 0)
             central_layout.setSpacing(0)
 
@@ -198,12 +199,6 @@ class SCOUT(QtWidgets.QMainWindow):
             splitter.setSizes([600, 600])
 
             central_layout.addWidget(splitter)
-
-            status_bar_frame = QtWidgets.QFrame(self)
-            status_bar_frame.setObjectName("StatusBarFrame")
-            self.chat_component.create_status_bar(status_bar_frame)
-            central_layout.addWidget(status_bar_frame)
-
             self.setCentralWidget(central_widget)
 
             self.show()    

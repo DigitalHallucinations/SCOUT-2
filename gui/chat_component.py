@@ -12,7 +12,6 @@ from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
 from modules.logging.logger import setup_logger
 from gui.speech_bar import SpeechBar
-from gui.status_bar import StatusBar
 
 logger = setup_logger('chat_component.py') 
 
@@ -105,7 +104,7 @@ class ChatComponent(QtWidgets.QWidget):
 
         self.show_message("system", self.current_persona["message"])
 
-        self.StatusBar.update_status_bar()
+        self.update_status_bar()
 
     def update_conversation_id(self, new_conversation_id):
         self.conversation_id = new_conversation_id
@@ -140,6 +139,7 @@ class ChatComponent(QtWidgets.QWidget):
         right_layout.addWidget(self.stacked_widget)
 
         self.create_chat_page()
+
         self.create_appearance_settings_page()
 
         self.speech_bar = SpeechBar(
@@ -152,15 +152,51 @@ class ChatComponent(QtWidgets.QWidget):
         right_layout.addWidget(self.speech_bar) 
 
         content_layout.addLayout(right_layout)
+
         main_layout.addLayout(content_layout)
 
+        status_bar_frame = QtWidgets.QFrame(self)
+        status_bar_frame.setObjectName("StatusBarFrame")
+        self.create_status_bar(status_bar_frame)
+        main_layout.addWidget(status_bar_frame)
+
         self.apply_font_settings()
+        self.update_status_bar()
 
     def create_sidebar(self):
         logger.info("Creating sidebar")
         sidebar = Sidebar(self, self.personas, self.appearance_settings_instance.sidebar_frame_bg, self.appearance_settings_instance.sidebar_font_color, self.appearance_settings_instance.sidebar_font_size, self.appearance_settings_instance.sidebar_font_family)
         sidebar.chat_component = self  
         return sidebar 
+
+    def create_status_bar(self, status_bar_frame):
+        status_bar_frame.setStyleSheet(f"background-color: {self.appearance_settings_instance.statusbar_frame_bg}; border: none;")
+        status_bar_frame.setFixedHeight(30)
+        status_bar_layout = QtWidgets.QHBoxLayout(status_bar_frame)
+        status_bar_layout.setContentsMargins(5, 0, 5, 0)
+        status_bar_layout.setSpacing(10)
+
+        self.provider_label = QtWidgets.QLabel(status_bar_frame)
+        self.provider_label.setStyleSheet(f"color: {self.appearance_settings_instance.statusbar_font_color}; font-family: {self.appearance_settings_instance.statusbar_font_family}; font-size: {self.appearance_settings_instance.statusbar_font_size}px;")
+        status_bar_layout.addWidget(self.provider_label)
+
+        self.model_label = QtWidgets.QLabel(status_bar_frame)
+        self.model_label.setStyleSheet(f"color: {self.appearance_settings_instance.statusbar_font_color}; font-family: {self.appearance_settings_instance.statusbar_font_family}; font-size: {self.appearance_settings_instance.statusbar_font_size}px;")
+        status_bar_layout.addWidget(self.model_label)
+
+        status_bar_layout.addStretch(1)
+
+        self.username_label = QtWidgets.QLabel(status_bar_frame)
+        self.username_label.setStyleSheet(f"color: {self.appearance_settings_instance.statusbar_font_color}; font-family: {self.appearance_settings_instance.statusbar_font_family}; font-size: {self.appearance_settings_instance.statusbar_font_size}px;")
+        status_bar_layout.addWidget(self.username_label) 
+        
+    def update_status_bar(self):
+        provider = self.provider_manager.get_current_llm_provider()
+        model = self.provider_manager.get_current_model()
+
+        self.provider_label.setText(f"Provider: {provider}")
+        self.model_label.setText(f"Model: {model}")
+        self.username_label.setText(f"User: {self.user}")        
 
     def create_chat_page(self):
         logger.info("Creating chat page")

@@ -1,9 +1,9 @@
 #modules/Personas/FeedManager/Toolbox/Feed_Portal/modules/entries_frame.py
 
-
 from PySide6 import QtWidgets as qtw
 from PySide6 import QtCore as qtc
 from PySide6 import QtGui as qtg
+import asyncio
 
 def create_entries_frame(self, layout):
     entries_frame = qtw.QFrame(self)
@@ -120,12 +120,11 @@ def show_context_menu(self, pos):
     menu = qtw.QMenu(self)
 
     show_details_action = qtg.QAction("Show Details", self)
-    show_details_action.triggered.connect(self.show_entry_details)
+    show_details_action.triggered.connect(lambda: asyncio.create_task(self.show_entry_details()))
     menu.addAction(show_details_action)
 
     remove_entry_action = qtg.QAction("Remove Entry", self)
-    remove_entry_action.triggered.connect(self.remove_entry)
+    remove_entry_action.triggered.connect(lambda: asyncio.create_task(self.remove_entry()))
     menu.addAction(remove_entry_action)
 
     menu.exec(self.entries_listbox.mapToGlobal(pos))
-

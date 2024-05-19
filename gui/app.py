@@ -1,6 +1,5 @@
 # gui/app.py
 
-
 import os
 import time
 import asyncio
@@ -24,7 +23,6 @@ from modules.Personas.FeedManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeed
 from modules.Tools.Comms.Voip.voip_app import VoIPApp
 
 logger = setup_logger('app.py')
-
 
 class SCOUT(QtWidgets.QMainWindow):
     """Initialize the SCOUT application."""
@@ -162,7 +160,6 @@ class SCOUT(QtWidgets.QMainWindow):
                 conversation_manager=self.chat_history_database  
             )
 
-            
             central_widget = QtWidgets.QWidget(self)
             central_layout = QtWidgets.QHBoxLayout(central_widget)
             central_layout.setContentsMargins(0, 0, 0, 0)

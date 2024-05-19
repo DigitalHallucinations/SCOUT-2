@@ -1,9 +1,9 @@
-# modules/Personas/FeedManager/ToolboxFeed_Portal/modules/feed_entry_frame.py
+# modules/Personas/FeedManager/Toolbox/Feed_Portal/modules/feed_entry_frame.py
 
+import asyncio
 from PySide6 import QtWidgets as qtw
 from PySide6 import QtCore as qtc
 from PySide6 import QtGui as qtg
-
 from gui.tooltip import ToolTip
 from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.rss_feed_reader import RSSFeedReaderError
 from modules.logging.logger import setup_logger
@@ -66,7 +66,7 @@ def create_feed_entry_frame(self, layout):
     self.add_feed_button.setIcon(qtg.QIcon("assets/SCOUT/Icons/add_file_wt.png"))
     self.add_feed_button.setIconSize(qtc.QSize(icon_size, icon_size))
     self.add_feed_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-    self.add_feed_button.clicked.connect(lambda: add_feed(self))
+    self.add_feed_button.clicked.connect(lambda: asyncio.run(self.add_feed()))
     category_layout.addWidget(self.add_feed_button)
     ToolTip.setToolTip(self.add_feed_button, "Add a new RSS feed")
 
@@ -111,6 +111,28 @@ def create_feed_entry_frame(self, layout):
     self.feeds_listbox.customContextMenuRequested.connect(lambda pos: show_feed_context_menu(self, pos))
     feed_entry_layout.addWidget(self.feeds_listbox)
 
+async def add_feed(self):
+       logger.info("Adding a new feed...")
+       try:
+           feed_url = self.feed_url_entry.text()
+           category = self.category_entry.text()
+
+           if not feed_url:
+               qtw.QMessageBox.critical(self, "Error", "Please enter a feed URL.")
+               return
+
+           await self.rss_feed_reader.add_feed(feed_url, category)
+           await self.refresh_feeds()
+           self.feed_url_entry.clear()
+           self.category_entry.clear()
+           await self.save_feeds()
+       except RSSFeedReaderError as e:
+           logger.exception("Error occurred while adding feed.")
+           qtw.QMessageBox.critical(self, "Error", str(e))
+       except Exception as e:
+           logger.exception("Unexpected error occurred while adding feed.")
+           qtw.QMessageBox.critical(self, "Error", "An unexpected error occurred.")
+
 def show_feed_context_menu(self, pos):
     item = self.feeds_listbox.itemAt(pos)
     if item:
@@ -121,33 +143,11 @@ def show_feed_context_menu(self, pos):
         action = menu.exec_(self.feeds_listbox.mapToGlobal(pos))
 
         if action == start_action:
-            self.start_feed()
+            asyncio.create_task(self.start_feed())
         elif action == remove_action:
-            remove_feed(self)
+            asyncio.create_task(remove_feed(self))
 
-def add_feed(self):
-    logger.info("Adding a new feed...")
-    try:
-        feed_url = self.feed_url_entry.text()
-        category = self.category_entry.text()
-
-        if not feed_url:
-            qtw.QMessageBox.critical(self, "Error", "Please enter a feed URL.")
-            return
-
-        self.rss_feed_reader.add_feed(feed_url, category)
-        self.refresh_feeds()
-        self.feed_url_entry.clear()
-        self.category_entry.clear()
-        self.save_feeds()
-    except RSSFeedReaderError as e:
-        logger.exception("Error occurred while adding feed.")
-        qtw.QMessageBox.critical(self, "Error", str(e))
-    except Exception as e:
-        logger.exception("Unexpected error occurred while adding feed.")
-        qtw.QMessageBox.critical(self, "Error", "An unexpected error occurred.")
-
-def remove_feed(self):
+async def remove_feed(self):
     try:
         selected_feed = self.feeds_listbox.currentItem().text()
 
@@ -157,9 +157,9 @@ def remove_feed(self):
 
         feed_url = selected_feed.split(" - ")[0]
 
-        self.rss_feed_reader.remove_feed(feed_url)
-        self.save_feeds()
-        self.refresh_feeds()
+        await self.rss_feed_reader.remove_feed(feed_url)
+        await self.save_feeds()
+        await self.refresh_feeds()
     except RSSFeedReaderError as e:
         logger.exception("Error occurred while removing feed.")
         qtw.QMessageBox.critical(self, "Error", str(e))

@@ -132,7 +132,17 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
     logger.info(f"Function args: {function_args}")
 
     if function_name in function_map:
-        required_args = get_required_args(function_map[function_name])  
+        if function_name == "rss_feed_reader":
+            action = function_args.pop("action", None)
+            if action and action in function_map[function_name]:
+                function = function_map[function_name][action]
+            else:
+                logger.error(f"Action {action} not found in rss_feed_reader function map.")
+                return f"Error: Action {action} not found in rss_feed_reader function map.", True
+        else:
+            function = function_map[function_name]
+
+        required_args = get_required_args(function)  
         logger.info(f"Required args for {function_name}: {required_args}")  
         missing_args = set(required_args) - set(function_args.keys())
 
@@ -142,7 +152,7 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
 
         try:
             logger.info(f"Calling function {function_name} with arguments {function_args}")
-            function_response = await function_map[function_name](**function_args)
+            function_response = await function(**function_args)
             logger.info(f"Function response: {function_response}")
         except Exception as e:
             logger.error(f"Exception during function call {function_name}: {e}", exc_info=True)

@@ -1,11 +1,10 @@
-# Feed portal/RSSFeedReaderUI.py
-
 import os
 import threading
 import json
 import configparser
 import feedparser
 import webbrowser
+import asyncio
 
 from PySide6 import QtWidgets as qtw
 from PySide6 import QtCore as qtc
@@ -19,8 +18,6 @@ from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.header_frame impor
 from modules.Personas.FeedManager.Toolbox.Feed_Portal.modules.feed_entry_frame import create_feed_entry_frame
 from modules.logging.logger import setup_logger
 
-import os
-
 logger = setup_logger('RSSFeedReaderUI')
 
 class RSSFeedReaderUI(qtw.QFrame):
@@ -30,7 +27,7 @@ class RSSFeedReaderUI(qtw.QFrame):
         self.setWindowTitle("Feed Portal")
         self.rss_feed_reader = RSSFeedReader()
         logger.info("Loading feeds and configuration...")
-        self.load_feeds()
+        asyncio.create_task(self.load_feeds())
         self.load_config()
         settings.load_settings(self)  
         filter_sort_settings.load_filter_sort_settings(self)
@@ -86,12 +83,10 @@ class RSSFeedReaderUI(qtw.QFrame):
             self.setLayout(layout)
 
             create_header_frame(self, layout)
-
             create_feed_entry_frame(self, layout)
-
             create_entries_frame(self, layout)
 
-            self.refresh_feeds()
+            asyncio.create_task(self.refresh_feeds())
         except Exception as e:
             logger.exception("Error occurred while creating widgets.")
             qtw.QMessageBox.critical(self, "Widget Creation Error", "Failed to create widgets.")
@@ -101,11 +96,11 @@ class RSSFeedReaderUI(qtw.QFrame):
         search_window.populate_categories()
         search_window.exec_()        
 
-    def remove_entry(self):
+    async def remove_entry(self):
         selected_entry = self.entries_listbox.currentItem().text()
         if selected_entry:
             feed_url = self.feeds_listbox.currentItem().text().split(" - ")[0]
-            self.rss_feed_reader.remove_entry(feed_url, selected_entry)
+            await self.rss_feed_reader.remove_entry(feed_url, selected_entry)
             self.entries_listbox.takeItem(self.entries_listbox.currentRow())
             self.entry_details_text.clear()
             self.show_entry_button.setEnabled(False)
@@ -113,46 +108,46 @@ class RSSFeedReaderUI(qtw.QFrame):
         else:
             qtw.QMessageBox.critical(self, "Error", "Please select an entry to remove.")
 
-    def show_entry_details(self):
-        selected_entry = None
-        if self.display_format == "Simple List":
-            selected_entry = self.entries_listbox.currentItem().text()
-        elif self.display_format == "Detailed List":
-            selected_entry = self.entries_detailed_list.currentItem().text(0)
-        elif self.display_format == "Card View":
-            selected_entry = self.entries_card_view.currentItem().text().split("<br>")[0].replace("<b>", "").replace("</b>", "")
+    async def show_entry_details(self):
+       selected_entry = None
+       if self.display_format == "Simple List":
+           selected_entry = self.entries_listbox.currentItem().text()
+       elif self.display_format == "Detailed List":
+           selected_entry = self.entries_detailed_list.currentItem().text(0)
+       elif self.display_format == "Card View":
+           selected_entry = self.entries_card_view.currentItem().text().split("<br>")[0].replace("<b>", "").replace("</b>", "")
 
-        if selected_entry:
-            feed_url = self.feeds_listbox.currentItem().text().split(" - ")[0]
-            entries = self.rss_feed_reader.get_feed_entries(feed_url)
-            for entry in entries:
-                if entry.title == selected_entry:
-                    entry_details = self.rss_feed_reader.get_entry_details(entry)
-                    self.entry_details_text.clear()
-                    self.entry_details_text.append(f"<h3>{entry_details['title']}</h3>")
+       if selected_entry:
+           feed_url = self.feeds_listbox.currentItem().text().split(" - ")[0]
+           entries = await self.rss_feed_reader.get_feed_entries(feed_url)
+           for entry in entries:
+               if entry.title == selected_entry:
+                   entry_details = await self.rss_feed_reader.get_entry_details(entry)
+                   self.entry_details_text.clear()
+                   self.entry_details_text.append(f"<h3>{entry_details['title']}</h3>")
 
-                    url_link = f"<a href=\"{entry_details['link']}\">{entry_details['link']}</a>"
-                    self.entry_details_text.append(f"<p><strong>Link:</strong> {url_link}</p>")
+                   url_link = f"<a href=\"{entry_details['link']}\">{entry_details['link']}</a>"
+                   self.entry_details_text.append(f"<p><strong>Link:</strong> {url_link}</p>")
 
-                    self.entry_details_text.append(f"<p><strong>Published:</strong> {entry_details['published']}</p>")
-                    self.entry_details_text.append(f"<p><strong>Summary:</strong> {entry_details['summary']}</p>")
+                   self.entry_details_text.append(f"<p><strong>Published:</strong> {entry_details['published']}</p>")
+                   self.entry_details_text.append(f"<p><strong>Summary:</strong> {entry_details['summary']}</p>")
 
-                    self.entry_details_text.setOpenExternalLinks(False)
-                    self.entry_details_text.anchorClicked.connect(self.open_url)
+                   self.entry_details_text.setOpenExternalLinks(False)
+                   self.entry_details_text.anchorClicked.connect(self.open_url)
 
-                    break
-        else:
-            qtw.QMessageBox.critical(self, "Error", "Please select an entry to show details.")
+                   break
+       else:
+           qtw.QMessageBox.critical(self, "Error", "Please select an entry to show details.")
             
     def open_url_in_browser(self, url):
         QDesktopServices.openUrl(url)
 
-    def start_feed(self):
+    async def start_feed(self):
         selected_feed = self.feeds_listbox.currentItem().text()
         if selected_feed:
             feed_url = selected_feed.split(" - ")[0]
-            entries = self.rss_feed_reader.get_feed_entries(feed_url)
-            entries = self.rss_feed_reader.sort_entries(entries, self.sorting)
+            entries = await self.rss_feed_reader.get_feed_entries(feed_url)
+            entries = await self.rss_feed_reader.sort_entries(entries, self.sorting)
 
             if self.display_format == "Simple List":
                 self.entries_listbox.clear()
@@ -181,23 +176,23 @@ class RSSFeedReaderUI(qtw.QFrame):
         else:
             qtw.QMessageBox.critical(self, "Error", "Please select a feed to start.")
 
-    def refresh_feeds(self):
+    async def refresh_feeds(self):
         logger.info("Refreshing feeds...")
         try:
             self.feeds_listbox.clear()
             self.entries_listbox.clear()
             self.entry_details_text.clear()
 
-            feeds = self.rss_feed_reader.get_feeds()
+            feeds = await self.rss_feed_reader.get_feeds()
             for feed in feeds:
                 self.feeds_listbox.addItem(f"{feed.url} - {feed.category}")
 
-            qtc.QTimer.singleShot(self.refresh_interval_mins * 60000, self.refresh_feeds)
+            qtc.QTimer.singleShot(self.refresh_interval_mins * 60000, lambda: asyncio.create_task(self.refresh_feeds()))
         except Exception as e:
             logger.exception("Error occurred while refreshing feeds.")
             qtw.QMessageBox.critical(self, "Error", "An error occurred while refreshing feeds.")
 
-    def load_feeds(self):
+    async def load_feeds(self):
         logger.info("Loading feeds...")
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -209,7 +204,7 @@ class RSSFeedReaderUI(qtw.QFrame):
                     self.loaded_entries = {}
                     for category, data in feed_data.items():
                         for feed in data["feeds"]:
-                            self.rss_feed_reader.add_feed(feed["url"], category)
+                            await self.rss_feed_reader.add_feed(feed["url"], category)
                             entries = data["entries"].get(feed["url"], [])
                             self.loaded_entries[feed["url"]] = []
                             for entry_details in entries:
@@ -218,7 +213,7 @@ class RSSFeedReaderUI(qtw.QFrame):
         except Exception as e:
             logger.exception("Error occurred while loading feeds.")
 
-    def on_feed_select(self, item):
+    async def on_feed_select(self, item):
         try:
             selected_feed = item.text()
 
@@ -227,8 +222,8 @@ class RSSFeedReaderUI(qtw.QFrame):
 
             feed_url = selected_feed.split(" - ")[0]
 
-            entries = self.rss_feed_reader.get_feed_entries(feed_url)
-            entries = self.rss_feed_reader.sort_entries(entries, self.sorting)
+            entries = await self.rss_feed_reader.get_feed_entries(feed_url)
+            entries = await self.rss_feed_reader.sort_entries(entries, self.sorting)
             self.entries_listbox.clear()
 
             for entry in entries:
@@ -242,7 +237,7 @@ class RSSFeedReaderUI(qtw.QFrame):
             logger.exception("Unexpected error occurred while selecting feed.")
             qtw.QMessageBox.critical(self, "Error", "An unexpected error occurred.")
 
-    def on_entry_select(self, item):
+    async def on_entry_select(self, item):
         try:
             selected_entry = item.text()
 
@@ -250,11 +245,11 @@ class RSSFeedReaderUI(qtw.QFrame):
                 return
 
             feed_url = self.feeds_listbox.currentItem().text().split(" - ")[0]
-            entries = self.rss_feed_reader.get_feed_entries(feed_url)
+            entries = await self.rss_feed_reader.get_feed_entries(feed_url)
 
             for entry in entries:
                 if entry.title == selected_entry:
-                    entry_details = self.rss_feed_reader.get_entry_details(entry)
+                    entry_details = await self.rss_feed_reader.get_entry_details(entry)
                     self.entry_details_text.clear()
                     self.entry_details_text.append(f"<h3>{entry_details['title']}</h3>")
                     self.entry_details_text.append(f"<p><strong>Link:</strong> {entry_details['link']}</p>")
@@ -268,10 +263,10 @@ class RSSFeedReaderUI(qtw.QFrame):
             logger.exception("Unexpected error occurred while selecting entry.")
             qtw.QMessageBox.critical(self, "Error", "An unexpected error occurred.")
 
-    def save_feeds(self):
+    async def save_feeds(self):
         logger.info("Saving feeds...")
         try:
-            feeds = self.rss_feed_reader.get_feeds()
+            feeds = await self.rss_feed_reader.get_feeds()
             feed_data = {}
 
             for feed in feeds:
@@ -282,12 +277,12 @@ class RSSFeedReaderUI(qtw.QFrame):
                 feed_data[category]["feeds"].append({"url": feed.url})
 
                 try:
-                    entries = self.rss_feed_reader.get_feed_entries(feed.url)
+                    entries = await self.rss_feed_reader.get_feed_entries(feed.url)
                     feed_data[category]["entries"][feed.url] = []
 
                     for entry in entries:
                         try:
-                            entry_details = self.rss_feed_reader.get_entry_details(entry)
+                            entry_details = await self.rss_feed_reader.get_entry_details(entry)
                             feed_data[category]["entries"][feed.url].append(entry_details)
                         except RSSFeedReaderError as e:
                             logger.warning(f"Skipping entry due to missing details: {str(e)}")
@@ -306,4 +301,3 @@ class RSSFeedReaderUI(qtw.QFrame):
         #self.save_feeds()
         logger.info("RSS Feed Reader closed.")
         event.accept()
-

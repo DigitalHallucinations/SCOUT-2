@@ -5,6 +5,7 @@ import chardet
 import requests
 from urllib.parse import urlparse
 from modules.logging.logger import setup_logger
+import asyncio
 
 logger = setup_logger('rss_feed_reader')
 
@@ -21,7 +22,7 @@ class RSSFeedReader:
     def __init__(self):
         self.feeds = []
 
-    def is_valid_feed_url(self, feed_url):
+    async def is_valid_feed_url(self, feed_url):
         try:
             parsed_url = urlparse(feed_url)
             return parsed_url.scheme and parsed_url.netloc
@@ -29,9 +30,9 @@ class RSSFeedReader:
             logger.exception(f"Error occurred while validating feed URL: {str(e)}")
             return False
 
-    def add_feed(self, feed_url, category=None):
+    async def add_feed(self, feed_url, category=None):
         logger.info(f"Adding RSS feed: {feed_url}")
-        if not self.is_valid_feed_url(feed_url):
+        if not await self.is_valid_feed_url(feed_url):
             logger.warning(f"Invalid feed URL: {feed_url}")
             raise RSSFeedReaderError(f"Invalid feed URL: {feed_url}. Please provide a valid RSS feed URL.")
         try:
@@ -42,13 +43,13 @@ class RSSFeedReader:
             logger.exception(f"Error occurred while adding RSS feed: {str(e)}")
             raise RSSFeedReaderError(f"Failed to add RSS feed: {feed_url}. Please check the URL and try again.")
 
-    def remove_entry(self, feed_url, entry_title):
+    async def remove_entry(self, feed_url, entry_title):
         for feed in self.feeds:
             if feed.url == feed_url:
                 feed.entries = [entry for entry in feed.entries if entry.title != entry_title]
                 break
 
-    def remove_feed(self, feed_url):
+    async def remove_feed(self, feed_url):
         logger.info(f"Removing RSS feed: {feed_url}")
         try:
             self.feeds = [feed for feed in self.feeds if feed.url != feed_url]
@@ -57,7 +58,7 @@ class RSSFeedReader:
             logger.exception(f"Error occurred while removing RSS feed: {str(e)}")
             raise RSSFeedReaderError(f"Failed to remove RSS feed: {feed_url}. An unexpected error occurred.")
 
-    def get_feeds(self, category=None, enabled=True):
+    async def get_feeds(self, category=None, enabled=True):
         logger.info("Retrieving RSS feeds")
         if category:
             feeds = [feed for feed in self.feeds if feed.category == category and feed.enabled == enabled]
@@ -65,7 +66,7 @@ class RSSFeedReader:
             feeds = [feed for feed in self.feeds if feed.enabled == enabled]
         return feeds
 
-    def update_feed(self, feed_url, category=None, enabled=None):
+    async def update_feed(self, feed_url, category=None, enabled=None):
         logger.info(f"Updating RSS feed: {feed_url}")
         try:
             feed = next((feed for feed in self.feeds if feed.url == feed_url), None)
@@ -82,7 +83,7 @@ class RSSFeedReader:
             logger.exception(f"Error occurred while updating RSS feed: {str(e)}")
             raise RSSFeedReaderError(f"Failed to update RSS feed: {feed_url}. An unexpected error occurred.")
 
-    def parse_feed(self, feed_url):
+    async def parse_feed(self, feed_url):
         logger.info(f"Parsing RSS feed: {feed_url}")
         try:
             feed = feedparser.parse(feed_url)
@@ -96,17 +97,13 @@ class RSSFeedReader:
             logger.exception(f"Error occurred while parsing RSS feed: {str(e)}")
             raise RSSFeedReaderError(f"Failed to parse RSS feed: {feed_url}. An unexpected error occurred.")
 
-    def get_feed_entries(self, feed_url):
+    async def get_feed_entries(self, feed_url):
         logger.info(f"Retrieving entries from feed: {feed_url}")
         try:
             response = requests.get(feed_url)
-            
             encoding = chardet.detect(response.content)['encoding']
-            
             content = response.content.decode(encoding)
-
             feed = feedparser.parse(content)
-            
             if feed.bozo:
                 feed_format = feed.version
                 if feed_format.startswith('rss'):
@@ -117,16 +114,15 @@ class RSSFeedReader:
                     logger.info(f"Detected RDF feed format: {feed_format}")
                 else:
                     logger.warning(f"Unknown feed format: {feed_format}")
-                    return []  
-            
+                    return []
             entries = feed.entries
             logger.info(f"Retrieved {len(entries)} entries from feed: {feed_url}")
             return entries
         except Exception as e:
             logger.exception(f"Error occurred while retrieving entries from feed: {str(e)}")
-            return []   
+            return []
 
-    def get_entry_details(self, entry):
+    async def get_entry_details(self, entry):
         logger.info(f"Retrieving details for entry: {getattr(entry, 'title', 'N/A')}")
         try:
             entry_details = {
@@ -140,8 +136,8 @@ class RSSFeedReader:
         except Exception as e:
             logger.exception(f"Error occurred while retrieving entry details: {str(e)}")
             raise RSSFeedReaderError(f"Failed to retrieve details for entry. An unexpected error occurred.")
-        
-    def get_categories(self):
+
+    async def get_categories(self):
         logger.info("Retrieving categories from RSS feeds")
         try:
             categories = set()
@@ -152,9 +148,9 @@ class RSSFeedReader:
             return list(categories)
         except Exception as e:
             logger.exception(f"Error occurred while retrieving categories: {str(e)}")
-            raise RSSFeedReaderError(f"Failed to retrieve categories. An unexpected error occurred.")   
-        
-    def sort_entries(self, entries, sorting):
+            raise RSSFeedReaderError(f"Failed to retrieve categories. An unexpected error occurred.")
+
+    async def sort_entries(self, entries, sorting):
         logger.info(f"Sorting entries based on {sorting['method']} in {sorting['order']} order")
         try:
             if sorting['method'] == 'date':
@@ -166,14 +162,14 @@ class RSSFeedReader:
         except Exception as e:
             logger.exception(f"Error occurred while sorting entries: {str(e)}")
             raise RSSFeedReaderError(f"Failed to sort entries. An unexpected error occurred.")
-    
-    def search_feeds_by_keyword(self, keyword):
-            matching_feeds = []
-            for feed in self.feeds:
-                if keyword.lower() in feed.url.lower() or keyword.lower() in feed.category.lower():
-                    matching_feeds.append(feed)
-            return matching_feeds
 
-    def filter_feeds_by_category(self, category):
+    async def search_feeds_by_keyword(self, keyword):
+        matching_feeds = []
+        for feed in self.feeds:
+            if keyword.lower() in feed.url.lower() or keyword.lower() in feed.category.lower():
+                matching_feeds.append(feed)
+        return matching_feeds
+
+    async def filter_feeds_by_category(self, category):
         filtered_feeds = [feed for feed in self.feeds if feed.category == category]
-        return filtered_feeds   
+        return filtered_feeds

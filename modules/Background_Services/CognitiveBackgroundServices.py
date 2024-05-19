@@ -64,9 +64,9 @@ class CognitiveBackgroundServices:
             system_message_content = system_message_content.replace('<<Profile>>', profile_string)
 
             payload = {
-                #"model": "gpt-4-turbo-preview",
+                "model": "gpt-4-turbo",
                 #"model": "mistral-large-latest",
-                "model": "claude-3-sonnet-20240229",
+                #"model": "claude-3-sonnet-20240229",
                 "messages": [{"role": "system","content": system_message_content}] + conversation_data
             }
             logger.info("Payload being sent")

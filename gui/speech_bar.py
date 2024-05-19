@@ -42,13 +42,13 @@ class SpeechBar(QtWidgets.QFrame):
         buttons_layout.setSpacing(10)
 
         self.speech_provider_button = QtWidgets.QPushButton("Speech Provider", self)
-        self.speech_provider_button.setStyleSheet("background-color: #000000; color: white;")
+        self.speech_provider_button.setStyleSheet("background-color: #2d2d2d; color: white;")
         self.speech_provider_menu = QtWidgets.QMenu(self.speech_provider_button)
         self.speech_provider_button.clicked.connect(self.show_speech_provider_menu)
         buttons_layout.addWidget(self.speech_provider_button, alignment=QtCore.Qt.AlignLeft)
 
         self.voice_button = QtWidgets.QPushButton("Voice", self)
-        self.voice_button.setStyleSheet("background-color: #000000; color: white;")
+        self.voice_button.setStyleSheet("background-color: #2d2d2d; color: white;")
         self.voice_menu = QtWidgets.QMenu(self.voice_button)
         self.voice_button.clicked.connect(self.show_voice_menu)
         buttons_layout.addWidget(self.voice_button, alignment=QtCore.Qt.AlignLeft)

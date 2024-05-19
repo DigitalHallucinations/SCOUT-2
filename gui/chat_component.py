@@ -1,5 +1,6 @@
 # gui/chat_component.py
 
+
 import asyncio 
 import time
 from PySide6 import QtWidgets, QtGui, QtCore
@@ -11,6 +12,7 @@ from gui.tooltip import ToolTip
 import gui.send_message as send_message_module
 from modules.logging.logger import setup_logger
 from gui.speech_bar import SpeechBar
+from gui.status_bar import StatusBar
 
 logger = setup_logger('chat_component.py') 
 
@@ -45,11 +47,11 @@ class ChatComponent(QtWidgets.QWidget):
         self.personas = self.persona_manager.personas
         self.conversation_manager = conversation_manager
         
-        self.typing_indicator_index = None
         self.system_name = "SCOUT"
         self.system_name_color = "#00BFFF"
+        self.user_name_color = "#00ff7f"
         self.system_name_tag = "SCOUT"
-        self.timestamp_color = "#888888"
+        self.timestamp_color = "#ffff7f"
         self.temperature = 0.1  
         self.top_p = 0.9 
         self.top_k = 40  
@@ -103,7 +105,7 @@ class ChatComponent(QtWidgets.QWidget):
 
         self.show_message("system", self.current_persona["message"])
 
-        self.update_status_bar()
+        self.StatusBar.update_status_bar()
 
     def update_conversation_id(self, new_conversation_id):
         self.conversation_id = new_conversation_id
@@ -138,7 +140,6 @@ class ChatComponent(QtWidgets.QWidget):
         right_layout.addWidget(self.stacked_widget)
 
         self.create_chat_page()
-
         self.create_appearance_settings_page()
 
         self.speech_bar = SpeechBar(
@@ -151,51 +152,15 @@ class ChatComponent(QtWidgets.QWidget):
         right_layout.addWidget(self.speech_bar) 
 
         content_layout.addLayout(right_layout)
-
         main_layout.addLayout(content_layout)
 
-        status_bar_frame = QtWidgets.QFrame(self)
-        status_bar_frame.setObjectName("StatusBarFrame")
-        self.create_status_bar(status_bar_frame)
-        main_layout.addWidget(status_bar_frame)
-
         self.apply_font_settings()
-        self.update_status_bar()
 
     def create_sidebar(self):
         logger.info("Creating sidebar")
         sidebar = Sidebar(self, self.personas, self.appearance_settings_instance.sidebar_frame_bg, self.appearance_settings_instance.sidebar_font_color, self.appearance_settings_instance.sidebar_font_size, self.appearance_settings_instance.sidebar_font_family)
         sidebar.chat_component = self  
         return sidebar 
-
-    def create_status_bar(self, status_bar_frame):
-        status_bar_frame.setStyleSheet(f"background-color: {self.appearance_settings_instance.statusbar_frame_bg}; border: none;")
-        status_bar_frame.setFixedHeight(30)
-        status_bar_layout = QtWidgets.QHBoxLayout(status_bar_frame)
-        status_bar_layout.setContentsMargins(5, 0, 5, 0)
-        status_bar_layout.setSpacing(10)
-
-        self.provider_label = QtWidgets.QLabel(status_bar_frame)
-        self.provider_label.setStyleSheet(f"color: {self.appearance_settings_instance.statusbar_font_color}; font-family: {self.appearance_settings_instance.statusbar_font_family}; font-size: {self.appearance_settings_instance.statusbar_font_size}px;")
-        status_bar_layout.addWidget(self.provider_label)
-
-        self.model_label = QtWidgets.QLabel(status_bar_frame)
-        self.model_label.setStyleSheet(f"color: {self.appearance_settings_instance.statusbar_font_color}; font-family: {self.appearance_settings_instance.statusbar_font_family}; font-size: {self.appearance_settings_instance.statusbar_font_size}px;")
-        status_bar_layout.addWidget(self.model_label)
-
-        status_bar_layout.addStretch(1)
-
-        self.username_label = QtWidgets.QLabel(status_bar_frame)
-        self.username_label.setStyleSheet(f"color: {self.appearance_settings_instance.statusbar_font_color}; font-family: {self.appearance_settings_instance.statusbar_font_family}; font-size: {self.appearance_settings_instance.statusbar_font_size}px;")
-        status_bar_layout.addWidget(self.username_label) 
-        
-    def update_status_bar(self):
-        provider = self.provider_manager.get_current_llm_provider()
-        model = self.provider_manager.get_current_model()
-
-        self.provider_label.setText(f"Provider: {provider}")
-        self.model_label.setText(f"Model: {model}")
-        self.username_label.setText(f"User: {self.user}")
 
     def create_chat_page(self):
         logger.info("Creating chat page")
@@ -396,14 +361,14 @@ class ChatComponent(QtWidgets.QWidget):
         self.appearance_settings_instance = AppearanceSettings(parent=self, user=self.user)
         self.appearance_settings_instance.hide()  
         self.appearance_settings_instance.show()  
-
+ 
     def sync_send_message(self):
         logger.info("Sending message")
         if self.session_id is None:
-            self.session_id = self.retrieve_session_id() 
+            self.session_id = self.retrieve_session_id()
 
         if self.conversation_id is None:
-            self.conversation_id = self.retrieve_conversation_id()  
+            self.conversation_id = self.retrieve_conversation_id()
 
         logger.info(f"About to call send_message with user: %s", self.user)
 
@@ -414,47 +379,36 @@ class ChatComponent(QtWidgets.QWidget):
     def show_message(self, role, message):
         QtCore.QMetaObject.invokeMethod(self, "_show_message", QtCore.Qt.QueuedConnection, QtCore.Q_ARG(str, role), QtCore.Q_ARG(str, message))
 
-    def show_message(self, role, message):
-        QtCore.QMetaObject.invokeMethod(self, "_show_message", QtCore.Qt.QueuedConnection, QtCore.Q_ARG(str, role), QtCore.Q_ARG(str, message))
-
     @QtCore.Slot(str, str)
     def _show_message(self, role, message):
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        
+        timestamp = time.strftime("%I:%M %p", time.localtime()).lower()
+
         cursor = self.chat_log.textCursor()
         cursor.movePosition(QtGui.QTextCursor.End)
-        
-        if role == "system":
-            # Remove the timestamp and "is typing..." message if they exist
-            typing_indicator_text = f"{self.system_name}: is typing...\n"
-            chat_log_text = self.chat_log.toPlainText()
-            typing_indicator_index = chat_log_text.rfind(typing_indicator_text)
-            if typing_indicator_index != -1:
-                timestamp_start_index = chat_log_text.rfind("\n", 0, typing_indicator_index)
-                if timestamp_start_index != -1:
-                    timestamp_start_index += 1
-                    cursor.setPosition(timestamp_start_index)
-                    cursor.movePosition(QtGui.QTextCursor.Right, QtGui.QTextCursor.KeepAnchor, typing_indicator_index - timestamp_start_index + len(typing_indicator_text))
-                    cursor.removeSelectedText()
-                else:
-                    cursor.setPosition(typing_indicator_index)
-                    cursor.movePosition(QtGui.QTextCursor.Right, QtGui.QTextCursor.KeepAnchor, len(typing_indicator_text))
-                    cursor.removeSelectedText()
-        
-        cursor.setCharFormat(QtGui.QTextCharFormat())
+
+        timestamp_format = QtGui.QTextCharFormat()
+        timestamp_format.setForeground(QtGui.QColor(self.timestamp_color))
+        cursor.setCharFormat(timestamp_format)
         cursor.insertText(f"{timestamp}\n")
-        
+
         if role == "user":
-            cursor.insertText(f"{self.user}: {message}\n")
+            user_format = QtGui.QTextCharFormat()
+            user_format.setForeground(QtGui.QColor(self.user_name_color))  
+            user_format.setFontWeight(QtGui.QFont.Bold)
+            cursor.setCharFormat(user_format)
+            cursor.insertText(f"{self.user}: ")
+
+            cursor.setCharFormat(QtGui.QTextCharFormat())
+            cursor.insertText(f"{message}\n\n")
         elif role == "system":
             system_format = QtGui.QTextCharFormat()
             system_format.setForeground(QtGui.QColor(self.system_name_color))
             system_format.setFontWeight(QtGui.QFont.Bold)
             cursor.setCharFormat(system_format)
             cursor.insertText(f"{self.system_name}: ")
-            
+
             cursor.setCharFormat(QtGui.QTextCharFormat())
-            cursor.insertText(f"{message}\n")
-        
+            cursor.insertText(f"{message}\n\n")
+
         self.chat_log.setTextCursor(cursor)
         self.chat_log.verticalScrollBar().setValue(self.chat_log.verticalScrollBar().maximum())

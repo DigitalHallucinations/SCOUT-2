@@ -210,7 +210,7 @@ class Sidebar(QtWidgets.QFrame):
         providers_button_frame.setStyleSheet("border: none;")
         providers_button_layout = QtWidgets.QVBoxLayout(providers_button_frame)
         providers_button_layout.setContentsMargins(2, 2, 2, 2)
-        providers_button_layout.setSpacing(0)
+        providers_button_layout.setSpacing(0) 
 
         self.providers_button = QtWidgets.QPushButton(providers_button_frame)
         self.providers_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/providers_wt.png"))

@@ -13,8 +13,10 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('OA_gen_response.py')
 
-MODEL = "gpt-4-turbo-preview"
+MODEL = "gpt-4o"
 
+MODEL_GPT4o = "gpt-4o"
+MODEL_GPTo_2024_05_13 = "gpt-4o-2024-05-13"
 MODEL_GPT4_0613 = "gpt-4-0613"
 MODEL_GPT4_1106_PREVIEW = "gpt-4-1106-preview"
 MODEL_GPT4_TURBO_PREVIEW = "gpt-4-turbo-preview"
@@ -30,7 +32,7 @@ MAX_TOKENS_GPT3_5_TURBO_16K = 10000
 MAX_TOKENS_GPT3_5_TURBO_16K_0613 = 10000
 
 # Model that can use tools. This insures models without the abilty to call tools are not sent tools in the rquest body.
-ALLOWED_MODELS = [MODEL_GPT3_5_TURBO_1106, MODEL_GPT4_0613, MODEL_GPT3_5_TURBO_16K_0613, MODEL_GPT3_5_TURBO_0613, MODEL_GPT4_1106_PREVIEW, MODEL_GPT4_TURBO_PREVIEW]
+ALLOWED_MODELS = [MODEL_GPT3_5_TURBO_1106, MODEL_GPT4_0613, MODEL_GPT3_5_TURBO_16K_0613, MODEL_GPT3_5_TURBO_0613, MODEL_GPT4_1106_PREVIEW, MODEL_GPT4_TURBO_PREVIEW, MODEL_GPT4o, MODEL_GPTo_2024_05_13]
 
 # Update the FUNCTIONS_JSON_PATH_TEMPLATE and the MAPS_PATH_TEMPLATE to use the dynamic path based on the current_persona
 FUNCTIONS_JSON_PATH_TEMPLATE = 'modules/Personas/{}/Toolbox/functions.json'
@@ -44,7 +46,7 @@ def set_OA_model(model_name):
     MODEL = model_name
     if MODEL in ["gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k"]:
         MAX_TOKENS = 4000
-    elif MODEL in ["gpt-4-0613", "gpt-4"]:
+    elif MODEL in ["gpt-4-0613", "gpt-4", "gpt-4o", "gpt-4o-2024-05-13"]:
         MAX_TOKENS = 4000
     else:
         MAX_TOKENS = 2000 

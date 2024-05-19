@@ -9,9 +9,7 @@ from modules.Providers.Google.genai_api import GenAIAPI
 from modules.Tools.Tool_Manager import ToolManager
 from modules.logging.logger import setup_logger
 
-
 logger = setup_logger('GG_gen_response.py')
-
 
 GG_MODEL = 'gemini-1.5-pro-latest' 
 
@@ -27,7 +25,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     parts = []
     if current_persona.get("content"):
         parts.append({
-            "text":  f"SYSTEM MESSAGE: {current_persona["content"]}" + f"    THIS IS THE CHAT HISTORY BETWEEN YOU AND THE USER: {messages}"
+            "text":  f"SYSTEM MESSAGE: {current_persona['content']}" + f" THIS IS THE CHAT HISTORY BETWEEN YOU AND THE USER: {messages}"
         })    
     
     contents = [{
@@ -41,7 +39,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
         "temperature": temperature_var,
         "top_p": top_p_var,
         "top_k": top_k_var
-        }
+    }
 
     data = {
         "contents": contents,
@@ -52,7 +50,6 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
 
     logger.info("Data object created for HTTP request.")
     return data
-
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None, provider_manager=None):  
     logger.info("Starting response generation")
@@ -103,7 +100,6 @@ async def generate_response(user, current_persona, message, session_id, conversa
                 ToolManager.logger.error(f"Error occurred in function call: {function_response}")
         except Exception as e:
             ToolManager.logger.error(f"Exception handling function call: {e}", exc_info=True)
-
 
     try:
         if hasattr(response_data, 'candidates') and len(response_data.candidates) > 0:
@@ -158,7 +154,6 @@ async def text_to_speech(text):
     text_without_code = re.sub(r"`[^`]*`", "", text)
     logger.info("Processing text to speech")
     await tts.text_to_speech(text_without_code)
-    
 
 def format_message_history(messages, user_name, assistant_name):
     """

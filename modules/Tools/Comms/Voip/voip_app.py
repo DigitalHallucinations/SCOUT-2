@@ -1,0 +1,108 @@
+# modules/Tools/Voip_app.py
+
+import sys
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout
+
+from modules.Tools.Comms.Voip.modules.header_frame import create_header_frame
+from modules.Tools.Comms.Voip.modules.phone import PhoneFrame 
+from modules.Tools.Comms.Voip.modules.messages import ConversationFrame
+from modules.Tools.Comms.Voip.modules.contacts import ContactsFrame
+from modules.Tools.Comms.Voip.modules.Contacts.contact_details import ContactDetailsFrame
+from modules.logging.logger import setup_logger
+
+logger = setup_logger('Voip_app.py')
+
+class VoIPApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        logger.info("Initializing VoIPApp")
+        try:
+            self.setWindowTitle("VoIP App")
+            self.setGeometry(100, 100, 400, 600)
+
+            # Create central widget and layout
+            central_widget = QWidget()
+            central_widget.setStyleSheet("background-color: transparent;")
+            main_layout = QVBoxLayout(central_widget)
+            self.setCentralWidget(central_widget)
+
+            create_header_frame(self, main_layout)
+
+            self.content_layout = QHBoxLayout()  
+            main_layout.addLayout(self.content_layout)
+
+            # Contacts Frame
+            self.contacts_frame = ContactsFrame(self)  # Pass self as parent
+            self.content_layout.addWidget(self.contacts_frame)
+            self.contacts_frame.hide()  
+
+            # Right side: Conversation, contact details, Phone Frame, etc.
+            right_side_layout = QVBoxLayout()
+            self.content_layout.addLayout(right_side_layout, 2)  
+
+            # Conversation Frame
+            self.conversation_frame = ConversationFrame()
+            right_side_layout.addWidget(self.conversation_frame)
+
+            # Phone Frame
+            self.phone_frame = PhoneFrame()
+            right_side_layout.addWidget(self.phone_frame)
+            self.phone_frame.hide()  
+
+            # Contact Details Frame
+            self.contact_details_frame = ContactDetailsFrame(self)  # Pass self as parent
+            right_side_layout.addWidget(self.contact_details_frame)
+            self.contact_details_frame.hide()
+
+            self.previous_frame = None  # Track the previous frame
+
+            logger.debug("VoIPApp initialized successfully")
+        except Exception as e:
+            logger.error(f"An error occurred while initializing the VoIPApp: {e}")
+
+    def toggle_contact_details(self):
+        logger.info("Attempting to toggle contact details.")
+        if self.contact_details_frame.isVisible():
+            logger.debug("Contact details frame is visible, hiding it.")
+            self.contact_details_frame.hide()
+            if self.previous_frame:
+                self.previous_frame.show()
+        else:
+            logger.debug("Contact details frame is not visible, showing it.")
+            self.previous_frame = None
+            if self.conversation_frame.isVisible():
+                self.previous_frame = self.conversation_frame
+                self.conversation_frame.hide()
+            elif self.phone_frame.isVisible():
+                self.previous_frame = self.phone_frame
+                self.phone_frame.hide()
+            self.contact_details_frame.show()
+
+    def toggle_call_button(self):
+        if self.sender().isChecked():  
+            self.sender().setText("End")
+        else:
+            self.sender().setText("Call")
+
+    def toggle_contacts(self):
+        if self.contacts_frame.isVisible():
+            self.contacts_frame.hide()
+        else:
+            self.contacts_frame.show()
+
+    def show_phone_page(self):
+        self.conversation_frame.hide() 
+        self.contact_details_frame.hide()
+        self.phone_frame.show()     
+
+    def show_messages_page(self):
+        self.phone_frame.hide()      
+        self.contact_details_frame.hide()
+        self.conversation_frame.show()  
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = VoIPApp()
+    window.show()
+    sys.exit(app.exec())

@@ -34,7 +34,7 @@ class OpenAIAPI:
                     return response_data
                 else:
                     error_message = await response.text()
-                    logger.erroe("Error generating conversation from API: %s: %s", response.status, error_message)
+                    logger.error("Error generating conversation from API: %s: %s", response.status, error_message)
                     return None
 
     async def generate_cognitive_background_service(self, data):

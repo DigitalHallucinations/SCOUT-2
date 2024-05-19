@@ -7,8 +7,8 @@ logger = logging.getLogger('provider_manager.py')
 class ProviderManager:
     def __init__(self, chat_component):
         self.chat_component = chat_component
-        self.current_llm_provider = "Anthropic"
-        self.current_background_provider = "Anthropic"
+        self.current_llm_provider = "OpenAI"
+        self.current_background_provider = "OpenAI"
         self.current_model = None
         self.current_speech_provider = "Eleven Labs"
         self.switch_llm_provider(self.current_llm_provider)

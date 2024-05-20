@@ -19,7 +19,6 @@ class VoIPApp(QMainWindow):
             self.setWindowTitle("VoIP App")
             self.setGeometry(100, 100, 400, 600)
 
-            # Create central widget and layout
             central_widget = QWidget()
             central_widget.setStyleSheet("background-color: transparent;")
             main_layout = QVBoxLayout(central_widget)
@@ -30,25 +29,20 @@ class VoIPApp(QMainWindow):
             self.content_layout = QHBoxLayout()  
             main_layout.addLayout(self.content_layout)
 
-            # Contacts Frame
             self.contacts_frame = ContactsFrame(self)  # Pass self as parent
             self.content_layout.addWidget(self.contacts_frame)
             self.contacts_frame.hide()  
 
-            # Right side: Conversation, contact details, Phone Frame, etc.
             right_side_layout = QVBoxLayout()
             self.content_layout.addLayout(right_side_layout, 2)  
 
-            # Conversation Frame
             self.conversation_frame = ConversationFrame()
             right_side_layout.addWidget(self.conversation_frame)
 
-            # Phone Frame
             self.phone_frame = PhoneFrame()
             right_side_layout.addWidget(self.phone_frame)
             self.phone_frame.hide()  
 
-            # Contact Details Frame
             self.contact_details_frame = ContactDetailsFrame(self)  # Pass self as parent
             right_side_layout.addWidget(self.contact_details_frame)
             self.contact_details_frame.hide()
@@ -113,6 +107,10 @@ class VoIPApp(QMainWindow):
             self.conversation_frame.show()  
         except Exception as e:
             logger.error(f"An error occurred while showing the messages page: {e}", exc_info=True)
+
+    def update_current_contact(self, contact_name):
+        self.conversation_frame.update_current_contact(contact_name)
+        self.phone_frame.update_current_contact(contact_name)
 
 if __name__ == "__main__":
     try:

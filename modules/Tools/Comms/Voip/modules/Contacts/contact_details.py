@@ -1,6 +1,8 @@
 # modules/Tools/Comms/Voip/modules/Contacts/contact_details.py
 
 from PySide6 import QtWidgets as qtw
+from PySide6 import QtCore as qtc
+from PySide6 import QtGui as qtg
 from modules.logging.logger import setup_logger
 from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDatabase  # Import ContactsDatabase
 
@@ -9,13 +11,19 @@ logger = setup_logger('contact_details.py')
 class ContactDetailsFrame(qtw.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.parent = parent  # Store the parent reference
-        self.db = ContactsDatabase()  # Initialize the database
+        self.parent = parent  
+        self.db = ContactsDatabase() 
+        self.profile_pic_data = None 
         self.setup_ui()
 
     def setup_ui(self):
         layout = qtw.QVBoxLayout(self)
-        
+
+        self.profile_pic_label = qtw.QLabel()
+        self.profile_pic_label.setFixedSize(100, 100)
+        self.profile_pic_label.setStyleSheet("border: 1px solid #ffffff; border-radius: 50px;")
+        layout.addWidget(self.profile_pic_label, alignment=qtc.Qt.AlignCenter)
+
         self.profile_pic_button = qtw.QPushButton("Upload Profile Picture")
         self.profile_pic_button.clicked.connect(self.upload_profile_picture)
         layout.addWidget(self.profile_pic_button)
@@ -28,7 +36,7 @@ class ContactDetailsFrame(qtw.QWidget):
         self.position_edit = qtw.QLineEdit()
         self.notes_edit = qtw.QTextEdit()
         self.group_combo = qtw.QComboBox()
-        
+
         self.group_combo.addItems(["Family", "Friends", "Work", "Others"])
         layout.addWidget(self.group_combo)
 
@@ -114,7 +122,7 @@ class ContactDetailsFrame(qtw.QWidget):
 
         if name and number:  # Ensure that name and number are provided
             try:
-                self.db.add_contact(name, number, email, address, company, position, notes, None)
+                self.db.add_contact(name, number, email, address, company, position, notes, None, self.profile_pic_data)
                 self.parent.contacts_frame.load_contacts()  # Refresh the contact list
                 logger.info(f"Contact {name} added successfully")
                 self.parent.toggle_contact_details()  # Hide contact details frame
@@ -140,7 +148,7 @@ class ContactDetailsFrame(qtw.QWidget):
 
             if name and number:  # Ensure that name and number are provided
                 try:
-                    self.db.update_contact(contact_id, name, number, email, address, company, position, notes, None)
+                    self.db.update_contact(contact_id, name, number, email, address, company, position, notes, self.profile_pic_data)
                     self.parent.contacts_frame.load_contacts()  # Refresh the contact list
                     logger.info(f"Contact {name} updated successfully")
                     self.parent.toggle_contact_details()  # Hide contact details frame
@@ -180,6 +188,10 @@ class ContactDetailsFrame(qtw.QWidget):
         self.company_edit.setText(contact[5])
         self.position_edit.setText(contact[6])
         self.notes_edit.setPlainText(contact[7])
+        if contact[10]:  # Check if there is a profile picture
+            pixmap = qtg.QPixmap()
+            pixmap.loadFromData(contact[10])
+            self.profile_pic_label.setPixmap(pixmap.scaled(100, 100, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
 
     def upload_profile_picture(self):
         file_dialog = qtw.QFileDialog(self)
@@ -188,4 +200,7 @@ class ContactDetailsFrame(qtw.QWidget):
             file_path = file_dialog.selectedFiles()[0]
             with open(file_path, 'rb') as file:
                 self.profile_pic_data = file.read()
+            pixmap = qtg.QPixmap()
+            pixmap.loadFromData(self.profile_pic_data)
+            self.profile_pic_label.setPixmap(pixmap.scaled(100, 100, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
             logger.info(f"Profile picture uploaded: {file_path}")

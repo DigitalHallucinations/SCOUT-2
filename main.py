@@ -1,5 +1,16 @@
 # main.py
 
+import sys
+import traceback
+
+def custom_excepthook(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    print("".join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+
+sys.excepthook = custom_excepthook
+
 import asyncio
 from contextlib import asynccontextmanager
 from gui.app import SCOUT  

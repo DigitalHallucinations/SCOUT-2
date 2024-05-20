@@ -1,8 +1,7 @@
 # modules/Tools/Comms/Voip/modules/messages.py
 
-
 from PySide6.QtWidgets import QWidget, QLabel, QTextEdit, QVBoxLayout, QSpacerItem, QHBoxLayout, QSizePolicy, QFrame, QPushButton
-from PySide6.QtGui import QIcon, QFont
+from PySide6.QtGui import QIcon, QFont, QPixmap
 from PySide6.QtCore import Qt, QDateTime, QSize
 from modules.Tools.Comms.Voip.modules.emoji_picker import EmojiPicker
 from modules.Tools.Comms.Voip.modules.messaging.Twilio.send_sms_twilio import send_sms
@@ -10,6 +9,7 @@ from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDataba
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('messages.py')
+
 class ConversationFrame(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -38,11 +38,18 @@ class ConversationFrame(QWidget):
                 border: 1px solid #ffffff;
             }
         """)
+        contact_layout = QHBoxLayout(self.current_contact)
         self.contact_label = QLabel(self.current_contact)
         self.contact_label.setContentsMargins(0, 0, 0, 0)
         self.contact_label.setStyleSheet("color: #ffffff;")
-        contact_layout = QVBoxLayout(self.current_contact)
         contact_layout.addWidget(self.contact_label)
+
+        # Profile Picture
+        self.profile_pic_label = QLabel(self.current_contact)
+        self.profile_pic_label.setFixedSize(50, 50)
+        self.profile_pic_label.setStyleSheet("border-radius: 25px; border: 1px solid #ffffff;")
+        contact_layout.addWidget(self.profile_pic_label)
+
         left_layout.addWidget(self.current_contact)
 
         # Conversation Area
@@ -230,7 +237,7 @@ class ConversationFrame(QWidget):
 
     def send_message(self):
         try:
-            message = self.text_input.toPlainText()  # Extract plain text from QTextEdit
+            message = self.text_input.toPlainText()  
             if message:
                 timestamp = QDateTime.currentDateTime().toString("hh:mm ap")
                 new_message = f"<font color='gray'>{timestamp}</font> <font color='blue'>[Sent]</font> {message}<br>"
@@ -281,6 +288,13 @@ class ConversationFrame(QWidget):
     def update_current_contact(self, contact_name):
         try:
             self.contact_label.setText(contact_name)
+            contact = self.db.get_contact_by_name(contact_name)
+            if contact and contact[10]:  
+                pixmap = QPixmap()
+                pixmap.loadFromData(contact[10])
+                self.profile_pic_label.setPixmap(pixmap.scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            else:
+                self.profile_pic_label.clear()
             logger.info(f"Current contact updated to: {contact_name}")
         except Exception as e:
             logger.error(f"Failed to update current contact: {e}")

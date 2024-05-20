@@ -30,7 +30,7 @@ class ContactsDatabase:
                     company TEXT,
                     position TEXT,
                     notes TEXT,
-                    group TEXT,
+                    "group" TEXT,  -- Escaping the reserved keyword
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     image BLOB 
@@ -101,7 +101,6 @@ class ContactsDatabase:
                 self.conn.close()
 
     def get_contact_by_name(self, name):
-        """Retrieves a specific contact by its name."""
         logger.info(f"Retrieving contact with name: {name}")
         try:
             self.conn = sqlite3.connect(self.db_name)

@@ -191,7 +191,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
         message = response_data["choices"][0]["message"]
         text = message["content"]  
 
-        if text is '':
+        if text == '':
             function_name = message.get("function_call", {}).get("name", "unknown function")
             function_args = message.get("function_call", {}).get("arguments", "{}")
             text = f"[System message: Assistant made a function call to {function_name}] with arguments: {function_args}"

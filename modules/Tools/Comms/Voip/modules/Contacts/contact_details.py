@@ -16,6 +16,10 @@ class ContactDetailsFrame(qtw.QWidget):
     def setup_ui(self):
         layout = qtw.QVBoxLayout(self)
         
+        self.profile_pic_button = qtw.QPushButton("Upload Profile Picture")
+        self.profile_pic_button.clicked.connect(self.upload_profile_picture)
+        layout.addWidget(self.profile_pic_button)
+
         self.name_edit = qtw.QLineEdit()
         self.numbers_edit = qtw.QLineEdit()
         self.email_edit = qtw.QLineEdit()
@@ -23,6 +27,10 @@ class ContactDetailsFrame(qtw.QWidget):
         self.company_edit = qtw.QLineEdit()
         self.position_edit = qtw.QLineEdit()
         self.notes_edit = qtw.QTextEdit()
+        self.group_combo = qtw.QComboBox()
+        
+        self.group_combo.addItems(["Family", "Friends", "Work", "Others"])
+        layout.addWidget(self.group_combo)
 
         name_label = qtw.QLabel("Name:")
         number_label = qtw.QLabel("Number:")
@@ -172,3 +180,12 @@ class ContactDetailsFrame(qtw.QWidget):
         self.company_edit.setText(contact[5])
         self.position_edit.setText(contact[6])
         self.notes_edit.setPlainText(contact[7])
+
+    def upload_profile_picture(self):
+        file_dialog = qtw.QFileDialog(self)
+        file_dialog.setNameFilter("Images (*.png *.xpm *.jpg)")
+        if file_dialog.exec():
+            file_path = file_dialog.selectedFiles()[0]
+            with open(file_path, 'rb') as file:
+                self.profile_pic_data = file.read()
+            logger.info(f"Profile picture uploaded: {file_path}")

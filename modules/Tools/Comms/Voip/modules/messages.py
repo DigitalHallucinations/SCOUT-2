@@ -1,12 +1,15 @@
 # modules/Tools/Comms/Voip/modules/messages.py
 
+
 from PySide6.QtWidgets import QWidget, QLabel, QTextEdit, QVBoxLayout, QSpacerItem, QHBoxLayout, QSizePolicy, QFrame, QPushButton
 from PySide6.QtGui import QIcon, QFont
 from PySide6.QtCore import Qt, QDateTime, QSize
 from modules.Tools.Comms.Voip.modules.emoji_picker import EmojiPicker
 from modules.Tools.Comms.Voip.modules.messaging.Twilio.send_sms_twilio import send_sms
 from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDatabase
+from modules.logging.logger import setup_logger
 
+logger = setup_logger('messages.py')
 class ConversationFrame(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -226,42 +229,68 @@ class ConversationFrame(QWidget):
         left_layout.addWidget(input_frame)
 
     def send_message(self):
-        message = self.text_input.toPlainText()  # Extract plain text from QTextEdit
-        if message:
-            timestamp = QDateTime.currentDateTime().toString("hh:mm ap")
-            new_message = f"<font color='gray'>{timestamp}</font> <font color='blue'>[Sent]</font> {message}<br>"
-            self.conversation_area.setText(self.conversation_area.text() + new_message)
-            self.text_input.clear()
+        try:
+            message = self.text_input.toPlainText()  # Extract plain text from QTextEdit
+            if message:
+                timestamp = QDateTime.currentDateTime().toString("hh:mm ap")
+                new_message = f"<font color='gray'>{timestamp}</font> <font color='blue'>[Sent]</font> {message}<br>"
+                self.conversation_area.setText(self.conversation_area.text() + new_message)
+                self.text_input.clear()
 
-            # Send the message via Twilio
-            contact_name = self.contact_label.text()
-            contact_phone_number = self.get_contact_phone_number(contact_name)
-            if contact_phone_number:
-                send_sms(contact_phone_number, message)
+                # Send the message via Twilio
+                contact_name = self.contact_label.text()
+                contact_phone_number = self.get_contact_phone_number(contact_name)
+                if contact_phone_number:
+                    send_sms(contact_phone_number, message)
+                    logger.info(f"Message sent to {contact_name} ({contact_phone_number}): {message}")
+                else:
+                    logger.warning(f"Contact phone number not found for {contact_name}")
+        except Exception as e:
+            logger.error(f"Failed to send message: {e}")
 
     def make_text_bold(self):
-        self.text_input.setFontWeight(QFont.Bold if self.text_input.fontWeight() != QFont.Bold else QFont.Normal)
+        try:
+            self.text_input.setFontWeight(QFont.Bold if self.text_input.fontWeight() != QFont.Bold else QFont.Normal)
+        except Exception as e:
+            logger.error(f"Failed to toggle bold text: {e}")
 
     def make_text_italic(self):
-        self.text_input.setFontItalic(not self.text_input.fontItalic)
+        try:
+            self.text_input.setFontItalic(not self.text_input.fontItalic)
+        except Exception as e:
+            logger.error(f"Failed to toggle italic text: {e}")
 
     def make_text_underline(self):
-        self.text_input.setFontUnderline(not self.text_input.fontUnderline)
+        try:
+            self.text_input.setFontUnderline(not self.text_input.fontUnderline)
+        except Exception as e:
+            logger.error(f"Failed to toggle underline text: {e}")
 
     def insert_emoji(self):
-        emoji_picker = EmojiPicker(self)
-        if emoji_picker.exec():
-            emoji = emoji_picker.selected_emoji
-            self.text_input.insertPlainText(emoji)
+        try:
+            emoji_picker = EmojiPicker(self)
+            if emoji_picker.exec():
+                emoji = emoji_picker.selected_emoji
+                self.text_input.insertPlainText(emoji)
+        except Exception as e:
+            logger.error(f"Failed to insert emoji: {e}")
 
     def do_nothing(self):
-        pass
+        logger.info("Attach button clicked, but no action is defined.")
 
     def update_current_contact(self, contact_name):
-        self.contact_label.setText(contact_name)
+        try:
+            self.contact_label.setText(contact_name)
+            logger.info(f"Current contact updated to: {contact_name}")
+        except Exception as e:
+            logger.error(f"Failed to update current contact: {e}")
 
     def get_contact_phone_number(self, contact_name):
-        contact = self.db.get_contact_by_name(contact_name)
-        if contact:
-            return contact[2]  
-        return None
+        try:
+            contact = self.db.get_contact_by_name(contact_name)
+            if contact:
+                return contact[2]  
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get contact phone number for {contact_name}: {e}")
+            return None

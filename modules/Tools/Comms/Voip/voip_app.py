@@ -1,13 +1,11 @@
 # modules/Tools/Voip_app.py
 
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout
-
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout
 from modules.Tools.Comms.Voip.modules.header_frame import create_header_frame
 from modules.Tools.Comms.Voip.modules.phone import PhoneFrame 
 from modules.Tools.Comms.Voip.modules.messages import ConversationFrame
-from modules.Tools.Comms.Voip.modules.contacts import ContactsFrame
+from modules.Tools.Comms.Voip.modules.contacts_frame import ContactsFrame
 from modules.Tools.Comms.Voip.modules.Contacts.contact_details import ContactDetailsFrame
 from modules.logging.logger import setup_logger
 
@@ -59,50 +57,68 @@ class VoIPApp(QMainWindow):
 
             logger.debug("VoIPApp initialized successfully")
         except Exception as e:
-            logger.error(f"An error occurred while initializing the VoIPApp: {e}")
+            logger.error(f"An error occurred while initializing the VoIPApp: {e}", exc_info=True)
 
     def toggle_contact_details(self):
         logger.info("Attempting to toggle contact details.")
-        if self.contact_details_frame.isVisible():
-            logger.debug("Contact details frame is visible, hiding it.")
-            self.contact_details_frame.hide()
-            if self.previous_frame:
-                self.previous_frame.show()
-        else:
-            logger.debug("Contact details frame is not visible, showing it.")
-            self.previous_frame = None
-            if self.conversation_frame.isVisible():
-                self.previous_frame = self.conversation_frame
-                self.conversation_frame.hide()
-            elif self.phone_frame.isVisible():
-                self.previous_frame = self.phone_frame
-                self.phone_frame.hide()
-            self.contact_details_frame.show()
+        try:
+            if self.contact_details_frame.isVisible():
+                logger.debug("Contact details frame is visible, hiding it.")
+                self.contact_details_frame.hide()
+                if self.previous_frame:
+                    self.previous_frame.show()
+            else:
+                logger.debug("Contact details frame is not visible, showing it.")
+                self.previous_frame = None
+                if self.conversation_frame.isVisible():
+                    self.previous_frame = self.conversation_frame
+                    self.conversation_frame.hide()
+                elif self.phone_frame.isVisible():
+                    self.previous_frame = self.phone_frame
+                    self.phone_frame.hide()
+                self.contact_details_frame.show()
+        except Exception as e:
+            logger.error(f"An error occurred while toggling contact details: {e}", exc_info=True)
 
     def toggle_call_button(self):
-        if self.sender().isChecked():  
-            self.sender().setText("End")
-        else:
-            self.sender().setText("Call")
+        try:
+            if self.sender().isChecked():  
+                self.sender().setText("End")
+            else:
+                self.sender().setText("Call")
+        except Exception as e:
+            logger.error(f"An error occurred while toggling the call button: {e}", exc_info=True)
 
     def toggle_contacts(self):
-        if self.contacts_frame.isVisible():
-            self.contacts_frame.hide()
-        else:
-            self.contacts_frame.show()
+        try:
+            if self.contacts_frame.isVisible():
+                self.contacts_frame.hide()
+            else:
+                self.contacts_frame.show()
+        except Exception as e:
+            logger.error(f"An error occurred while toggling contacts: {e}", exc_info=True)
 
     def show_phone_page(self):
-        self.conversation_frame.hide() 
-        self.contact_details_frame.hide()
-        self.phone_frame.show()     
+        try:
+            self.conversation_frame.hide() 
+            self.contact_details_frame.hide()
+            self.phone_frame.show()     
+        except Exception as e:
+            logger.error(f"An error occurred while showing the phone page: {e}", exc_info=True)
 
     def show_messages_page(self):
-        self.phone_frame.hide()      
-        self.contact_details_frame.hide()
-        self.conversation_frame.show()  
+        try:
+            self.phone_frame.hide()      
+            self.contact_details_frame.hide()
+            self.conversation_frame.show()  
+        except Exception as e:
+            logger.error(f"An error occurred while showing the messages page: {e}", exc_info=True)
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = VoIPApp()
-    window.show()
-    sys.exit(app.exec())
+    try:
+        app = QApplication(sys.argv)
+        window = VoIPApp()
+        window.show()
+        sys.exit(app.exec())
+    except Exception as e:
+        logger.error(f"An error occurred in the main application: {e}", exc_info=True)

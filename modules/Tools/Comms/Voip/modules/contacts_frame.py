@@ -16,6 +16,12 @@ class ContactsFrame(qtw.QWidget):
         layout = qtw.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
+        # Search Bar
+        self.search_bar = qtw.QLineEdit()
+        self.search_bar.setPlaceholderText("Search contacts...")
+        self.search_bar.textChanged.connect(self.filter_contacts)
+        layout.addWidget(self.search_bar)
+
         # Create a frame for the buttons and add it to the layout
         button_frame = qtw.QFrame()
         button_layout = qtw.QHBoxLayout(button_frame)
@@ -60,6 +66,13 @@ class ContactsFrame(qtw.QWidget):
 
         self.db = ContactsDatabase()
         self.load_contacts()
+
+    def filter_contacts(self):
+        search_text = self.search_bar.text().lower()
+        for i in range(self.contact_list.count()):
+            item = self.contact_list.item(i)
+            item.setHidden(search_text not in item.text().lower())
+
 
     def load_contacts(self):
         logger.info("Loading contacts from the database")
@@ -143,3 +156,14 @@ class ContactsFrame(qtw.QWidget):
         except Exception as e:
             logger.error(f"An error occurred while retrieving the phone number: {e}")
             return None
+        
+    def search_contacts(self, text):
+        logger.info(f"Searching contacts for: {text}")
+        try:
+            self.contact_list.clear()
+            contacts = self.db.search_contacts(text)
+            for contact in contacts:
+                self.contact_list.addItem(contact[1])
+            logger.debug(f"Found {len(contacts)} contacts matching '{text}'")
+        except Exception as e:
+            logger.error(f"An error occurred while searching contacts: {e}")

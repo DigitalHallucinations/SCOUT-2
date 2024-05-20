@@ -30,6 +30,7 @@ class ContactsDatabase:
                     company TEXT,
                     position TEXT,
                     notes TEXT,
+                    group TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     image BLOB 
@@ -40,20 +41,20 @@ class ContactsDatabase:
             logger.debug("Database and tables created successfully")
         except sqlite3.Error as e:
             logger.error(f"An error occurred while creating the database: {e}")
+        finally:
+            if self.conn:
+                self.conn.close()
 
-    def add_contact(self, name, numbers, email, address, company, position, notes, image):
-        """Adds a new contact to the database."""
+    def add_contact(self, name, numbers, email, address, company, position, notes, group, image):
         logger.info("Adding new contact to the database")
         logger.debug(f"Adding contact: {name}")
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
-
             self.cursor.execute("""
-                INSERT INTO contacts (name, numbers, email, address, company, position, notes, image)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (name, numbers, email, address, company, position, notes, image))
-
+                INSERT INTO contacts (name, numbers, email, address, company, position, notes, group, image)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (name, numbers, email, address, company, position, notes, group, image))
             self.conn.commit()
             logger.debug(f"Contact {name} added successfully")
         except sqlite3.Error as e:
@@ -77,7 +78,8 @@ class ContactsDatabase:
             logger.error(f"An error occurred while retrieving contacts: {e}")
             return []
         finally:
-            self.conn.close()
+            if self.conn:
+                self.conn.close()
 
     def get_contact_by_id(self, contact_id):
         """Retrieves a specific contact by its ID."""
@@ -95,7 +97,8 @@ class ContactsDatabase:
             logger.error(f"An error occurred while retrieving the contact: {e}")
             return None
         finally:
-            self.conn.close()
+            if self.conn:
+                self.conn.close()
 
     def get_contact_by_name(self, name):
         """Retrieves a specific contact by its name."""
@@ -113,7 +116,8 @@ class ContactsDatabase:
             logger.error(f"An error occurred while retrieving the contact: {e}")
             return None
         finally:
-            self.conn.close()
+            if self.conn:
+                self.conn.close()
 
     def update_contact(self, contact_id, name, numbers, email, address, company, position, notes, image):
         """Updates an existing contact in the database."""
@@ -124,7 +128,7 @@ class ContactsDatabase:
 
             self.cursor.execute("""
                 UPDATE contacts 
-                SET name = ?, numbers = ?, email = ?, address = ?, company = ?, position = ?, notes = ?, image = ?
+                SET name = ?, numbers = ?, email = ?, address = ?, company = ?, position = ?, notes = ?, image = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             """, (name, numbers, email, address, company, position, notes, image, contact_id))
 
@@ -148,5 +152,22 @@ class ContactsDatabase:
             logger.debug(f"Contact with ID {contact_id} deleted successfully")
         except sqlite3.Error as e:
             logger.error(f"An error occurred while deleting the contact: {e}")
+        finally:
+            if self.conn:
+                self.conn.close()
+
+    def search_contacts(self, search_text):
+        logger.info(f"Searching contacts with text: {search_text}")
+        try:
+            self.conn = sqlite3.connect(self.db_name)
+            self.cursor = self.conn.cursor()
+            query = "SELECT * FROM contacts WHERE name LIKE ? OR numbers LIKE ? OR email LIKE ?"
+            self.cursor.execute(query, (f"%{search_text}%", f"%{search_text}%", f"%{search_text}%"))
+            contacts = self.cursor.fetchall()
+            logger.debug(f"Found {len(contacts)} contacts matching '{search_text}'")
+            return contacts
+        except sqlite3.Error as e:
+            logger.error(f"An error occurred while searching contacts: {e}")
+            return []
         finally:
             self.conn.close()

@@ -30,3 +30,21 @@ Anthropic_API_KEY=
 
 # Eleven Labs API KEY
 XI_API_KEY=
+
+# Feedly API KEY
+FEEDLY_ACCESS_TOKEN=
+
+# GitHub Credentials
+GITHUB_ACCESS_TOKEN=
+GITHUB_USERNAME=
+GITHUB_ORG=
+
+# Git credentials
+GIT_USERNAME=
+GIT_PASSWORD=
+GIT_SSH_KEY_=
+
+# Twilio credentials
+auth_token=
+account_sid=
+phone_number=

@@ -73,7 +73,7 @@ To begin using SCOUT, follow these steps:
 
 5. Enter your Google Cloud credentials in `./assets/scout/GCC_template.json` and rename it to `GCC.json`.
 
-6. Create a desktop shortcut for `SCOUT.bat` and update paths in `run_app.vbs` and `SCOUT.bat` to match your directory.
+6. Create a desktop shortcut for `SCOUT.bat` and update paths in `run_app.vbs` and `SCOUT.bat` to match your directory. Change the icon to 'assets/SCOUT/SCOUT.ico'. Make sure to set the shortcut to run as administrator.
 
 7. Launch SCOUT using the shortcut, sign up, and enjoy the assistant!
 

@@ -28,5 +28,6 @@ feedparser
 chardet
 urllib.parse
 twilio
+pyaudio
 
 

@@ -5,6 +5,9 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from modules.logging.logger import setup_logger
 from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDatabase
+from modules.Tools.Comms.Voip.modules.Voice.voice_call_twilio import make_call, end_call
+import pyaudio
+import threading
 
 logger = setup_logger('phone.py')
 
@@ -12,6 +15,10 @@ class PhoneFrame(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent 
+        self.call_active = False
+        self.audio_stream = None
+        self.audio_thread = None
+        self.current_call_sid = None  
         logger.info("Initializing PhoneFrame")
         try:
             layout = QVBoxLayout(self)
@@ -23,6 +30,7 @@ class PhoneFrame(QWidget):
 
             self.number_display = QLabel("")
             self.number_display.setAlignment(Qt.AlignCenter)
+            self.number_display.setStyleSheet("color: #ffffff;")  
             layout.addWidget(self.number_display, 1)
 
             dialpad_layout = QGridLayout()
@@ -46,6 +54,7 @@ class PhoneFrame(QWidget):
 
             self.call_button = QPushButton("Call")
             self.call_button.setCheckable(True)
+            self.call_button.clicked.connect(self.handle_call)
             self.call_button.setStyleSheet("""
                 QPushButton {
                     background-color: #2d2d2d; 
@@ -105,3 +114,50 @@ class PhoneFrame(QWidget):
                 logger.warning(f"Contact not found: {contact_name}")
         except Exception as e:
             logger.error(f"Failed to update current contact: {e}", exc_info=True)
+
+    def handle_call(self):
+        try:
+            if self.call_button.isChecked():
+                self.call_button.setText("End")
+                to_number = self.number_display.text()
+                self.current_call_sid = make_call(to_number)
+            else:
+                self.call_button.setText("Call")
+                if self.current_call_sid:
+                    end_call(self.current_call_sid)
+                    self.current_call_sid = None
+        except Exception as e:
+            logger.error(f"An error occurred while handling the call: {e}", exc_info=True)
+
+    def start_audio_stream(self):
+        try:
+            self.audio_stream = pyaudio.PyAudio()
+            self.audio_thread = threading.Thread(target=self.audio_stream_thread)
+            self.audio_thread.start()
+        except Exception as e:
+            logger.error(f"An error occurred while starting the audio stream: {e}", exc_info=True)
+
+    def stop_audio_stream(self):
+        try:
+            if self.audio_stream:
+                self.audio_stream.terminate()
+            if self.audio_thread:
+                self.audio_thread.join()
+        except Exception as e:
+            logger.error(f"An error occurred while stopping the audio stream: {e}", exc_info=True)
+
+    def audio_stream_thread(self):
+        try:
+            stream = self.audio_stream.open(format=pyaudio.paInt16,
+                                            channels=1,
+                                            rate=44100,
+                                            input=True,
+                                            output=True,
+                                            frames_per_buffer=1024)
+            while self.call_active:
+                data = stream.read(1024)
+                stream.write(data, 1024)
+            stream.stop_stream()
+            stream.close()
+        except Exception as e:
+            logger.error(f"An error occurred in the audio stream thread: {e}", exc_info=True)

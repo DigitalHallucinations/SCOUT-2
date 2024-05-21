@@ -11,9 +11,9 @@ logger = setup_logger('contact_details.py')
 class ContactDetailsFrame(qtw.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.parent = parent  
-        self.db = ContactsDatabase() 
-        self.profile_pic_data = None 
+        self.parent = parent
+        self.db = ContactsDatabase()
+        self.profile_pic_data = None
         self.setup_ui()
 
     def setup_ui(self):
@@ -25,7 +25,7 @@ class ContactDetailsFrame(qtw.QWidget):
         layout.addWidget(self.profile_pic_label, alignment=qtc.Qt.AlignCenter)
 
         self.profile_pic_button = qtw.QPushButton("Upload Profile Picture")
-        self.profile_pic_button.clicked.connect(self.upload_profile_picture)
+        self.profile_pic_button.clicked.connect(self.show_upload_profile_picture_frame)
         layout.addWidget(self.profile_pic_button)
 
         self.name_edit = qtw.QLineEdit()
@@ -158,7 +158,7 @@ class ContactDetailsFrame(qtw.QWidget):
                 qtw.QMessageBox.warning(self, 'Input Error', 'Name and Number are required fields.')
         else:
             qtw.QMessageBox.warning(self, 'Selection Error', 'No contact selected to edit.')
-
+            
     def delete_contact(self):
         logger.info("Deleting contact")
         selected_item = self.parent.contacts_frame.contact_list.currentItem()
@@ -166,8 +166,8 @@ class ContactDetailsFrame(qtw.QWidget):
             current_name = selected_item.text()
             contact_id = self.parent.contacts_frame.get_contact_id_by_name(current_name)
 
-            reply = qtw.QMessageBox.question(self, 'Delete Contact', 
-                                            f"Are you sure you want to delete {current_name}?", 
+            reply = qtw.QMessageBox.question(self, 'Delete Contact',
+                                            f"Are you sure you want to delete {current_name}?",
                                             qtw.QMessageBox.Yes | qtw.QMessageBox.No, qtw.QMessageBox.No)
             if reply == qtw.QMessageBox.Yes:
                 try:
@@ -193,14 +193,17 @@ class ContactDetailsFrame(qtw.QWidget):
             pixmap.loadFromData(contact[10])
             self.profile_pic_label.setPixmap(pixmap.scaled(100, 100, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
 
-    def upload_profile_picture(self):
-        file_dialog = qtw.QFileDialog(self)
-        file_dialog.setNameFilter("Images (*.png *.xpm *.jpg)")
-        if file_dialog.exec():
-            file_path = file_dialog.selectedFiles()[0]
-            with open(file_path, 'rb') as file:
-                self.profile_pic_data = file.read()
+    def show_upload_profile_picture_frame(self):
+        if self.parent:
+            self.parent.toggle_upload_frame()
+
+    def update_profile_picture(self, profile_pic_data):
+        self.profile_pic_data = profile_pic_data
+        if self.profile_pic_data:
             pixmap = qtg.QPixmap()
-            pixmap.loadFromData(self.profile_pic_data)
+            pixmap.loadFromData(self.profile_pic_data)  # Ensure this is bytes
             self.profile_pic_label.setPixmap(pixmap.scaled(100, 100, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
-            logger.info(f"Profile picture uploaded: {file_path}")
+            logger.info("Profile picture updated successfully")
+        else:
+            self.profile_pic_label.clear()
+            logger.info("No profile picture data available")

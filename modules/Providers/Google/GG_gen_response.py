@@ -11,7 +11,7 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('GG_gen_response.py')
 
-GG_MODEL = 'gemini-1.5-pro-latest' 
+GG_MODEL = 'gemini-1.5-pro-latest'
 
 def set_GG_model(model_name):
     global GG_MODEL
@@ -25,12 +25,12 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     parts = []
     if current_persona.get("content"):
         parts.append({
-            "text":  f"SYSTEM MESSAGE: {current_persona['content']}" + f" THIS IS THE CHAT HISTORY BETWEEN YOU AND THE USER: {messages}"
-        })    
-    
+            "text": f"SYSTEM MESSAGE: {current_persona['content']} THIS IS THE CHAT HISTORY BETWEEN YOU AND THE USER: {messages}"
+        })
+
     contents = [{
         "parts": parts,
-        "role": "user"  
+        "role": "user"
     }]
 
     Generation_config = {
@@ -51,10 +51,10 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     logger.info("Data object created for HTTP request.")
     return data
 
-async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None, provider_manager=None):  
+async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var=None, provider_manager=None):
     logger.info("Starting response generation")
-    
-    if "name" in current_persona: 
+
+    if "name" in current_persona:
         conversation_history = ConversationManager(user, current_persona["name"], provider_manager)
     else:
         conversation_history = None
@@ -74,7 +74,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
         if 'timestamp' in msg:
             del msg['timestamp']
     messages_formatted = format_message_history(messages, user, current_persona.get("name", "Assistant"))
-    messages= messages_formatted
+    messages = messages_formatted
 
     functions = ToolManager.load_functions_from_json(current_persona)
 
@@ -84,16 +84,16 @@ async def generate_response(user, current_persona, message, session_id, conversa
     logger.debug(f"Data: {data}")
 
     genai_api = GenAIAPI(GG_MODEL)
-    
+
     # Call the generate_content method asynchronously
     response_data = await genai_api.generate_content(data)
-    
+
     function_map = ToolManager.load_function_map_from_current_persona(current_persona)
 
     if "function_call" in response_data:
         try:
             function_response, error_occurred = await ToolManager.handle_function_call(user, conversation_id, response_data, conversation_history, function_map)
-            
+
             if not error_occurred:
                 ToolManager.logger.info(f"Function call successful with response: {function_response}")
             else:
@@ -108,12 +108,12 @@ async def generate_response(user, current_persona, message, session_id, conversa
             for part in detailed_content:
                 ChatResponse += part.text + "\n"
             logger.debug(f"Raw detailed_content: {detailed_content}")
-            
-            separator = ": "  
+
+            separator = ": "
             persona_prefix = f"{current_persona.get('name', '')}{separator}"
             if ChatResponse.startswith(persona_prefix):
                 ChatResponse = ChatResponse[len(persona_prefix):]
-            
+
             logger.debug(f"ChatResponse: {ChatResponse}")
 
         else:
@@ -126,7 +126,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
         raise
 
     conversation_history.add_message(user, conversation_id, "assistant", ChatResponse, current_time)
-     
+
     try:
         if get_tts() and not contains_code(ChatResponse):
             await text_to_speech(ChatResponse)

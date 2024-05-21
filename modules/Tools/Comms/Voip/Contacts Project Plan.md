@@ -83,3 +83,18 @@ Based on what I've seen, here are some additional features you might consider ad
 7. **UI Enhancements**:
     - Improve the UI with better styling, animations, and user feedback.
 
+
+
+
+## Upload Profile Picture
+
+1. **Create a New Frame for Uploading Profile Pictures**:
+   - This frame will include a slider for zooming/resizing the image and the ability to drag the image within a circular frame.
+
+2. **Integrate the New Frame into the Existing Application**:
+   - Replace the `ContactDetailsFrame` with the new upload frame when the user selects an image.
+   - Restore the `ContactDetailsFrame` when the user accepts the changes.
+
+3. **Implement the Zoom and Drag Functionality**:
+   - Use a slider to adjust the zoom level of the image.
+   - Allow the user to drag the image within the circular frame.

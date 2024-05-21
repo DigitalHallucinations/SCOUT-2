@@ -78,7 +78,10 @@ class ContactsFrame(qtw.QWidget):
                 item = qtw.QListWidgetItem(contact[1])
                 if contact[10]:  # Check if there is an image
                     pixmap = qtg.QPixmap()
-                    pixmap.loadFromData(contact[10])
+                    image_data = contact[10]
+                    if isinstance(image_data, str):
+                        image_data = image_data.encode('utf-8')  # Convert string to bytes
+                    pixmap.loadFromData(image_data)
                     icon = qtg.QIcon(pixmap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
                     item.setIcon(icon)
                 self.contact_list.addItem(item)
@@ -171,3 +174,5 @@ class ContactsFrame(qtw.QWidget):
             logger.debug(f"Found {len(contacts)} contacts matching '{text}'")
         except Exception as e:
             logger.error(f"An error occurred while searching contacts: {e}")
+
+    

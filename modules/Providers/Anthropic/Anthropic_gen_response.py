@@ -10,18 +10,18 @@ from modules.chat_history.convo_manager import ConversationManager
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('Anthropic_gen_response.py')
- 
+
 api = AnthropicAPI()
 
 MODEL = "claude-3-opus-20240229"
 
 MODEL_CLAUDE_3_OPUS = "claude-3-opus-20240229"
-MODEL_CLAUDE_3_SONNET = "claude-3-sonnet-20240229" 
+MODEL_CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
 MODEL_CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
 MODEL_CLAUDE_3_SONNET = 4096
 MODEL_CLAUDE_3_OPUS = 4096
 MODEL_CLAUDE_3_HAIKU = 4096
-MAX_TOKENS = 4096 
+MAX_TOKENS = 4096
 
 FUNCTIONS_JSON_PATH_TEMPLATE = 'modules/Personas/{}/Toolbox/functions.json'
 
@@ -37,7 +37,7 @@ def set_Anthropic_model(model_name):
     elif MODEL in ["claude-3-haiku-20240307"]:
         MAX_TOKENS = 4096    
     else:
-        MAX_TOKENS = 2000 
+        MAX_TOKENS = 2000
 
 def get_Anthropic_model():
     return MODEL
@@ -56,7 +56,7 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     
     data = {
         "model": MODEL,
-        "system": system_content,  
+        "system": system_content,
         "max_tokens": MAX_TOKENS,
         "temperature": temperature_var,
         "messages": messages
@@ -66,10 +66,10 @@ def create_request_body(current_persona, messages, temperature_var, top_p_var, t
     return data
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager):
-    logger.info(f"generate_response called with user: {user}, current persona: {current_persona['name']}, session_id: {session_id}, conversation_id: {conversation_id}")    
+    logger.info(f"generate_response called with user: {user}, current persona: {current_persona['name']}, session_id: {session_id}, conversation_id: {conversation_id}")
     functions = None
 
-    if "name" in current_persona: 
+    if "name" in current_persona:
         conversation_history = ConversationManager(user, current_persona["name"], provider_manager)
     else:
         conversation_history = None
@@ -77,7 +77,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
     if conversation_id is None:
         raise ValueError("conversation_id cannot be None")
 
-    if message:  
+    if message:
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conversation_history.add_message(user, conversation_id, "user", message, current_time)
         logger.info("New user message added to conversation history.")
@@ -87,25 +87,23 @@ async def generate_response(user, current_persona, message, session_id, conversa
         if 'timestamp' in msg:
             del msg['timestamp']
 
-
-    data = create_request_body(current_persona, 
-                              messages, 
-                              temperature_var, 
+    data = create_request_body(current_persona,
+                              messages,
+                              temperature_var,
                               top_p_var,
-                              functions 
+                              functions
                               )
       
     logger.info(f"Starting response generation for user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
     logger.info("Data being sent in HTTP request to AnthropicAPI.")
-    logger.debug("Data: %s", data) 
-     
+    logger.debug("Data: %s", data)
 
     response_data = await api.generate_conversation(data)
 
     if response_data:
         logger.info("response from Anthropic API.")
         logger.debug(f"response: {response_data}")
-        content_blocks = response_data.content 
+        content_blocks = response_data.content
         text = ''
         if not content_blocks:
             logger.error("No content blocks found in the response from Anthropic API.")
@@ -113,7 +111,7 @@ async def generate_response(user, current_persona, message, session_id, conversa
         else:
             for block in content_blocks:
                 if block.type == 'text':
-                    text_block = block.text 
+                    text_block = block.text
                     if text_block:
                         text += text_block + '\n\n'
                     else:
@@ -122,22 +120,21 @@ async def generate_response(user, current_persona, message, session_id, conversa
                     logger.warning(f"A content block of type '{block.type}' was found, which is not handled by this method.")
             
         logger.debug(f"Extracted response: {text}")
-        
 
-        if text:  
-            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
+        if text:
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             conversation_history.add_message(user, conversation_id, "assistant", text, current_time)
             logger.info("Assistant message added to conversation history.")
             logger.debug(f"Message: {text}")
 
         try:
-                if get_tts():
-                    if contains_code(text):
-                        logger.info("Skipping TTS as the text contains code.")
-                    else:
-                        await tts(text)
+            if get_tts():
+                if contains_code(text):
+                    logger.info("Skipping TTS as the text contains code.")
+                else:
+                    await tts(text)
         except Exception as e:
-                logger.error("Error during TTS: %s", e)
+            logger.error("Error during TTS: %s", e)
 
         return text
     else:

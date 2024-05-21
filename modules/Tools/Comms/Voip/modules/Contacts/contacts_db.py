@@ -52,9 +52,9 @@ class ContactsDatabase:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
             self.cursor.execute("""
-                INSERT INTO contacts (name, numbers, email, address, company, position, notes, "group", image)
+                INSERT INTO contacts (name, numbers, email, address, company, position, notes, group, image)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (name, numbers, email, address, company, position, notes, group, sqlite3.Binary(image) if image else None))
+            """, (name, numbers, email, address, company, position, notes, group, image))
             self.conn.commit()
             logger.debug(f"Contact {name} added successfully")
         except sqlite3.Error as e:
@@ -103,10 +103,10 @@ class ContactsDatabase:
     def get_contact_by_name(self, name):
         logger.info(f"Retrieving contact with name: {name}")
         try:
-            self.conn = sqlite3.connect(self.db_name, detect_types=sqlite3.PARSE_COLNAMES)
+            self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
 
-            self.cursor.execute("SELECT *, CAST(image AS BLOB) AS image FROM contacts WHERE name = ?", (name,))
+            self.cursor.execute("SELECT * FROM contacts WHERE name = ?", (name,))
             contact = self.cursor.fetchone()
             logger.debug(f"Retrieved contact: {contact}")
 
@@ -129,7 +129,7 @@ class ContactsDatabase:
                 UPDATE contacts 
                 SET name = ?, numbers = ?, email = ?, address = ?, company = ?, position = ?, notes = ?, image = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
-            """, (name, numbers, email, address, company, position, notes, sqlite3.Binary(image) if image else None, contact_id))
+            """, (name, numbers, email, address, company, position, notes, image, contact_id))
 
             self.conn.commit()
             logger.debug(f"Contact with ID {contact_id} updated successfully")

@@ -66,7 +66,7 @@ def create_feed_entry_frame(self, layout):
     self.add_feed_button.setIcon(qtg.QIcon("assets/SCOUT/Icons/add_file_wt.png"))
     self.add_feed_button.setIconSize(qtc.QSize(icon_size, icon_size))
     self.add_feed_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
-    self.add_feed_button.clicked.connect(lambda: asyncio.run(self.add_feed()))
+    self.add_feed_button.clicked.connect(lambda: asyncio.create_task(self.rss_feed_reader.add_feed(self.feed_url_entry.text(), self.category_entry.text())))
     category_layout.addWidget(self.add_feed_button)
     ToolTip.setToolTip(self.add_feed_button, "Add a new RSS feed")
 

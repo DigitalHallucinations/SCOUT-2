@@ -14,11 +14,13 @@ class ContactsFrame(qtw.QWidget):
         layout = qtw.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
+        # Search Bar
         self.search_bar = qtw.QLineEdit()
         self.search_bar.setPlaceholderText("Search contacts...")
         self.search_bar.textChanged.connect(self.filter_contacts)
         layout.addWidget(self.search_bar)
 
+        # Create a frame for the buttons and add it to the layout
         button_frame = qtw.QFrame()
         button_layout = qtw.QHBoxLayout(button_frame)
         button_layout.setContentsMargins(0, 0, 0, 0)
@@ -40,6 +42,7 @@ class ContactsFrame(qtw.QWidget):
         self.edit_button.clicked.connect(self.edit_contact)
         button_layout.addWidget(self.edit_button)
 
+        # Create the contact list and add it to the layout
         self.contact_list = qtw.QListWidget()
         self.contact_list.setStyleSheet("""
             QListWidget {
@@ -71,17 +74,14 @@ class ContactsFrame(qtw.QWidget):
     def load_contacts(self):
         logger.info("Loading contacts from the database")
         try:
-            self.contact_list.clear() 
+            self.contact_list.clear()  
             contacts = self.db.get_all_contacts()
             max_width = 0
             for contact in contacts:
                 item = qtw.QListWidgetItem(contact[1])
-                if contact[10]:  # Check if there is an image
+                if contact[10]: 
                     pixmap = qtg.QPixmap()
-                    image_data = contact[10]
-                    if isinstance(image_data, str):
-                        image_data = image_data.encode('utf-8')  # Convert string to bytes
-                    pixmap.loadFromData(image_data)
+                    pixmap.loadFromData(contact[10])
                     icon = qtg.QIcon(pixmap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
                     item.setIcon(icon)
                 self.contact_list.addItem(item)
@@ -141,14 +141,14 @@ class ContactsFrame(qtw.QWidget):
     def display_selected_contact(self, item):
         contact_name = item.text()
         if self.parent:
-            self.parent.update_current_contact(contact_name)
+            self.parent.conversation_frame.update_current_contact(contact_name)
 
     def get_contact_phone_number(self, contact_name):
         logger.info(f"Retrieving phone number for contact: {contact_name}")
         try:
             contact = self.db.get_contact_by_name(contact_name)
             if contact:
-                phone_number = contact[2]
+                phone_number = contact[2]  
                 logger.debug(f"Phone number for {contact_name} is {phone_number}")
                 return phone_number
             else:
@@ -157,7 +157,7 @@ class ContactsFrame(qtw.QWidget):
         except Exception as e:
             logger.error(f"An error occurred while retrieving the phone number: {e}")
             return None
-
+        
     def search_contacts(self, text):
         logger.info(f"Searching contacts for: {text}")
         try:
@@ -165,7 +165,7 @@ class ContactsFrame(qtw.QWidget):
             contacts = self.db.search_contacts(text)
             for contact in contacts:
                 item = qtw.QListWidgetItem(contact[1])
-                if contact[10]:  # Check if there is an image
+                if contact[10]: 
                     pixmap = qtg.QPixmap()
                     pixmap.loadFromData(contact[10])
                     icon = qtg.QIcon(pixmap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
@@ -174,5 +174,3 @@ class ContactsFrame(qtw.QWidget):
             logger.debug(f"Found {len(contacts)} contacts matching '{text}'")
         except Exception as e:
             logger.error(f"An error occurred while searching contacts: {e}")
-
-    

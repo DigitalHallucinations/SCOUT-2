@@ -11,8 +11,7 @@ logger = setup_logger('phone.py')
 class PhoneFrame(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.parent = parent
-        self.db = ContactsDatabase()  # Initialize the ContactsDatabase
+        self.parent = parent 
         logger.info("Initializing PhoneFrame")
         try:
             layout = QVBoxLayout(self)
@@ -43,7 +42,7 @@ class PhoneFrame(QWidget):
 
             # Call Control Buttons
             call_controls_layout = QHBoxLayout()
-            layout.addLayout(call_controls_layout)
+            layout.addLayout(call_controls_layout) 
 
             self.call_button = QPushButton("Call")
             self.call_button.setCheckable(True)
@@ -96,22 +95,13 @@ class PhoneFrame(QWidget):
 
     def update_current_contact(self, contact_name):
         try:
-            self.number_display.setText(contact_name)
-            contact = self.db.get_contact_by_name(contact_name)
-            if contact and contact[10]:
-                image_data = contact[10]
-                if isinstance(image_data, bytes):
-                    pixmap = QPixmap()
-                    if pixmap.loadFromData(image_data):
-                        self.profile_pic_label.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-                    else:
-                        logger.error(f"Failed to load profile picture for {contact_name}. Error: {pixmap.error()}, {pixmap.errorString()}")
-                        self.profile_pic_label.clear()
-                else:
-                    logger.error(f"Unexpected image data type for {contact_name}: {type(image_data)}")
-                    self.profile_pic_label.clear()
+            logger.info(f"Updating current contact to: {contact_name}")
+            db = ContactsDatabase()
+            contact = db.get_contact_by_name(contact_name)
+            if contact:
+                self.update_profile_picture(contact)
+                logger.info(f"Current contact updated to: {contact_name}")
             else:
-                self.profile_pic_label.clear()
-            logger.info(f"Current contact updated to: {contact_name}")
+                logger.warning(f"Contact not found: {contact_name}")
         except Exception as e:
-            logger.exception(f"Failed to update current contact: {e}")
+            logger.error(f"Failed to update current contact: {e}", exc_info=True)

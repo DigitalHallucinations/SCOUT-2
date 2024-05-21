@@ -237,7 +237,7 @@ class ConversationFrame(QWidget):
 
     def send_message(self):
         try:
-            message = self.text_input.toPlainText()  
+            message = self.text_input.toPlainText()  # Extract plain text from QTextEdit
             if message:
                 timestamp = QDateTime.currentDateTime().toString("hh:mm ap")
                 new_message = f"<font color='gray'>{timestamp}</font> <font color='blue'>[Sent]</font> {message}<br>"
@@ -289,23 +289,15 @@ class ConversationFrame(QWidget):
         try:
             self.contact_label.setText(contact_name)
             contact = self.db.get_contact_by_name(contact_name)
-            if contact and contact[10]:
-                image_data = contact[10]
-                if isinstance(image_data, bytes):
-                    pixmap = QPixmap()
-                    if pixmap.loadFromData(image_data):
-                        self.profile_pic_label.setPixmap(pixmap.scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-                    else:
-                        logger.error(f"Failed to load profile picture for {contact_name}. Error: {pixmap.error()}, {pixmap.errorString()}")
-                        self.profile_pic_label.clear()
-                else:
-                    logger.error(f"Unexpected image data type for {contact_name}: {type(image_data)}")
-                    self.profile_pic_label.clear()
+            if contact and contact[10]:  # Assuming the image is stored in the 11th column
+                pixmap = QPixmap()
+                pixmap.loadFromData(contact[10])
+                self.profile_pic_label.setPixmap(pixmap.scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             else:
                 self.profile_pic_label.clear()
             logger.info(f"Current contact updated to: {contact_name}")
         except Exception as e:
-            logger.exception(f"Failed to update current contact: {e}")
+            logger.error(f"Failed to update current contact: {e}")
 
     def get_contact_phone_number(self, contact_name):
         try:

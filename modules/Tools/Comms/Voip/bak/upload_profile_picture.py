@@ -1,8 +1,8 @@
 # modules/Tools/Comms/Voip/modules/Contacts/upload_profile_picture.py
 
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QFileDialog, QSlider
-from PySide6.QtCore import Qt, QPointF
-from PySide6.QtGui import QPixmap, QMouseEvent, QWheelEvent
+from PySide6.QtCore import Qt, QPointF, QRectF
+from PySide6.QtGui import QPixmap, QMouseEvent, QWheelEvent, QPainter, QPainterPath
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('upload_profile_picture.py')
@@ -43,6 +43,7 @@ class UploadProfilePictureFrame(QWidget):
         self.drag_start_position = QPointF()
         self.current_pixmap = QPixmap()
         self.current_scale = 1.0
+        self.image_offset = QPointF()
 
         self.profile_pic_label.installEventFilter(self)
 
@@ -68,7 +69,22 @@ class UploadProfilePictureFrame(QWidget):
                 Qt.KeepAspectRatio,
                 Qt.SmoothTransformation
             )
-            self.profile_pic_label.setPixmap(scaled_pixmap)
+            self.draw_circular_pixmap(scaled_pixmap)
+
+    def draw_circular_pixmap(self, pixmap):
+        size = self.profile_pic_label.size()
+        mask = QPixmap(size)
+        mask.fill(Qt.transparent)
+
+        painter = QPainter(mask)
+        painter.setRenderHint(QPainter.Antialiasing)
+        path = QPainterPath()
+        path.addEllipse(0, 0, size.width(), size.height())
+        painter.setClipPath(path)
+        painter.drawPixmap(self.image_offset, pixmap)
+        painter.end()
+
+        self.profile_pic_label.setPixmap(mask)
 
     def accept_profile_picture(self):
         if self.parent:
@@ -84,7 +100,8 @@ class UploadProfilePictureFrame(QWidget):
                 if not self.drag_start_position.isNull():
                     delta = event.position() - self.drag_start_position
                     self.drag_start_position = event.position()
-                    self.profile_pic_label.move(self.profile_pic_label.pos() + delta.toPoint())
+                    self.image_offset += delta
+                    self.update_profile_picture()
             elif event.type() == QMouseEvent.MouseButtonRelease:
                 self.drag_start_position = QPointF()
             elif event.type() == QWheelEvent.Wheel:

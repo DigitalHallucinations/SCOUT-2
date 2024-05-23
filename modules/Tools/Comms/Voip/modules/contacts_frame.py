@@ -10,6 +10,7 @@ class ContactsFrame(qtw.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        self.db = ContactsDatabase()
         self.setStyleSheet("background-color: transparent;")
         layout = qtw.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -62,7 +63,7 @@ class ContactsFrame(qtw.QWidget):
         self.contact_list.customContextMenuRequested.connect(self.show_context_menu)
         self.contact_list.itemClicked.connect(self.display_selected_contact)
 
-        self.db = ContactsDatabase()
+        
         self.load_contacts()
 
     def filter_contacts(self):
@@ -74,14 +75,17 @@ class ContactsFrame(qtw.QWidget):
     def load_contacts(self):
         logger.info("Loading contacts from the database")
         try:
-            self.contact_list.clear()  
+            self.contact_list.clear() 
             contacts = self.db.get_all_contacts()
             max_width = 0
             for contact in contacts:
                 item = qtw.QListWidgetItem(contact[1])
-                if contact[10]: 
+                if contact[11]:  # Check if there is an image
                     pixmap = qtg.QPixmap()
-                    pixmap.loadFromData(contact[10])
+                    image_data = contact[11]
+                    if isinstance(image_data, str):
+                        image_data = image_data.encode('utf-8')  # Convert string to bytes
+                    pixmap.loadFromData(image_data)  # Pass bytes to loadFromData
                     icon = qtg.QIcon(pixmap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
                     item.setIcon(icon)
                 self.contact_list.addItem(item)
@@ -112,7 +116,11 @@ class ContactsFrame(qtw.QWidget):
                 if contact_id is not None:
                     contact = self.db.get_contact_by_id(contact_id)
                     if self.parent:
-                        self.parent.contact_details_frame.load_contact(contact)
+                        if contact[11]:  # Check if there is a profile picture
+                            profile_pic_data = bytes(contact[11])  # Convert to bytes
+                            self.parent.contact_details_frame.load_contact(contact, profile_pic_data=profile_pic_data)
+                        else:
+                            self.parent.contact_details_frame.load_contact(contact)
                         self.parent.toggle_contact_details()
         except Exception as e:
             logger.error(f"An error occurred while editing the contact: {e}")
@@ -142,6 +150,7 @@ class ContactsFrame(qtw.QWidget):
         contact_name = item.text()
         if self.parent:
             self.parent.conversation_frame.update_current_contact(contact_name)
+            self.parent.phone_frame.update_current_contact(contact_name) 
 
     def get_contact_phone_number(self, contact_name):
         logger.info(f"Retrieving phone number for contact: {contact_name}")
@@ -165,9 +174,9 @@ class ContactsFrame(qtw.QWidget):
             contacts = self.db.search_contacts(text)
             for contact in contacts:
                 item = qtw.QListWidgetItem(contact[1])
-                if contact[10]: 
+                if contact[11]: 
                     pixmap = qtg.QPixmap()
-                    pixmap.loadFromData(contact[10])
+                    pixmap.loadFromData(contact[11])
                     icon = qtg.QIcon(pixmap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.SmoothTransformation))
                     item.setIcon(icon)
                 self.contact_list.addItem(item)

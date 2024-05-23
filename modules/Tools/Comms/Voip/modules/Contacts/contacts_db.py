@@ -46,15 +46,22 @@ class ContactsDatabase:
                 self.conn.close()
 
     def add_contact(self, name, numbers, email, address, company, position, notes, group, image):
-        logger.info("Adding new contact to the database")
+        logger.info("ADDING new contact to the database")
         logger.debug(f"Adding contact: {name}")
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
+            
+            # Log the type and length of the image data
+            if image:
+                logger.debug(f"Image data type: {type(image)}, Image data length: {len(image)}")
+            else:
+                logger.debug("No image data provided")
+
             self.cursor.execute("""
-                INSERT INTO contacts (name, numbers, email, address, company, position, notes, group, image)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (name, numbers, email, address, company, position, notes, group, image))
+                    INSERT INTO contacts (name, numbers, email, address, company, position, notes, "group", image)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (name, numbers, email, address, company, position, notes, group, image))
             self.conn.commit()
             logger.debug(f"Contact {name} added successfully")
         except sqlite3.Error as e:
@@ -64,14 +71,18 @@ class ContactsDatabase:
 
     def get_all_contacts(self):
         """Retrieves all contacts from the database."""
-        logger.info("Retrieving all contacts from the database")
+        logger.info("Retrieving ALL CONTACTS from the database")
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("SELECT * FROM contacts")
             contacts = self.cursor.fetchall()
+
             logger.debug(f"Retrieved {len(contacts)} contacts")
+
+            for contact in contacts:
+                logger.debug(f"Contact ID: {contact[0]}, Name: {contact[1]}, Image Data: {contact[11]}")
 
             return contacts
         except sqlite3.Error as e:
@@ -124,13 +135,11 @@ class ContactsDatabase:
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
-
             self.cursor.execute("""
                 UPDATE contacts 
                 SET name = ?, numbers = ?, email = ?, address = ?, company = ?, position = ?, notes = ?, image = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             """, (name, numbers, email, address, company, position, notes, image, contact_id))
-
             self.conn.commit()
             logger.debug(f"Contact with ID {contact_id} updated successfully")
         except sqlite3.Error as e:

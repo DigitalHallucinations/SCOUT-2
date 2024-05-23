@@ -6,15 +6,21 @@ from PySide6.QtCore import Qt, QDateTime, QSize
 from modules.Tools.Comms.Voip.modules.emoji_picker import EmojiPicker
 from modules.Tools.Comms.Voip.modules.messaging.Twilio.send_sms_twilio import send_sms
 from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDatabase
+from modules.Tools.Comms.Voip.modules.messaging.Twilio.Twilio_verify import TwilioVerify
 from modules.logging.logger import setup_logger
 
+
 logger = setup_logger('messages.py')
+
 
 class ConversationFrame(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent  
         self.db = ContactsDatabase()  
+
+        # Twilio Verify instance
+        self.twilio_verify = TwilioVerify('your_account_sid', 'your_auth_token', 'your_verify_service_sid')
 
         rich_text_tool_bar_icon_size = 24
         sidebar_frame_icon_size = 30
@@ -235,6 +241,11 @@ class ConversationFrame(QWidget):
 
         left_layout.addWidget(input_frame)
 
+        # Verify Button
+        self.verify_button = QPushButton("Verify")
+        self.verify_button.clicked.connect(self.send_verification_request)
+        left_layout.addWidget(self.verify_button)
+
     def send_message(self):
         try:
             message = self.text_input.toPlainText()  # Extract plain text from QTextEdit
@@ -289,10 +300,16 @@ class ConversationFrame(QWidget):
         try:
             self.contact_label.setText(contact_name)
             contact = self.db.get_contact_by_name(contact_name)
-            if contact and contact[10]:  # Assuming the image is stored in the 11th column
+            if contact and contact[11]:  # Assuming the image is stored in the 11th column
                 pixmap = QPixmap()
-                pixmap.loadFromData(contact[10])
-                self.profile_pic_label.setPixmap(pixmap.scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                if isinstance(contact[11], bytes) and len(contact[11]) > 0:
+                    pixmap.loadFromData(contact[11])
+                    if not pixmap.isNull():
+                        self.profile_pic_label.setPixmap(pixmap.scaled(self.profile_pic_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                    else:
+                        logger.warning(f"Failed to load profile picture for contact: {contact_name}")  # Log contact name instead of data
+                else:
+                    logger.warning(f"Invalid image data for contact: {contact_name}")  # Log contact name instead of data
             else:
                 self.profile_pic_label.clear()
             logger.info(f"Current contact updated to: {contact_name}")
@@ -308,3 +325,31 @@ class ConversationFrame(QWidget):
         except Exception as e:
             logger.error(f"Failed to get contact phone number for {contact_name}: {e}")
             return None
+
+    def send_verification_request(self):
+        try:
+            contact_name = self.contact_label.text()
+            contact_phone_number = self.get_contact_phone_number(contact_name)
+            if contact_phone_number:
+                # Send verification request using Twilio Verify API
+                verification_sid = self.twilio_verify.send_verification_request(contact_phone_number)
+                if verification_sid:
+                    logger.info(f"Verification request sent to {contact_name} ({contact_phone_number})")
+                else:
+                    logger.warning(f"Failed to send verification request to {contact_name} ({contact_phone_number})")
+            else:
+                logger.warning(f"Contact phone number not found for {contact_name}")
+        except Exception as e:
+            logger.error(f"Failed to send verification request: {e}")
+
+    def check_verification_status(self, contact_phone_number, code):
+        try:
+            is_verified = self.twilio_verify.check_verification_status(contact_phone_number, code)
+            if is_verified:
+                logger.info(f"Verification successful for {contact_phone_number}")
+            else:
+                logger.warning(f"Verification failed for {contact_phone_number}")
+            return is_verified
+        except Exception as e:
+            logger.error(f"Failed to check verification status: {e}")
+            return False

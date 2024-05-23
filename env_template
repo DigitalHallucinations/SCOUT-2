@@ -47,4 +47,5 @@ GIT_SSH_KEY_=
 # Twilio credentials
 auth_token=
 account_sid=
+verify_service_sid=
 phone_number=

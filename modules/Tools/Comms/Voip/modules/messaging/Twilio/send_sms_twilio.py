@@ -30,16 +30,20 @@ if phone_number is None:
 # Initialize Twilio client
 client = Client(account_sid, auth_token)
 
-def send_sms(to, body):
+def send_sms(to, body, media_url=None):
     try:
-        logger.info(f"Sending SMS to {to}")
-        message = client.messages.create(
-            body=body,
-            from_=phone_number,
-            to=to
-        )
-        logger.info(f"SMS sent successfully. Message SID: {message.sid}")
+        logger.info(f"Sending SMS/MMS to {to}")
+        message_data = {
+            'body': body,
+            'from_': phone_number,
+            'to': to
+        }
+        if media_url:
+            message_data['media_url'] = media_url
+
+        message = client.messages.create(**message_data)
+        logger.info(f"SMS/MMS sent successfully. Message SID: {message.sid}")
         return message.sid
     except Exception as e:
-        logger.error(f"Failed to send SMS to {to}: {e}")
+        logger.error(f"Failed to send SMS/MMS to {to}: {e}")
         raise

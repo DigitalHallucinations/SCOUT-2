@@ -4,7 +4,6 @@ from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QGridLa
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from modules.logging.logger import setup_logger
-from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDatabase
 from modules.Tools.Comms.Voip.modules.Voice.voice_call_twilio import make_call, end_call
 import pyaudio
 import threading
@@ -12,25 +11,26 @@ import threading
 logger = setup_logger('phone.py')
 
 class PhoneFrame(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, db, parent=None):
         super().__init__(parent)
-        self.parent = parent 
+        self.parent = parent
+        self.db = db 
         self.call_active = False
         self.audio_stream = None
         self.audio_thread = None
-        self.current_call_sid = None  
+        self.current_call_sid = None
         logger.info("Initializing PhoneFrame")
         try:
             layout = QVBoxLayout(self)
 
             self.profile_pic_label = QLabel()
             self.profile_pic_label.setFixedSize(100, 100)
-            self.profile_pic_label.setStyleSheet("border: 1px solid #ffffff; border-radius: 50px;")
+            self.profile_pic_label.setStyleSheet("border: None")
             layout.addWidget(self.profile_pic_label, alignment=Qt.AlignCenter)
 
             self.number_display = QLabel("")
             self.number_display.setAlignment(Qt.AlignCenter)
-            self.number_display.setStyleSheet("color: #ffffff;")  
+            self.number_display.setStyleSheet("color: #ffffff;")
             layout.addWidget(self.number_display, 1)
 
             dialpad_layout = QGridLayout()
@@ -40,27 +40,27 @@ class PhoneFrame(QWidget):
                 button.clicked.connect(lambda _, digit=digit: self.update_number_display(digit))
                 button.setStyleSheet("""
                     QPushButton {
-                        background-color: #2d2d2d; 
+                        background-color: #2d2d2d;
                         color: #ffffff;
-                        border-radius: 50%; 
-                        padding: 10px; 
+                        border-radius: 50px;
+                        padding: 10px;
                     }
                 """)
                 dialpad_layout.addWidget(button, i // 3, i % 3)
 
             # Call Control Buttons
             call_controls_layout = QHBoxLayout()
-            layout.addLayout(call_controls_layout) 
+            layout.addLayout(call_controls_layout)
 
             self.call_button = QPushButton("Call")
             self.call_button.setCheckable(True)
             self.call_button.clicked.connect(self.handle_call)
             self.call_button.setStyleSheet("""
                 QPushButton {
-                    background-color: #2d2d2d; 
+                    background-color: #2d2d2d;
                     color: #ffffff;
-                    border-radius: 15px; 
-                    padding: 10px; 
+                    border-radius: 15px;
+                    padding: 10px;
                 }
             """)
             call_controls_layout.addWidget(self.call_button)
@@ -69,10 +69,10 @@ class PhoneFrame(QWidget):
                 button = QPushButton(label)
                 button.setStyleSheet("""
                     QPushButton {
-                        background-color: #2d2d2d; 
+                        background-color: #2d2d2d;
                         color: #ffffff;
-                        border-radius: 15px; 
-                        padding: 10px; 
+                        border-radius: 15px;
+                        padding: 10px;
                     }
                 """)
                 call_controls_layout.addWidget(button)
@@ -90,12 +90,14 @@ class PhoneFrame(QWidget):
 
     def update_profile_picture(self, contact):
         try:
-            logger.info(f"Updating profile picture for contact: {contact}")
-            if contact[10]:  # Check if there is a profile picture
+            #logger.info(f"Updating profile picture for contact: {contact}")
+            if contact[11]:  # Check if there is a profile picture
                 pixmap = QPixmap()
-                pixmap.loadFromData(contact[10])
-                self.profile_pic_label.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-                logger.info("Profile picture updated successfully")
+                if pixmap.loadFromData(contact[11]):
+                    self.profile_pic_label.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                    logger.info("Profile picture updated successfully")
+                else:
+                    logger.warning(f"Failed to load profile picture for contact: {contact[1]}")  # Log contact name instead of data
             else:
                 self.profile_pic_label.clear()
                 logger.info("No profile picture found for contact")
@@ -105,8 +107,7 @@ class PhoneFrame(QWidget):
     def update_current_contact(self, contact_name):
         try:
             logger.info(f"Updating current contact to: {contact_name}")
-            db = ContactsDatabase()
-            contact = db.get_contact_by_name(contact_name)
+            contact = self.db.get_contact_by_name(contact_name)  # Use self.db instead of creating a new instance
             if contact:
                 self.update_profile_picture(contact)
                 logger.info(f"Current contact updated to: {contact_name}")

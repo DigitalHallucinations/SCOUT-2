@@ -12,12 +12,12 @@ logger = setup_logger('Twilio_verify.py')
 load_dotenv()
 
 # Retrieve Twilio credentials from environment variables
-auth_token = os.getenv("auth_token")
+auth_token = os.getenv("TWILIO_AUTH_TOKEN")
 if auth_token is None:
     logger.error("The Twilio Auth Token not found. Please set the auth_token environment variable.")
     raise ValueError("The Twilio Auth Token not found. Please set the auth_token environment variable.")
 
-account_sid = os.getenv("account_sid")
+account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 if account_sid is None:
     logger.error("The Twilio Account SID not found. Please set the account_sid environment variable.")
     raise ValueError("The Twilio Account SID not found. Please set the account_sid environment variable.")
@@ -31,8 +31,8 @@ if verify_service_sid is None:
 client = Client(account_sid, auth_token)
 
 class TwilioVerify:
-    def __init__(self):
-        self.client = client
+    def __init__(self, account_sid, auth_token, verify_service_sid):
+        self.client = Client(account_sid, auth_token)
         self.verify_service_sid = verify_service_sid
 
     def send_verification_request(self, phone_number):

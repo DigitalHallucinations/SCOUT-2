@@ -12,12 +12,12 @@ logger = setup_logger('send_sms_twilio.py')
 load_dotenv()
 
 # Retrieve Twilio credentials from environment variables
-auth_token = os.getenv("auth_token")
+auth_token = os.getenv("TWILIO_AUTH_TOKEN")
 if auth_token is None:
     logger.error("The Twilio Auth Token not found. Please set the auth_token environment variable.")
     raise ValueError("The Twilio Auth Token not found. Please set the auth_token environment variable.")
 
-account_sid = os.getenv("account_sid")
+account_sid = os.getenv("TWILIO_ACCOUNT_SID")
 if account_sid is None:
     logger.error("The Twilio Account SID not found. Please set the account_sid environment variable.")
     raise ValueError("The Twilio Account SID not found. Please set the account_sid environment variable.")

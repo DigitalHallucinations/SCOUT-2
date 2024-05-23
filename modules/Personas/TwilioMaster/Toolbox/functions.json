@@ -32,5 +32,43 @@
             },
             "required": []
         }
+    },
+    {
+        "name": "contact_twilio_support",
+        "description": "Contact Twilio Support with the provided error details.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "error_code": {
+                    "type": "string",
+                    "description": "The specific error code encountered."
+                },
+                "debug_event_sid": {
+                    "type": "string",
+                    "description": "The unique identifier for the debug event."
+                },
+                "account_sid": {
+                    "type": "string",
+                    "description": "Your Twilio account SID."
+                },
+                "call_sid": {
+                    "type": "string",
+                    "description": "The unique identifier for the call."
+                },
+                "timestamp": {
+                    "type": "string",
+                    "description": "The time when the error occurred."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A brief description of the issue."
+                },
+                "contact_info": {
+                    "type": "string",
+                    "description": "Your email address or preferred contact method."
+                }
+            },
+            "required": ["error_code", "debug_event_sid", "account_sid", "call_sid", "timestamp", "description", "contact_info"]
+        }
     }
 ]

@@ -10,29 +10,22 @@ logger = setup_logger('voice_call_twilio.py')
 load_dotenv()
 
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-if auth_token is None:
-    logger.error("The Twilio Auth Token not found. Please set the auth_token environment variable.")
-    raise ValueError("The Twilio Auth Token not found. Please set the auth_token environment variable.")
-
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-if account_sid is None:
-    logger.error("The Twilio Account SID not found. Please set the account_sid environment variable.")
-    raise ValueError("The Twilio Account SID not found. Please set the account_sid environment variable.")
- 
 phone_number = os.getenv("phone_number")
-if phone_number is None:
-    logger.error("The Twilio phone number was not found. Please set the phone_number environment variable.")
-    raise ValueError("The Twilio phone number was not found. Please set the phone_number environment variable.")
-
 voice_twiml_bin_sid = os.getenv("voice_twiml_bin_sid")
-if voice_twiml_bin_sid is None:
-    logger.error("The Twilio voice_twiml_bin_sid was not found. Please set the voice_twiml_bin_sid environment variable.")
-    raise ValueError("The Twilio voice_twiml_bin_sid was not found. Please set the voice_twiml_bin_sid environment variable.")
 
-# Initialize Twilio client
-client = Client(account_sid, auth_token)
+if auth_token is None or account_sid is None or phone_number is None or voice_twiml_bin_sid is None:
+    logger.error("Twilio credentials not found. Voice call features will be disabled.")
+    TWILIO_ENABLED = False
+else:
+    TWILIO_ENABLED = True
+    client = Client(account_sid, auth_token)
 
 def make_call(to):
+    if not TWILIO_ENABLED:
+        logger.error("Twilio voice call is disabled due to missing credentials.")
+        return None
+
     try:
         logger.info(f"Making call to {to}")
         voice_url = f"https://handler.twilio.com/twiml/{voice_twiml_bin_sid}?PhoneNumber={to}"
@@ -48,6 +41,10 @@ def make_call(to):
         raise
 
 def end_call(call_sid):
+    if not TWILIO_ENABLED:
+        logger.error("Twilio voice call is disabled due to missing credentials.")
+        return None
+
     try:
         logger.info(f"Ending call with SID: {call_sid}")
         call = client.calls(call_sid).update(status="completed")

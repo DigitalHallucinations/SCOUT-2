@@ -1,0 +1,79 @@
+[
+    {
+        "name": "google_search",
+        "description": "A Google search result API. When you need a short and clear answer to a specific question, you can use it. The input should be a search query.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search content."
+                },
+                "k": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Select first k results in the search results as response."
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "get_current_info",
+        "description": "Get the current time, date, day, month and year, or timestamp based on the format specified.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "format_type": {
+                    "type": "string",
+                    "enum": ["time", "date", "day", "month_year", "timestamp"],
+                    "default": "timestamp"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "terminal_command",
+        "description": "Execute a terminal command and return the output, error, and status code.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The terminal command to execute."
+                },
+                "timeout": {
+                    "type": "integer",
+                    "default": 60,
+                    "description": "The maximum time (in seconds) to wait for the command to complete. This overrides the default_timeout if both are provided."
+                },
+                "default_timeout": {
+                    "type": "integer",
+                    "description": "The default timeout value (in seconds) to use if no specific timeout is provided. This value is used as the fallback timeout."
+                },
+                "encoding": {
+                    "type": "string",
+                    "default": "utf-8",
+                    "description": "The encoding to use for decoding the command's output and error messages."
+                },
+                "verbose": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable verbose mode to log additional information about the command execution process."
+                },
+                "output_limit": {
+                    "type": "integer",
+                    "default": "1048576, // 1024 * 1024",
+                    "description": "The maximum size (in bytes) of the command's output."
+                },
+                "max_retries": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "The maximum number of retries to attempt if the command fails due to temporary issues."
+                }
+            },
+            "required": ["command"]
+        }
+    }
+]

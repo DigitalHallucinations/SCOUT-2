@@ -10,16 +10,19 @@ logger = setup_logger('contact_twilio_support.py')
 load_dotenv()
 
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-if auth_token is None:
-    logger.error("The Twilio Auth Token not found. Please set the TWILIO_AUTH_TOKEN environment variable.")
-    raise ValueError("The Twilio Auth Token not found. Please set the TWILIO_AUTH_TOKEN environment variable.")
-
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-if account_sid is None:
-    logger.error("The Twilio Account SID not found. Please set the TWILIO_ACCOUNT_SID environment variable.")
-    raise ValueError("The Twilio Account SID not found. Please set the TWILIO_ACCOUNT_SID environment variable.")
+
+if auth_token is None or account_sid is None:
+    logger.error("Twilio credentials not found. Twilio support features will be disabled.")
+    TWILIO_ENABLED = False
+else:
+    TWILIO_ENABLED = True
 
 def contact_twilio_support(error_code, debug_event_sid, account_sid, call_sid, timestamp, description, contact_info):
+    if not TWILIO_ENABLED:
+        logger.error("Twilio support is disabled due to missing credentials.")
+        return None
+
     try:
         logger.info("Contacting Twilio Support with error details.")
         url = "https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json".format(account_sid=account_sid)
@@ -49,10 +52,13 @@ def contact_twilio_support(error_code, debug_event_sid, account_sid, call_sid, t
 
 # Example usage
 if __name__ == "__main__":
-    error_code = "13225"
-    debug_event_sid = "NO8336bec59aaa9c5e3fa319546fac0a91"
-    call_sid = "CAfd2760a84e1b3d13ca339c5bd69bd891"
-    timestamp = "2024-05-23 03:15:25"
-    description = "The destination number is blocked by Twilio. If you have a legitimate need to call this number, please reach out to Twilio Support."
-    contact_info = "jeremyshws@gmail.com"
-    contact_twilio_support(error_code, debug_event_sid, account_sid, call_sid, timestamp, description, contact_info)
+    if TWILIO_ENABLED:
+        error_code = "13225"
+        debug_event_sid = "NO8336bec59aaa9c5e3fa319546fac0a91"
+        call_sid = "CAfd2760a84e1b3d13ca339c5bd69bd891"
+        timestamp = "2024-05-23 03:15:25"
+        description = "The destination number is blocked by Twilio. If you have a legitimate need to call this number, please reach out to Twilio Support."
+        contact_info = "jeremyshws@gmail.com"
+        contact_twilio_support(error_code, debug_event_sid, account_sid, call_sid, timestamp, description, contact_info)
+    else:
+        logger.error("Twilio support is disabled. Example usage cannot proceed.")

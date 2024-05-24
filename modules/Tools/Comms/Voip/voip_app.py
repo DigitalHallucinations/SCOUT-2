@@ -2,7 +2,6 @@
 
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout
-from PySide6.QtCore import QPointF
 from modules.Tools.Comms.Voip.modules.header_frame import create_header_frame
 from modules.Tools.Comms.Voip.modules.phone import PhoneFrame
 from modules.Tools.Comms.Voip.modules.messages import ConversationFrame

@@ -1,7 +1,10 @@
+# giu/tool_control.py
+
 from PySide6 import QtWidgets, QtGui, QtCore as qtc
 
+
 class ToolControlBar(QtWidgets.QFrame):
-    def __init__(self, parent=None, voip_app=None, feed_portal=None):
+    def __init__(self, parent=None, voip_app=None, feed_portal=None, browser=None):
         super().__init__(parent)
         self.setFixedHeight(30)
         self.setStyleSheet("""
@@ -17,6 +20,7 @@ class ToolControlBar(QtWidgets.QFrame):
 
         self.voip_app = voip_app
         self.feed_portal = feed_portal
+        self.browser = browser
 
         icon_size = 20
 
@@ -64,12 +68,41 @@ class ToolControlBar(QtWidgets.QFrame):
         rss_button.enterEvent = lambda event: on_rss_button_hover(event)
         rss_button.leaveEvent = lambda event: on_rss_button_leave(event)
 
+        # Browser Icon
+        browser_img = QtGui.QPixmap("assets/SCOUT/Icons/browser_wt.png")
+        browser_img = browser_img.scaled(icon_size, icon_size)
+
+        browser_button = QtWidgets.QPushButton(self)
+        browser_button.setIcon(QtGui.QIcon(browser_img))
+        browser_button.setIconSize(qtc.QSize(icon_size, icon_size))
+        browser_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
+        browser_button.clicked.connect(self.show_browser)
+        layout.addWidget(browser_button)
+
+        def on_browser_button_hover(event):
+            hover_img = QtGui.QPixmap("assets/SCOUT/Icons/browser_bl.png")
+            hover_img = hover_img.scaled(icon_size, icon_size)
+            browser_button.setIcon(QtGui.QIcon(hover_img))
+
+        def on_browser_button_leave(event):
+            browser_button.setIcon(QtGui.QIcon(browser_img))
+
+        browser_button.enterEvent = lambda event: on_browser_button_hover(event)
+        browser_button.leaveEvent = lambda event: on_browser_button_leave(event)
+
         layout.addStretch(1) 
 
     def show_feed_portal(self):
         self.feed_portal.show()
-        self.voip_app.hide()  
+        self.voip_app.hide()
+        self.browser.hide()
 
     def show_voip_app(self):
         self.voip_app.show()
-        self.feed_portal.hide()  
+        self.feed_portal.hide()
+        self.browser.hide()
+
+    def show_browser(self):
+        self.browser.show()
+        self.voip_app.hide()
+        self.feed_portal.hide()

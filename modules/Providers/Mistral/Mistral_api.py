@@ -11,9 +11,9 @@ load_dotenv()
 
 api_key = os.getenv("Mistral_API_KEY")
 if api_key is None:
-    raise ValueError("API key not found. Please set the Mistral_API_KEY environment variable.")
-
-API_ENDPOINT = "https://api.mistral.ai/v1/chat/completions"
+    logger.error("Mistral_API_KEY is not set. Mistral functionality will be disabled.")
+else:
+    API_ENDPOINT = "https://api.mistral.ai/v1/chat/completions"
 
 class MistralAPI:
     def __init__(self):
@@ -51,5 +51,3 @@ class MistralAPI:
                     error_message = await response.text()
                     logger.error("Error generating CBS response from API: %s: %s", response.status, error_message)
                     return None
-
-                  

@@ -5,37 +5,35 @@ from twilio.rest import Client
 from dotenv import load_dotenv
 from modules.logging.logger import setup_logger
 
-# Setup logger
 logger = setup_logger('Twilio_verify.py')
 
-# Load environment variables
 load_dotenv()
 
-# Retrieve Twilio credentials from environment variables
 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-if auth_token is None:
-    logger.error("The Twilio Auth Token not found. Please set the auth_token environment variable.")
-    raise ValueError("The Twilio Auth Token not found. Please set the auth_token environment variable.")
-
 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-if account_sid is None:
-    logger.error("The Twilio Account SID not found. Please set the account_sid environment variable.")
-    raise ValueError("The Twilio Account SID not found. Please set the account_sid environment variable.")
-
 verify_service_sid = os.getenv("verify_service_sid")
-if verify_service_sid is None:
-    logger.error("The Twilio Verify Service SID not found. Please set the verify_service_sid environment variable.")
-    raise ValueError("The Twilio Verify Service SID not found. Please set the verify_service_sid environment variable.")
 
-# Initialize Twilio client
-client = Client(account_sid, auth_token)
+if auth_token is None or account_sid is None or verify_service_sid is None:
+    logger.error("Twilio credentials not found. Verification features will be disabled.")
+    TWILIO_ENABLED = False
+else:
+    TWILIO_ENABLED = True
+    client = Client(account_sid, auth_token)
 
 class TwilioVerify:
     def __init__(self, account_sid, auth_token, verify_service_sid):
+        if not TWILIO_ENABLED:
+            logger.error("Twilio verification is disabled due to missing credentials.")
+            return
+
         self.client = Client(account_sid, auth_token)
         self.verify_service_sid = verify_service_sid
 
     def send_verification_request(self, phone_number):
+        if not TWILIO_ENABLED:
+            logger.error("Twilio verification is disabled due to missing credentials.")
+            return None
+
         try:
             verification = self.client.verify \
                 .services(self.verify_service_sid) \
@@ -49,6 +47,10 @@ class TwilioVerify:
             return None
 
     def check_verification_status(self, phone_number, code):
+        if not TWILIO_ENABLED:
+            logger.error("Twilio verification is disabled due to missing credentials.")
+            return False
+
         try:
             verification_check = self.client.verify \
                 .services(self.verify_service_sid) \

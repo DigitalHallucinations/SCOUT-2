@@ -1,0 +1,24 @@
+
+1. **Systeminfo, filesystem, and environment sensor: Get systeminfo and format for insertion. This should be done at time of application start and injected into persona system prompt.
+
+2. **Code Analysis and Linting Tool**: A tool that can analyze code for potential errors, code smells, and style issues. This would allow me to provide more detailed feedback on code quality and suggest improvements.
+
+3. **Version Control System Integration**: Direct integration with version control systems like Git. This would enable me to perform operations such as cloning repositories, committing changes, and pushing updates directly from the terminal.
+
+4. **File and Directory Management**: Enhanced capabilities for managing files and directories, such as creating, copying, moving, and deleting files and directories. This would complement the existing terminal command tool by providing more specialized file operations.
+
+5. **Networking Tools**: Tools for performing network operations, such as sending HTTP requests, interacting with APIs, and managing sockets. This would be useful for developing and testing networked applications.
+
+6. **Database Interaction Tool**: A tool for interacting with databases, allowing for the execution of SQL queries, database management, and data manipulation directly from the terminal.
+
+7. **Environment and Dependency Management**: Tools for managing project environments and dependencies, such as creating virtual environments, installing packages, and managing package versions.
+
+8. **Automated Testing Tool**: A tool for running and managing tests, including unit tests, integration tests, and end-to-end tests. This would help in ensuring code quality and reliability.
+
+9. **Performance Profiling Tool**: A tool for analyzing and profiling code performance. This could help identify bottlenecks and optimize code for better performance.
+
+10. **Documentation Generation Tool**: (partially complete [DocGenius]) A tool for automatically generating documentation from code comments and annotations. This would help in maintaining up-to-date documentation for projects.
+
+11. **Interactive Development Environment (IDE) Features**: Features commonly found in IDEs, such as code completion, refactoring tools, and debugging capabilities. This would make coding and troubleshooting more efficient.
+
+12. **Jupiter notebook interface: 

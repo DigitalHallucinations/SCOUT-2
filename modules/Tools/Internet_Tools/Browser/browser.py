@@ -2,7 +2,7 @@
 
 import re
 
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QToolBar, QStatusBar, QTabWidget, QTabBar, QLabel, QMenu, QFileDialog
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QToolBar, QStatusBar, QTabWidget, QTabBar, QLabel, QMenu, QFileDialog, QFrame, QScrollArea
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtCore import QUrl, QSize, Qt
@@ -200,6 +200,30 @@ class Browser(QMainWindow):
         self.toolbar.addWidget(self.url_bar)
         logger.info("URL bar added")
 
+        # History Icon
+        history_img = QPixmap("assets/SCOUT/Icons/Browser_icons/history_wt.png")
+        history_img = history_img.scaled(icon_size.width(), icon_size.height())
+
+        # History button
+        self.history_button = QPushButton(self)
+        self.history_button.setIcon(QIcon(history_img))
+        self.history_button.setIconSize(icon_size)
+        self.history_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
+        self.history_button.clicked.connect(self.toggle_history_frame)
+        self.toolbar.addWidget(self.history_button)
+        logger.info("History button added")
+
+        def on_history_button_hover(event):
+            hover_img = QPixmap("assets/SCOUT/Icons/Browser_icons/history_bl.png")
+            hover_img = hover_img.scaled(icon_size.width(), icon_size.height())
+            self.history_button.setIcon(QIcon(hover_img))
+
+        def on_history_button_leave(event):
+            self.history_button.setIcon(QIcon(history_img))
+
+        self.history_button.enterEvent = lambda event: on_history_button_hover(event)
+        self.history_button.leaveEvent = lambda event: on_history_button_leave(event)
+
 
         # Add tab button
         self.add_tab_button = QPushButton(self)
@@ -290,6 +314,25 @@ class Browser(QMainWindow):
 
         # Load bookmarks from the database
         self.load_bookmarks()
+
+        # Create history frame
+        self.history_frame = QFrame(self)
+        self.history_frame.setStyleSheet("background-color: #2d2d2d; color: #ffffff; border-radius: 10px;")
+        self.history_frame.setFixedWidth(200)
+        self.history_frame.setVisible(False)
+
+        self.history_layout = QVBoxLayout(self.history_frame)
+        self.history_scroll = QScrollArea(self.history_frame)
+        self.history_scroll.setWidgetResizable(True)
+        self.history_scroll.setStyleSheet("background-color: #2d2d2d; border: none;")
+        self.history_content = QWidget()
+        self.history_scroll.setWidget(self.history_content)
+        self.history_content_layout = QVBoxLayout(self.history_content)
+        self.history_layout.addWidget(self.history_scroll)
+        self.content_layout.addWidget(self.history_frame)
+
+        # Load history from the database
+        self.load_history()
 
     def on_download_requested(self, download):
         download_path = QFileDialog.getSaveFileName(self, "Save File", download.path())[0]
@@ -424,9 +467,18 @@ class Browser(QMainWindow):
             self.bookmarks.append(url)
             logger.info(f"Loaded bookmark: {url}")
 
+    def toggle_history_frame(self):
+        self.history_frame.setVisible(not self.history_frame.isVisible())
+
+    # Update the load_history method to include the new history frame
     def load_history(self):
         history = self.db.get_all_history()
         for entry in history:
             url, title = entry[1], entry[2]
+            history_label = QLabel(title)
+            history_label.setStyleSheet("color: #FFFFFF;")
+            history_label.mousePressEvent = lambda event, url=url: self.tabs.currentWidget().setUrl(QUrl(url))
+            history_label.enterEvent = lambda event, label=history_label: label.setStyleSheet("color: #5077E0;")
+            history_label.leaveEvent = lambda event, label=history_label: label.setStyleSheet("color: #FFFFFF;")
+            self.history_content_layout.addWidget(history_label)
             self.history.append(url)
-            logger.info(f"Loaded history entry: {url}")

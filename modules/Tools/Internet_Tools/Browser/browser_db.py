@@ -1,6 +1,7 @@
 # modules/Tools/Internet_Tools/Browser/browser_db.py
 
 import sqlite3
+import os
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('browser_db.py')
@@ -13,9 +14,13 @@ class BrowserDatabase:
         self.cursor = None
         self.create_database()
 
+
+
     def create_database(self):
-        """Creates the browser database if it doesn't exist."""
         logger.info("Creating database and tables if they don't exist")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()

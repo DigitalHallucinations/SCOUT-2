@@ -37,6 +37,7 @@ class BrowserDatabase:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     url TEXT,
                     title TEXT,
+                    icon_path TEXT,  -- Add this line
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
@@ -100,45 +101,6 @@ class BrowserDatabase:
             if self.conn:
                 self.conn.close()
 
-    def add_bookmark(self, url, title):
-        logger.info("Adding new bookmark to the database")
-        logger.debug(f"Adding bookmark: {url}")
-        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
-        try:
-            self.conn = sqlite3.connect(db_path)
-            self.cursor = self.conn.cursor()
-
-            self.cursor.execute("""
-                INSERT INTO bookmarks (url, title)
-                VALUES (?, ?)
-            """, (url, title))
-            self.conn.commit()
-            logger.debug(f"Bookmark {url} added successfully")
-        except sqlite3.Error as e:
-            logger.error(f"An error occurred while adding the bookmark: {e}")
-        finally:
-            self.conn.close()
-
-    def get_all_bookmarks(self):
-        """Retrieves all bookmarks from the database."""
-        logger.info("Retrieving all bookmarks from the database")
-        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
-        try:
-            self.conn = sqlite3.connect(db_path)
-            self.cursor = self.conn.cursor()
-
-            self.cursor.execute("SELECT * FROM bookmarks")
-            bookmarks = self.cursor.fetchall()
-
-            logger.debug(f"Retrieved {len(bookmarks)} bookmarks")
-            return bookmarks
-        except sqlite3.Error as e:
-            logger.error(f"An error occurred while retrieving bookmarks: {e}")
-            return []
-        finally:
-            if self.conn:
-                self.conn.close()
-
     def add_cookie(self, name, value, domain, path, expiration):
         logger.info("Adding new cookie to the database")
         logger.debug(f"Adding cookie: {name}")
@@ -177,3 +139,81 @@ class BrowserDatabase:
         finally:
             if self.conn:
                 self.conn.close()
+
+    def add_bookmark(self, url, title, icon_path=None):
+        logger.info("Adding new bookmark to the database")
+        logger.debug(f"Adding bookmark: {url}")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
+        try:
+            self.conn = sqlite3.connect(db_path)
+            self.cursor = self.conn.cursor()
+
+            self.cursor.execute("""
+                INSERT INTO bookmarks (url, title, icon_path)
+                VALUES (?, ?, ?)
+            """, (url, title, icon_path))
+            self.conn.commit()
+            logger.debug(f"Bookmark {url} added successfully")
+        except sqlite3.Error as e:
+            logger.error(f"An error occurred while adding the bookmark: {e}")
+        finally:
+            self.conn.close()
+
+    def get_all_bookmarks(self):
+        """Retrieves all bookmarks from the database."""
+        logger.info("Retrieving all bookmarks from the database")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
+        try:
+            self.conn = sqlite3.connect(db_path)
+            self.cursor = self.conn.cursor()
+
+            self.cursor.execute("SELECT * FROM bookmarks")
+            bookmarks = self.cursor.fetchall()
+
+            logger.debug(f"Retrieved {len(bookmarks)} bookmarks")
+            return bookmarks
+        except sqlite3.Error as e:
+            logger.error(f"An error occurred while retrieving bookmarks: {e}")
+            return []
+        finally:
+            if self.conn:
+                self.conn.close()
+
+    def update_bookmark_icon(self, url, icon_path):
+        logger.info("Updating bookmark icon in the database")
+        logger.debug(f"Updating bookmark icon for: {url}")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
+        try:
+            self.conn = sqlite3.connect(db_path)
+            self.cursor = self.conn.cursor()
+
+            self.cursor.execute("""
+                UPDATE bookmarks
+                SET icon_path = ?
+                WHERE url = ?
+            """, (icon_path, url))
+            self.conn.commit()
+            logger.debug(f"Bookmark icon for {url} updated successfully")
+        except sqlite3.Error as e:
+            logger.error(f"An error occurred while updating the bookmark icon: {e}")
+        finally:
+            self.conn.close()
+
+    def delete_bookmark(self, url):
+        logger.info("Deleting bookmark from the database")
+        logger.debug(f"Deleting bookmark: {url}")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
+        try:
+            self.conn = sqlite3.connect(db_path)
+            self.cursor = self.conn.cursor()
+
+            self.cursor.execute("""
+                DELETE FROM bookmarks
+                WHERE url = ?
+            """, (url,))
+            self.conn.commit()
+            logger.debug(f"Bookmark {url} deleted successfully")
+        except sqlite3.Error as e:
+            logger.error(f"An error occurred while deleting the bookmark: {e}")
+        finally:
+            self.conn.close()

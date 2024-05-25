@@ -1,58 +1,18 @@
 # modules/Tools/Internet_Tools/browser.py
 
 import re
-import sys
 from threading import Thread
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QToolBar, QStatusBar, QTabWidget, QTabBar, QLabel, QMenu, QFileDialog, QFrame, QScrollArea, QApplication
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QToolBar, QStatusBar, QTabWidget, QTabBar, QLabel, QMenu, QFileDialog, QFrame, QScrollArea
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtCore import QUrl, QSize, Qt
 from PySide6.QtGui import QIcon, QPixmap
 
 from modules.Tools.Internet_Tools.Browser.browser_db import BrowserDatabase
 from modules.Tools.Internet_Tools.Browser.csp import app
+from modules.Tools.Internet_Tools.Browser.web_engine_page import MyWebEnginePage 
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('browser.py')
-
-class MyWebEnginePage(QWebEnginePage):
-    def certificateError(self, certificateError):
-        logger.error(f"SSL Certificate Error: {certificateError.errorDescription()}")
-        return True  
-
-    def javaScriptConsoleMessage(self, level, message, lineNumber, sourceID):
-        logger.error(f"JavaScript Console: {message} (Source: {sourceID}, Line: {lineNumber})")
-        
-        if "ax_tree.cc" in message:
-            logger.error(f"AXTree Error: {message} (Source: {sourceID}, Line: {lineNumber})")
-
-        # Check for CSP errors and log them
-        if "Content-Security-Policy" in message and "'\"self\"'" in message:
-            logger.error(f"CSP Error: Invalid source expression '\"self\"'. Use 'self' instead.")
-
-        # Check for undefined properties and log them
-        if "Cannot read properties of undefined" in message:
-            logger.error(f"Undefined Property Error: {message} (Source: {sourceID}, Line: {lineNumber})")
-
-        # Check for Permutive initialization errors and log them
-        if "Permutive was not initialized" in message:
-            logger.error(f"Permutive Initialization Error: {message} (Source: {sourceID}, Line: {lineNumber})")
-
-        # Check for AbortError and log them
-        if "AbortError" in message:
-            logger.error(f"AbortError: {message} (Source: {sourceID}, Line: {lineNumber})")
-
-        # Check for loadable state errors and log them
-        if "loadableReady() requires state" in message:
-            logger.error(f"Loadable State Error: {message} (Source: {sourceID}, Line: {lineNumber})")
-
-        # Check for event parsing errors and log them
-        if "Unable to parse event" in message:
-            logger.error(f"Parsing Event Error: {message} (Source: {sourceID}, Line: {lineNumber})")
-
-        # Check for fetch errors and log them
-        if "Failed to fetch" in message:
-            logger.error(f"Fetch Error: {message} (Source: {sourceID}, Line: {lineNumber})")
 
 class CustomTabBar(QTabBar):
     def __init__(self, parent=None):
@@ -80,23 +40,19 @@ class Browser(QMainWindow):
 
         icon_size = QSize(22, 22)
 
-
         # Create central widget and layout
         central_widget = QWidget()
         central_widget.setStyleSheet("background-color: transparent;")
         main_layout = QVBoxLayout(central_widget)
         self.setCentralWidget(central_widget)
 
-
         # Create toolbar for navigation
         self.toolbar = QToolBar()
         self.addToolBar(self.toolbar)
 
-
         # Back Icon
         back_img = QPixmap("assets/SCOUT/Icons/Browser_icons/back_wt.png")
         back_img = back_img.scaled(icon_size.width(), icon_size.height())
-
 
         # Back button
         back_button = QPushButton(self)
@@ -107,25 +63,20 @@ class Browser(QMainWindow):
         self.toolbar.addWidget(back_button)
         logger.info("Back button added")
 
-
         def on_back_button_hover(event):
             hover_img = QPixmap("assets/SCOUT/Icons/Browser_icons/back_bl.png")
             hover_img = hover_img.scaled(icon_size.width(), icon_size.height())
             back_button.setIcon(QIcon(hover_img))
 
-
         def on_back_button_leave(event):
             back_button.setIcon(QIcon(back_img))
-
 
         back_button.enterEvent = lambda event: on_back_button_hover(event)
         back_button.leaveEvent = lambda event: on_back_button_leave(event)
 
-
         # Forward Icon
         forward_img = QPixmap("assets/SCOUT/Icons/Browser_icons/forward_wt.png")
         forward_img = forward_img.scaled(icon_size.width(), icon_size.height())
-
 
         # Forward button
         forward_button = QPushButton(self)
@@ -136,25 +87,20 @@ class Browser(QMainWindow):
         self.toolbar.addWidget(forward_button)
         logger.info("Forward button added")
 
-
         def on_forward_button_hover(event):
             hover_img = QPixmap("assets/SCOUT/Icons/Browser_icons/forward_bl.png")
             hover_img = hover_img.scaled(icon_size.width(), icon_size.height())
             forward_button.setIcon(QIcon(hover_img))
 
-
         def on_forward_button_leave(event):
             forward_button.setIcon(QIcon(forward_img))
-
 
         forward_button.enterEvent = lambda event: on_forward_button_hover(event)
         forward_button.leaveEvent = lambda event: on_forward_button_leave(event)
 
-
         # Reload Icon
         reload_img = QPixmap("assets/SCOUT/Icons/Browser_icons/reload_wt.png")
         reload_img = reload_img.scaled(icon_size.width(), icon_size.height())
-
 
         # Reload button
         reload_button = QPushButton(self)
@@ -165,20 +111,16 @@ class Browser(QMainWindow):
         self.toolbar.addWidget(reload_button)
         logger.info("Reload button added")
 
-
         def on_reload_button_hover(event):
             hover_img = QPixmap("assets/SCOUT/Icons/Browser_icons/reload_bl.png")
             hover_img = hover_img.scaled(icon_size.width(), icon_size.height())
             reload_button.setIcon(QIcon(hover_img))
 
-
         def on_reload_button_leave(event):
             reload_button.setIcon(QIcon(reload_img))
 
-
         reload_button.enterEvent = lambda event: on_reload_button_hover(event)
         reload_button.leaveEvent = lambda event: on_reload_button_leave(event)
-
 
         # Home Icon
         home_img_path = "assets/SCOUT/Icons/Browser_icons/home_wt.png"
@@ -187,7 +129,6 @@ class Browser(QMainWindow):
             logger.error(f"Failed to load image: {home_img_path}")
         else:
             home_img = home_img.scaled(icon_size.width(), icon_size.height())
-
 
         # Home button
         home_button = QPushButton(self)
@@ -198,7 +139,6 @@ class Browser(QMainWindow):
         self.toolbar.addWidget(home_button)
         logger.info("Home button added")
 
-
         def on_home_button_hover(event):
             hover_img_path = "assets/SCOUT/Icons/Browser_icons/home_bl.png"
             hover_img = QPixmap(hover_img_path)
@@ -208,14 +148,11 @@ class Browser(QMainWindow):
                 hover_img = hover_img.scaled(icon_size.width(), icon_size.height())
                 home_button.setIcon(QIcon(hover_img))
 
-
         def on_home_button_leave(event):
             home_button.setIcon(QIcon(home_img))
 
-
         home_button.enterEvent = lambda event: on_home_button_hover(event)
         home_button.leaveEvent = lambda event: on_home_button_leave(event)
-
 
         # URL bar
         self.url_bar = QLineEdit()
@@ -256,7 +193,6 @@ class Browser(QMainWindow):
         self.history_button.enterEvent = lambda event: on_history_button_hover(event)
         self.history_button.leaveEvent = lambda event: on_history_button_leave(event)
 
-
         # Add tab button
         self.add_tab_button = QPushButton(self)
         self.add_tab_button.setIcon(QIcon("assets/SCOUT/Icons/Browser_icons/add_tab_wt.png"))
@@ -264,7 +200,6 @@ class Browser(QMainWindow):
         self.add_tab_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
         self.add_tab_button.clicked.connect(self.add_new_tab)
         self.toolbar.addWidget(self.add_tab_button)
-
 
         def on_home_button_hover(event):
             hover_img_path = "assets/SCOUT/Icons/Browser_icons/home_bl.png"
@@ -275,25 +210,20 @@ class Browser(QMainWindow):
                 hover_img = hover_img.scaled(icon_size.width(), icon_size.height())
                 home_button.setIcon(QIcon(hover_img))
 
-
         def on_home_button_leave(event):
             home_button.setIcon(QIcon(home_img))
 
-
         home_button.enterEvent = lambda event: on_home_button_hover(event)
         home_button.leaveEvent = lambda event: on_home_button_leave(event)
-
 
         # Bookmarks Bar
         self.bookmarks_toolbar = QToolBar("Bookmarks")
         self.addToolBar(Qt.TopToolBarArea, self.bookmarks_toolbar)
         self.insertToolBarBreak(self.bookmarks_toolbar)  # Ensure the bookmarks toolbar is below the main toolbar
 
-
         # Bookmark Icon
         bookmark_img = QPixmap("assets/SCOUT/Icons/Browser_icons/bookmark_wt.png")
         bookmark_img = bookmark_img.scaled(icon_size.width(), icon_size.height())
-
 
         # Bookmark button
         bookmark_button = QPushButton(self)
@@ -304,24 +234,19 @@ class Browser(QMainWindow):
         self.bookmarks_toolbar.addWidget(bookmark_button)  # Add bookmark button to bookmarks toolbar
         logger.info("Bookmark button added")
 
-
         def on_bookmark_button_hover(event):
             hover_img = QPixmap("assets/SCOUT/Icons/Browser_icons/bookmark_bl.png")
             hover_img = hover_img.scaled(icon_size.width(), icon_size.height())
             bookmark_button.setIcon(QIcon(hover_img))
 
-
         def on_bookmark_button_leave(event):
             bookmark_button.setIcon(QIcon(bookmark_img))
-
 
         bookmark_button.enterEvent = lambda event: on_bookmark_button_hover(event)
         bookmark_button.leaveEvent = lambda event: on_bookmark_button_leave(event)
 
-
         self.content_layout = QHBoxLayout()
         main_layout.addLayout(self.content_layout)
-
 
         # Create tab widget
         self.tabs = QTabWidget()
@@ -330,11 +255,9 @@ class Browser(QMainWindow):
         self.tabs.tabCloseRequested.connect(self.close_tab)
         self.content_layout.addWidget(self.tabs)
 
-
         # Add initial tab
         self.add_new_tab("Home")
         self.browser_home()
-
 
         # Add status bar
         self.status_bar = QStatusBar()
@@ -344,10 +267,9 @@ class Browser(QMainWindow):
 
         self.browser_view.page().profile().downloadRequested.connect(self.on_download_requested)
 
-        # Load bookmarks from the database
         self.load_bookmarks()
 
-        # Create history frame
+        # Add history frame
         self.history_frame = QFrame(self)
         self.history_frame.setStyleSheet("background-color: #2d2d2d; color: #ffffff; border-radius: 10px;")
         self.history_frame.setFixedWidth(200)
@@ -363,7 +285,6 @@ class Browser(QMainWindow):
         self.history_layout.addWidget(self.history_scroll)
         self.content_layout.addWidget(self.history_frame)
 
-        # Load history from the database
         self.load_history()
 
     def on_download_requested(self, download):
@@ -384,9 +305,7 @@ class Browser(QMainWindow):
         context_menu.addSeparator()
         bookmark_action = context_menu.addAction("Bookmark")
 
-
         action = context_menu.exec_(self.browser_view.mapToGlobal(pos))
-
 
         if action == back_action:
             self.browser_back()
@@ -396,7 +315,6 @@ class Browser(QMainWindow):
             self.browser_reload()
         elif action == bookmark_action:
             self.add_bookmark()
-
 
     def add_new_tab(self, qurl=None, label="Blank"):
         self.browser_view = QWebEngineView()
@@ -417,36 +335,29 @@ class Browser(QMainWindow):
         else:
             self.browser_home()
 
-        # Add history entry to the database
         self.db.add_history(qurl.toString(), label)
 
     def close_tab(self, i):
         if self.tabs.count() > 1:
             self.tabs.removeTab(i)
 
-
     def browser_back(self):
         self.tabs.currentWidget().back()
-
 
     def browser_forward(self):
         self.tabs.currentWidget().forward()
 
-
     def browser_reload(self):
         self.tabs.currentWidget().reload()
 
-
     def browser_home(self):
         self.tabs.currentWidget().setUrl(QUrl(self.home_page))
-
 
     def navigate_to_url(self):
         url = self.url_bar.text()
         if not url.startswith("http"):
             url = "http://" + url
         self.tabs.currentWidget().setUrl(QUrl(url))
-
 
     def update_url_bar(self, q):
         self.url_bar.setText(q.toString())
@@ -460,6 +371,19 @@ class Browser(QMainWindow):
             current_url = self.tabs.currentWidget().url().toString()
             current_title = self.tabs.tabText(self.tabs.currentIndex())
             self.db.add_history(current_url, current_title)
+            self.inject_focus_management_script()
+
+    def inject_focus_management_script(self):
+        script = """
+        (function() {
+            document.querySelectorAll('[tabindex]').forEach(function(element) {
+                if (!element.hasAttribute('role')) {
+                    element.setAttribute('role', 'button');
+                }
+            });
+        })();
+        """
+        self.browser_view.page().runJavaScript(script)
 
     def handle_ssl_errors(self, reply, errors):
         logger.error(f"SSL errors occurred: {errors}")
@@ -471,10 +395,12 @@ class Browser(QMainWindow):
             self.bookmarks.append(current_url)
             bookmark_name = self.extract_site_name(current_url)
             bookmark_label = QLabel(bookmark_name)
-            bookmark_label.setStyleSheet("color: #FFFFFF;")
+            bookmark_label.setStyleSheet("color: #FFFFFF; margin-right: 2px;")
             bookmark_label.mousePressEvent = lambda event: self.tabs.currentWidget().setUrl(QUrl(current_url))
-            bookmark_label.enterEvent = lambda event: bookmark_label.setStyleSheet("color: #5077E0;")
-            bookmark_label.leaveEvent = lambda event: bookmark_label.setStyleSheet("color: #FFFFFF;")
+            bookmark_label.enterEvent = lambda event: bookmark_label.setStyleSheet("color: #5077E0; margin-right: 2px;")
+            bookmark_label.leaveEvent = lambda event: bookmark_label.setStyleSheet("color: #FFFFFF; margin-right: 2px;")
+            bookmark_label.setContextMenuPolicy(Qt.CustomContextMenu)
+            bookmark_label.customContextMenuRequested.connect(lambda pos, label=bookmark_label, url=current_url: self.show_bookmark_context_menu(pos, label, url))
             self.bookmarks_toolbar.addWidget(bookmark_label)
             logger.info(f"Added bookmark: {current_url}")
 
@@ -482,29 +408,66 @@ class Browser(QMainWindow):
         else:
             logger.info(f"Bookmark already exists: {current_url}")
 
+    def show_bookmark_context_menu(self, pos, label, url):
+        context_menu = QMenu(self)
+        change_icon_action = context_menu.addAction("Change Icon")
+        delete_action = context_menu.addAction("Delete")
+
+        action = context_menu.exec_(label.mapToGlobal(pos))
+
+        if action == change_icon_action:
+            icon_path, _ = QFileDialog.getOpenFileName(self, "Select Icon", "", "Images (*.png *.xpm *.jpg)")
+            if icon_path:
+                pixmap = QPixmap(icon_path)
+                label.setPixmap(pixmap.scaled(22, 22))
+                self.db.update_bookmark_icon(url, icon_path)
+                logger.info(f"Bookmark icon updated for: {url}")
+        elif action == delete_action:
+            self.bookmarks_toolbar.removeWidget(label)
+            self.bookmarks.remove(url)
+            self.db.delete_bookmark(url)
+            logger.info(f"Bookmark deleted: {url}")
+
+    def load_bookmarks(self):
+        bookmarks = self.db.get_all_bookmarks()
+        for bookmark in bookmarks:
+            url, title, icon_path = bookmark[1], bookmark[2], bookmark[3]
+            bookmark_label = QLabel(title)
+            bookmark_label.setStyleSheet("color: #FFFFFF; margin-right: 2px;")
+            bookmark_label.mousePressEvent = lambda event, url=url: self.tabs.currentWidget().setUrl(QUrl(url))
+            bookmark_label.enterEvent = lambda event, label=bookmark_label: label.setStyleSheet("color: #5077E0; margin-right: 2px;")
+            bookmark_label.leaveEvent = lambda event, label=bookmark_label: label.setStyleSheet("color: #FFFFFF; margin-right: 2px;")
+            bookmark_label.setContextMenuPolicy(Qt.CustomContextMenu)
+            bookmark_label.customContextMenuRequested.connect(lambda pos, label=bookmark_label, url=url: self.show_bookmark_context_menu(pos, label, url))
+            if icon_path:
+                pixmap = QPixmap(icon_path)
+                bookmark_label.setPixmap(pixmap.scaled(22, 22))
+            self.bookmarks_toolbar.addWidget(bookmark_label)
+            self.bookmarks.append(url)
+            logger.info(f"Loaded bookmark: {url}")
+
+    def select_bookmark_icon(self, label):
+        icon_path, _ = QFileDialog.getOpenFileName(self, "Select Icon", "", "Images (*.png *.xpm *.jpg)")
+        if icon_path:
+            icon = QIcon(icon_path)
+            label.setPixmap(icon.pixmap(16, 16))  # Adjust the size as needed
+            logger.info(f"Icon selected for bookmark: {icon_path}")
+
+    def delete_bookmark(self, label, url):
+        self.bookmarks_toolbar.removeWidget(label)
+        self.bookmarks.remove(url)
+        self.db.delete_bookmark(url)
+        logger.info(f"Deleted bookmark: {url}")
+
     def extract_site_name(self, url):
         match = re.search(r'://(www\.)?([^/]+)', url)
         if match:
             return match.group(2).split('.')[0].capitalize()
         return "Unknown"
-    
-    def load_bookmarks(self):
-        bookmarks = self.db.get_all_bookmarks()
-        for bookmark in bookmarks:
-            url, title = bookmark[1], bookmark[2]
-            bookmark_label = QLabel(title)
-            bookmark_label.setStyleSheet("color: #FFFFFF;")
-            bookmark_label.mousePressEvent = lambda event, url=url: self.tabs.currentWidget().setUrl(QUrl(url))
-            bookmark_label.enterEvent = lambda event, label=bookmark_label: label.setStyleSheet("color: #5077E0;")
-            bookmark_label.leaveEvent = lambda event, label=bookmark_label: label.setStyleSheet("color: #FFFFFF;")
-            self.bookmarks_toolbar.addWidget(bookmark_label)
-            self.bookmarks.append(url)
-            logger.info(f"Loaded bookmark: {url}")
 
     def toggle_history_frame(self):
         self.history_frame.setVisible(not self.history_frame.isVisible())
 
-    # Update the load_history method to include the new history frame
     def load_history(self):
         history = self.db.get_all_history()
         for entry in history:

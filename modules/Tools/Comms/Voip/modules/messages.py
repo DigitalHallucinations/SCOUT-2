@@ -3,7 +3,7 @@
 from PySide6.QtWidgets import QWidget, QLabel, QTextEdit, QVBoxLayout, QSpacerItem, QHBoxLayout, QSizePolicy, QFrame, QPushButton
 from PySide6.QtGui import QIcon, QFont, QPixmap
 from PySide6.QtCore import Qt, QDateTime, QSize
-from modules.Tools.Comms.Voip.modules.emoji_picker import EmojiPicker
+from modules.Tools.Comms.Voip.modules.emoji.emoji_picker import EmojiPicker
 from modules.Tools.Comms.Voip.modules.messaging.Twilio.send_sms_twilio import send_sms
 from modules.Tools.Comms.Voip.modules.Contacts.contacts_db import ContactsDatabase
 from modules.Tools.Comms.Voip.modules.messaging.Twilio.Twilio_verify import TwilioVerify

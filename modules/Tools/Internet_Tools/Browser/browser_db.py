@@ -14,15 +14,13 @@ class BrowserDatabase:
         self.cursor = None
         self.create_database()
 
-
-
     def create_database(self):
         logger.info("Creating database and tables if they don't exist")
         db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
         try:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(db_path)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("""
@@ -66,8 +64,9 @@ class BrowserDatabase:
     def add_history(self, url, title):
         logger.info("Adding new history entry to the database")
         logger.debug(f"Adding history: {url}")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
         try:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(db_path)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("""
@@ -84,8 +83,9 @@ class BrowserDatabase:
     def get_all_history(self):
         """Retrieves all history entries from the database."""
         logger.info("Retrieving all history entries from the database")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
         try:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(db_path)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("SELECT * FROM history")
@@ -103,8 +103,9 @@ class BrowserDatabase:
     def add_bookmark(self, url, title):
         logger.info("Adding new bookmark to the database")
         logger.debug(f"Adding bookmark: {url}")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
         try:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(db_path)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("""
@@ -121,8 +122,9 @@ class BrowserDatabase:
     def get_all_bookmarks(self):
         """Retrieves all bookmarks from the database."""
         logger.info("Retrieving all bookmarks from the database")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
         try:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(db_path)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("SELECT * FROM bookmarks")
@@ -140,8 +142,9 @@ class BrowserDatabase:
     def add_cookie(self, name, value, domain, path, expiration):
         logger.info("Adding new cookie to the database")
         logger.debug(f"Adding cookie: {name}")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
         try:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(db_path)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("""
@@ -158,8 +161,9 @@ class BrowserDatabase:
     def get_all_cookies(self):
         """Retrieves all cookies from the database."""
         logger.info("Retrieving all cookies from the database")
+        db_path = os.path.join('modules', 'Tools', 'Internet_Tools', 'Browser', self.db_name)
         try:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(db_path)
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("SELECT * FROM cookies")

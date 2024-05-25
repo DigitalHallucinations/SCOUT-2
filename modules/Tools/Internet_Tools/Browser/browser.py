@@ -1,29 +1,58 @@
 # modules/Tools/Internet_Tools/browser.py
 
 import re
-
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QToolBar, QStatusBar, QTabWidget, QTabBar, QLabel, QMenu, QFileDialog, QFrame, QScrollArea
+import sys
+from threading import Thread
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QToolBar, QStatusBar, QTabWidget, QTabBar, QLabel, QMenu, QFileDialog, QFrame, QScrollArea, QApplication
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtCore import QUrl, QSize, Qt
 from PySide6.QtGui import QIcon, QPixmap
 
 from modules.Tools.Internet_Tools.Browser.browser_db import BrowserDatabase
+from modules.Tools.Internet_Tools.Browser.csp import app
 from modules.logging.logger import setup_logger
 
-
 logger = setup_logger('browser.py')
-
 
 class MyWebEnginePage(QWebEnginePage):
     def certificateError(self, certificateError):
         logger.error(f"SSL Certificate Error: {certificateError.errorDescription()}")
         return True  
 
-
     def javaScriptConsoleMessage(self, level, message, lineNumber, sourceID):
-        logger.error(f"JavaScript Console: {message} (Source: {sourceID}, Line: {lineNumber})") 
+        logger.error(f"JavaScript Console: {message} (Source: {sourceID}, Line: {lineNumber})")
+        
+        if "ax_tree.cc" in message:
+            logger.error(f"AXTree Error: {message} (Source: {sourceID}, Line: {lineNumber})")
 
+        # Check for CSP errors and log them
+        if "Content-Security-Policy" in message and "'\"self\"'" in message:
+            logger.error(f"CSP Error: Invalid source expression '\"self\"'. Use 'self' instead.")
+
+        # Check for undefined properties and log them
+        if "Cannot read properties of undefined" in message:
+            logger.error(f"Undefined Property Error: {message} (Source: {sourceID}, Line: {lineNumber})")
+
+        # Check for Permutive initialization errors and log them
+        if "Permutive was not initialized" in message:
+            logger.error(f"Permutive Initialization Error: {message} (Source: {sourceID}, Line: {lineNumber})")
+
+        # Check for AbortError and log them
+        if "AbortError" in message:
+            logger.error(f"AbortError: {message} (Source: {sourceID}, Line: {lineNumber})")
+
+        # Check for loadable state errors and log them
+        if "loadableReady() requires state" in message:
+            logger.error(f"Loadable State Error: {message} (Source: {sourceID}, Line: {lineNumber})")
+
+        # Check for event parsing errors and log them
+        if "Unable to parse event" in message:
+            logger.error(f"Parsing Event Error: {message} (Source: {sourceID}, Line: {lineNumber})")
+
+        # Check for fetch errors and log them
+        if "Failed to fetch" in message:
+            logger.error(f"Fetch Error: {message} (Source: {sourceID}, Line: {lineNumber})")
 
 class CustomTabBar(QTabBar):
     def __init__(self, parent=None):
@@ -33,7 +62,6 @@ class CustomTabBar(QTabBar):
         self.setElideMode(Qt.ElideRight)
         self.setSelectionBehaviorOnRemove(QTabBar.SelectPreviousTab)
 
-
 class Browser(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -41,6 +69,10 @@ class Browser(QMainWindow):
 
         # Initialize the BrowserDatabase
         self.db = BrowserDatabase()
+
+        # Start the Flask server in a separate thread
+        server_thread = Thread(target=app.run, kwargs={"debug": True, "use_reloader": False})
+        server_thread.start()
 
         self.home_page = "https://www.google.com"
         self.bookmarks = []
@@ -379,6 +411,8 @@ class Browser(QMainWindow):
         if qurl:
             if isinstance(qurl, str):
                 qurl = QUrl(qurl)
+            elif isinstance(qurl, bool):
+                qurl = QUrl(self.home_page)  # Default to home page if qurl is a boolean
             self.browser_view.setUrl(qurl)
         else:
             self.browser_home()

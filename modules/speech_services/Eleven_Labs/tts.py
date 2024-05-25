@@ -7,10 +7,11 @@ import threading
 import os
 import requests
 import re
+import os
 from dotenv import load_dotenv
 from modules.logging.logger import setup_logger
-
-logger = setup_logger('tts.py')
+#from logger import setup_logger
+logger = setup_logger('11_tts.py')
 
 CHUNK_SIZE = 1024 
 OUTPUT_PATH = "assets/SCOUT/tts_mp3/output.mp3"  
@@ -33,7 +34,6 @@ def contains_code(text: str) -> bool:
     return "<code>" in text
 
 def get_voices():
-    global VOICE_IDS
     load_dotenv()
     XI_API_KEY = os.getenv("XI_API_KEY")
     if XI_API_KEY is None:
@@ -51,15 +51,21 @@ def get_voices():
     response = requests.get(url, headers=headers)
     data = response.json()
 
+    voices = []
     for voice in data['voices']:
-        VOICE_IDS.append(voice['voice_id'])
+        voice_data = {
+            'voice_id': voice['voice_id'],
+            'name': voice['name']
+        }
+        voices.append(voice_data)
 
-    if VOICE_IDS:
-        logger.info(f"Found {len(VOICE_IDS)} voices.")
-        set_voice(VOICE_IDS[0])
+    if voices:
+        logger.info(f"Found {len(voices)} voices.")
+        return voices
     else:
         logger.error("No voices found. Please check your Eleven Labs API key.")
-
+        return [] 
+    
 async def text_to_speech(text):
     try:
         if not _use_tts:
@@ -77,8 +83,13 @@ async def text_to_speech(text):
             logger.error("API key not found. Please set the XI_API_KEY environment variable.")
             raise ValueError("API key not found. Please set the XI_API_KEY environment variable.")
 
-        tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_IDS[0]}/stream"
+        if not VOICE_IDS:
+            logger.error("No voice IDs found. Please make sure voices are loaded.")
+            return
 
+        voice_id = VOICE_IDS[0]['voice_id']
+        tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream"
+       
         headers = {
             "Accept": "application/json",
             "xi-api-key": XI_API_KEY
@@ -98,6 +109,9 @@ async def text_to_speech(text):
         logger.info(f"Sending TTS request to Eleven Labs API with text: {text}")
         response = requests.post(tts_url, headers=headers, json=data, stream=True)
 
+        logger.info(f"Eleven Labs API response status code: {response.status_code}")
+        logger.info(f"Eleven Labs API response headers: {response.headers}")
+
         if response.ok:
             logger.info("TTS response received successfully.")
             with open(OUTPUT_PATH, "wb") as f:
@@ -109,14 +123,27 @@ async def text_to_speech(text):
             logger.error(f"Error during TTS: {response.text}")
     except Exception as e:
         logger.error(f"Error during TTS: {e}")
-
-def set_voice(voice_id):
+        
+def set_voice(voice):
     global VOICE_IDS
-    if voice_id in VOICE_IDS:
-        VOICE_IDS[0] = voice_id
-        logger.info(f"Voice set to: {voice_id}")
+    for i, v in enumerate(VOICE_IDS):
+        if v['name'] == voice['name'] and v['voice_id'] == voice['voice_id']:
+            new_voice = {
+                'voice_id': voice['voice_id'],
+                'name': voice['name']
+            }
+            VOICE_IDS[i] = new_voice
+            logger.info(f"Voice set to: {voice['name']} with voice ID: {voice['voice_id']}")
+            return
+    logger.error(f"Voice name {voice['name']} not found in the list of available voices.")
+
+def load_voices():
+    global VOICE_IDS
+    VOICE_IDS = get_voices()
+    if VOICE_IDS:
+        logger.info(f"Loaded {len(VOICE_IDS)} voices.")
     else:
-        logger.error(f"Voice ID {voice_id} not found in the list of available voices.")
+        logger.warning("No voices loaded.")
 
 def get_voice():
     logger.info(f"Current voice ID: {VOICE_IDS[0]}")

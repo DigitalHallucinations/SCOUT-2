@@ -21,7 +21,7 @@ from modules.logging.logger import setup_logger
 from modules.Background_Services.CognitiveBackgroundServices import CognitiveBackgroundServices
 from modules.Personas.FeedManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeedReaderUI
 from modules.Tools.Comms.Voip.voip_app import VoIPApp
-from modules.Tools.Internet_Tools.browser import Browser
+from modules.Tools.Internet_Tools.Browser.browser import Browser
 
 logger = setup_logger('app.py')
 

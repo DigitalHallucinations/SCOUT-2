@@ -18,6 +18,7 @@ class CustomLogger(logging.Logger):
 
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+        # Ensure the log file is created in the correct directory
         file_handler = RotatingFileHandler('modules/logging/SCOUT.log', maxBytes=50*1024*1024, backupCount=5, encoding='utf-8')
         file_handler.setFormatter(formatter)
         self.addHandler(file_handler)
@@ -26,8 +27,11 @@ class CustomLogger(logging.Logger):
         stream_handler.setFormatter(formatter)
         self.addHandler(stream_handler)
 
-    def setup_logger(logger_name):
-        logging.setLoggerClass(CustomLogger)
-        logger = logging.getLogger(logger_name)
-        logger.setLevel(logging_level)
-        return logger
+        # Disable propagation to the root logger
+        self.propagate = False
+
+def setup_logger(logger_name):
+    logging.setLoggerClass(CustomLogger)
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging_level)
+    return logger

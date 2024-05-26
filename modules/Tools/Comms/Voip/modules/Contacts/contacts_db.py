@@ -1,12 +1,13 @@
 # modules/Tools/Comms/Voip/modules/Contacts/contacts_db.py
 
+import os
 import sqlite3
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('contacts_db.py')
 
 class ContactsDatabase:
-    def __init__(self, db_name='Tools/Comms/Voip/modules/Contacts/contacts.db'):
+    def __init__(self, db_name='modules/Tools/Comms/Voip/modules/Contacts/contacts.db'):
         logger.info("Initializing ContactsDatabase")
         self.db_name = db_name
         self.conn = None
@@ -41,6 +42,7 @@ class ContactsDatabase:
             logger.debug("Database and tables created successfully")
         except sqlite3.Error as e:
             logger.error(f"An error occurred while creating the database: {e}")
+            logger.error(f"Database file path: {os.path.abspath(self.db_name)}")
         finally:
             if self.conn:
                 self.conn.close()

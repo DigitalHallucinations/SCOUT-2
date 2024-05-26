@@ -32,5 +32,29 @@
             },
             "required": []
         }
+        
+    },
+    {
+        "name": "Calendar",
+        "description": "A calendar tool for managing appointments and events.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": ["add", "edit", "delete", "load"],
+                    "description": "The action to perform on the calendar."
+                },
+                "date": {
+                    "type": "string",
+                    "description": "The date for the action in 'yyyy-MM-dd' format."
+                },
+                "details": {
+                    "type": "string",
+                    "description": "The details of the appointment for add/edit actions."
+                }
+            },
+            "required": ["action", "date"]
+        }
     }
 ]

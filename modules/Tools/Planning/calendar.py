@@ -1,9 +1,10 @@
 # modules/Tools/Planning/calendar.py
 
-import json
+import asyncio
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QCalendarWidget, QListWidget, QPushButton, QHBoxLayout, QLineEdit, QLabel, QMessageBox, QMenu, QInputDialog
-from PySide6.QtCore import QDate
+from PySide6.QtCore import QDate, Qt
 from modules.logging.logger import setup_logger
+from modules.Tools.Planning.CalDatabase import Database
 
 logger = setup_logger('calendar.py')
 
@@ -12,6 +13,7 @@ class Calendar(QMainWindow):
         super().__init__()
         logger.info("Initializing calendar")
 
+        self.db = Database()  # Create an instance of the Database class
         self.dark_mode = False
 
         # Create central widget and layout
@@ -48,9 +50,6 @@ class Calendar(QMainWindow):
         # Label to show selected date
         self.selected_date_label = QLabel("Selected Date: None")
         main_layout.addWidget(self.selected_date_label)
-
-        # Load appointments from file
-        self.appointments = self.load_appointments_from_file()
 
         # Apply initial styles
         self.apply_styles()
@@ -145,16 +144,17 @@ class Calendar(QMainWindow):
 
     def date_selected(self, date: QDate):
         self.selected_date_label.setText(f"Selected Date: {date.toString('yyyy-MM-dd')}")
-        self.load_appointments(date)
+        asyncio.create_task(self.load_appointments(date))
 
     def add_appointment(self):
         date = self.calendar_widget.selectedDate()
         appointment_text = self.appointment_input.text()
         if appointment_text:
             self.appointments_list.addItem(f"{date.toString('yyyy-MM-dd')}: {appointment_text}")
-            self.save_appointment(date, appointment_text)
+            asyncio.create_task(self.save_appointment(date, appointment_text))
             self.appointment_input.clear()
             logger.info(f"Added appointment: {appointment_text} on {date.toString('yyyy-MM-dd')}")
+            asyncio.create_task(self.load_appointments(date))  # Refresh the appointments list
 
     def edit_appointment(self, item):
         appointment_text = item.text()
@@ -164,56 +164,63 @@ class Calendar(QMainWindow):
         new_text, ok = QInputDialog.getText(self, "Edit Appointment", "Edit appointment details:", QLineEdit.Normal, old_text)
         if ok and new_text:
             item.setText(f"{date.toString('yyyy-MM-dd')}: {new_text}")
-            self.update_appointment(date, old_text, new_text)
+            asyncio.create_task(self.update_appointment(date, old_text, new_text))
             logger.info(f"Edited appointment: {old_text} to {new_text} on {date.toString('yyyy-MM-dd')}")
+            asyncio.create_task(self.load_appointments(date))  # Refresh the appointments list
 
-    def load_appointments(self, date: QDate):
+    async def load_appointments(self, date: QDate):
         logger.info(f"Loading appointments for {date.toString('yyyy-MM-dd')}")
         self.appointments_list.clear()
         date_str = date.toString('yyyy-MM-dd')
-        if date_str in self.appointments:
-            for appointment in self.appointments[date_str]:
-                self.appointments_list.addItem(f"{date_str}: {appointment}")
+        appointments = self.db.get_appointments(date_str)
+        for appointment in appointments:
+            self.appointments_list.addItem(f"{date_str}: {appointment}")
 
-    def save_appointment(self, date: QDate, appointment_text: str):
+    async def load_appointments_by_week(self, date: QDate):
+        logger.info(f"Loading appointments for the week of {date.toString('yyyy-MM-dd')}")
+        self.appointments_list.clear()
+        start_of_week = date.addDays(-(date.dayOfWeek() - 1))
+        end_of_week = start_of_week.addDays(6)
+        appointments = self.db.get_appointments_by_week(start_of_week.toString('yyyy-MM-dd'), end_of_week.toString('yyyy-MM-dd'))
+        for date_str, appointment in appointments:
+            self.appointments_list.addItem(f"{date_str}: {appointment}")
+
+    async def load_appointments_by_month(self, date: QDate):
+        logger.info(f"Loading appointments for the month of {date.toString('yyyy-MM')}")
+        self.appointments_list.clear()
+        year = date.toString('yyyy')
+        month = date.toString('MM')
+        appointments = self.db.get_appointments_by_month(year, month)
+        for date_str, appointment in appointments:
+            self.appointments_list.addItem(f"{date_str}: {appointment}")
+
+    async def load_appointments_by_year(self, date: QDate):
+        logger.info(f"Loading appointments for the year of {date.year()}")
+        self.appointments_list.clear()
+        year = date.toString('yyyy')
+        appointments = self.db.get_appointments_by_year(year)
+        for date_str, appointment in appointments:
+            self.appointments_list.addItem(f"{date_str}: {appointment}")
+
+    async def save_appointment(self, date: QDate, appointment_text: str):
         date_str = date.toString('yyyy-MM-dd')
-        if date_str not in self.appointments:
-            self.appointments[date_str] = []
-        self.appointments[date_str].append(appointment_text)
-        self.save_appointments_to_file()
+        await self.db.add_appointment(date_str, appointment_text)
 
-    def update_appointment(self, date: QDate, old_text: str, new_text: str):
+    async def update_appointment(self, date: QDate, old_text: str, new_text: str):
         date_str = date.toString('yyyy-MM-dd')
-        if date_str in self.appointments:
-            try:
-                index = self.appointments[date_str].index(old_text)
-                self.appointments[date_str][index] = new_text
-                self.save_appointments_to_file()
-            except ValueError:
-                pass
+        await self.db.update_appointment(date_str, old_text, new_text)
 
-    def load_appointments_from_file(self):
-        try:
-            with open('modules/Tools/Planning/appointments.json', 'r') as file:
-                return json.load(file)
-        except FileNotFoundError:
-            return {}
-
-    def save_appointments_to_file(self):
-        with open('modules/Tools/Planning/appointments.json', 'w') as file:
-            json.dump(self.appointments, file)
-
-    def delete_appointment(self, item):
+    async def delete_appointment(self, item):
         appointment_text = item.text()
         date_str, text = appointment_text.split(": ", 1)
         date = QDate.fromString(date_str, 'yyyy-MM-dd')
 
         reply = QMessageBox.question(self, 'Delete Appointment', f"Are you sure you want to delete the appointment: {text}?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            self.appointments[date_str].remove(text)
+            await self.db.delete_appointment(date_str, text)
             self.appointments_list.takeItem(self.appointments_list.row(item))
-            self.save_appointments_to_file()
             logger.info(f"Deleted appointment: {text} on {date.toString('yyyy-MM-dd')}")
+            asyncio.create_task(self.load_appointments(date))  # Refresh the appointments list
 
     def contextMenuEvent(self, event):
         context_menu = QMenu(self)
@@ -231,3 +238,37 @@ class Calendar(QMainWindow):
     def toggle_dark_mode(self):
         self.dark_mode = not self.dark_mode
         self.apply_styles()
+
+    async def handle_action(self, action, date, details=None):
+        date_obj = QDate.fromString(date, 'yyyy-MM-dd')
+        if action == 'add' and details:
+            await self.save_appointment(date_obj, details)
+            await self.load_appointments(date_obj)
+            return {"status": "success", "message": f"Appointment added for {date}"}
+        elif action == 'edit' and details:
+            old_text, new_text = details.split('|', 1)
+            await self.update_appointment(date_obj, old_text, new_text)
+            await self.load_appointments(date_obj)
+            return {"status": "success", "message": f"Appointment updated for {date}"}
+        elif action == 'delete' and details:
+            await self.delete_appointment_by_text(date_obj, details)
+            await self.load_appointments(date_obj)
+            return {"status": "success", "message": f"Appointment deleted for {date}"}
+        elif action == 'load':
+            await self.load_appointments(date_obj)
+            return {"status": "success", "appointments": self.db.get_appointments(date)}
+        elif action == 'load_week':
+            await self.load_appointments_by_week(date_obj)
+            return {"status": "success", "appointments": self.db.get_appointments_by_week(date_obj)}
+        elif action == 'load_month':
+            await self.load_appointments_by_month(date_obj)
+            return {"status": "success", "appointments": self.db.get_appointments_by_month(date_obj)}
+        elif action == 'load_year':
+            await self.load_appointments_by_year(date_obj)
+            return {"status": "success", "appointments": self.db.get_appointments_by_year(date_obj)}
+        else:
+            return {"status": "error", "message": "Invalid action"}
+
+    async def delete_appointment_by_text(self, date, text):
+        date_str = date.toString('yyyy-MM-dd')
+        await self.db.delete_appointment(date_str, text)

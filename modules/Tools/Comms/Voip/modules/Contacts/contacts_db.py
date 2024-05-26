@@ -6,7 +6,7 @@ from modules.logging.logger import setup_logger
 logger = setup_logger('contacts_db.py')
 
 class ContactsDatabase:
-    def __init__(self, db_name='contacts.db'):
+    def __init__(self, db_name='Tools/Comms/Voip/modules/Contacts/contacts.db'):
         logger.info("Initializing ContactsDatabase")
         self.db_name = db_name
         self.conn = None

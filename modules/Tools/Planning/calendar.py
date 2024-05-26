@@ -194,13 +194,13 @@ class Calendar(QMainWindow):
 
     def load_appointments_from_file(self):
         try:
-            with open('appointments.json', 'r') as file:
+            with open('modules/Tools/Planning/appointments.json', 'r') as file:
                 return json.load(file)
         except FileNotFoundError:
             return {}
 
     def save_appointments_to_file(self):
-        with open('appointments.json', 'w') as file:
+        with open('modules/Tools/Planning/appointments.json', 'w') as file:
             json.dump(self.appointments, file)
 
     def delete_appointment(self, item):

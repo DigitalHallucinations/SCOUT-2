@@ -1,3 +1,5 @@
+# modules/Personas/FeedManager/Toolbox/Feed_Portal/Feed_Portal.py
+
 import os
 import threading
 import json
@@ -195,8 +197,7 @@ class RSSFeedReaderUI(qtw.QFrame):
     async def load_feeds(self):
         logger.info("Loading feeds...")
         try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            config_path = os.path.join(script_dir, "feeds.json")
+            config_path = os.path.join("modules", "Personas", "FeedManager", "Toolbox", "Feed_Portal", "feeds.json")
 
             if os.path.exists(config_path):
                 with open(config_path, "r") as file:
@@ -291,7 +292,7 @@ class RSSFeedReaderUI(qtw.QFrame):
                     continue
 
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            config_path = os.path.join(script_dir, "feeds.json")
+            config_path = os.path.join(script_dir, "modules/Personas/FeedManager/Toolbox/Feed_Portal/feeds.json")
             with open(config_path, "w") as file:
                 json.dump(feed_data, file, indent=2)
         except Exception as e:

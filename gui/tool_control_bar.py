@@ -1,10 +1,9 @@
-# giu/tool_control.py
+# gui/tool_control.py
 
 from PySide6 import QtWidgets, QtGui, QtCore as qtc
 
-
 class ToolControlBar(QtWidgets.QFrame):
-    def __init__(self, parent=None, voip_app=None, feed_portal=None, browser=None):
+    def __init__(self, parent=None, voip_app=None, feed_portal=None, browser=None, calendar=None):
         super().__init__(parent)
         self.setFixedHeight(30)
         self.setStyleSheet("""
@@ -21,6 +20,7 @@ class ToolControlBar(QtWidgets.QFrame):
         self.voip_app = voip_app
         self.feed_portal = feed_portal
         self.browser = browser
+        self.calendar = calendar
 
         icon_size = 20
 
@@ -90,19 +90,50 @@ class ToolControlBar(QtWidgets.QFrame):
         browser_button.enterEvent = lambda event: on_browser_button_hover(event)
         browser_button.leaveEvent = lambda event: on_browser_button_leave(event)
 
+        # Calendar Icon
+        calendar_img = QtGui.QPixmap("assets/SCOUT/Icons/calendar_wt.png")
+        calendar_img = calendar_img.scaled(icon_size, icon_size)
+
+        calendar_button = QtWidgets.QPushButton(self)
+        calendar_button.setIcon(QtGui.QIcon(calendar_img))
+        calendar_button.setIconSize(qtc.QSize(icon_size, icon_size))
+        calendar_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
+        calendar_button.clicked.connect(self.show_calendar)
+        layout.addWidget(calendar_button)
+
+        def on_calendar_button_hover(event):
+            hover_img = QtGui.QPixmap("assets/SCOUT/Icons/calendar_bl.png")
+            hover_img = hover_img.scaled(icon_size, icon_size)
+            calendar_button.setIcon(QtGui.QIcon(hover_img))
+
+        def on_calendar_button_leave(event):
+            calendar_button.setIcon(QtGui.QIcon(calendar_img))
+
+        calendar_button.enterEvent = lambda event: on_calendar_button_hover(event)
+        calendar_button.leaveEvent = lambda event: on_calendar_button_leave(event)
+
         layout.addStretch(1) 
 
     def show_feed_portal(self):
         self.feed_portal.show()
         self.voip_app.hide()
         self.browser.hide()
+        self.calendar.hide()
 
     def show_voip_app(self):
         self.voip_app.show()
         self.feed_portal.hide()
         self.browser.hide()
+        self.calendar.hide()
 
     def show_browser(self):
         self.browser.show()
+        self.voip_app.hide()
+        self.feed_portal.hide()
+        self.calendar.hide()
+
+    def show_calendar(self):
+        self.calendar.show()
+        self.browser.hide()
         self.voip_app.hide()
         self.feed_portal.hide()

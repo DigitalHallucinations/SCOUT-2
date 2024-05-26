@@ -22,6 +22,7 @@ from modules.Background_Services.CognitiveBackgroundServices import CognitiveBac
 from modules.Personas.FeedManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeedReaderUI
 from modules.Tools.Comms.Voip.voip_app import VoIPApp
 from modules.Tools.Internet_Tools.Browser.browser import Browser
+from modules.Tools.Planning.calendar import Calendar
 
 logger = setup_logger('app.py')
 
@@ -45,6 +46,8 @@ class SCOUT(QtWidgets.QMainWindow):
         self.voip_app.hide()
         self.browser = Browser()
         self.browser.hide()
+        self.calendar = Calendar()
+        self.calendar.hide()
 
         logger.info("Creating LoginComponent")
         self.login_component = LoginComponent(parent=self, 
@@ -188,13 +191,13 @@ class SCOUT(QtWidgets.QMainWindow):
             tool_ui_layout.setContentsMargins(0, 0, 0, 0)
             tool_ui_layout.setSpacing(0)
 
-            tool_control_bar = ToolControlBar(tool_ui_frame, self.voip_app, self.feed_portal, self.browser)
-            #tool_control_bar = ToolControlBar(tool_ui_frame, self.voip_app, self.feed_portal)
+            tool_control_bar = ToolControlBar(tool_ui_frame, self.voip_app, self.feed_portal, self.browser, self.calendar)
             tool_ui_layout.addWidget(tool_control_bar)
 
             tool_ui_layout.addWidget(self.feed_portal)
             tool_ui_layout.addWidget(self.voip_app)
             tool_ui_layout.addWidget(self.browser)
+            tool_ui_layout.addWidget(self.calendar)
 
             splitter.addWidget(chat_frame)
             splitter.addWidget(tool_ui_frame)

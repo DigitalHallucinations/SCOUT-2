@@ -41,3 +41,6 @@ feeds.json
 
 # Ignore
 RSSURLs country category rss-url US gene.md
+
+# Ignore 
+appointments.json

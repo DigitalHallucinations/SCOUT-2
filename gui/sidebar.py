@@ -7,7 +7,6 @@ from gui.tooltip import ToolTip
 from gui import chist_functions as cf
 from gui.fetch_models.OA_fetch_models import fetch_models_openai
 from gui.fetch_models.GG_fetch_models import fetch_models_google, fetch_model_details    
-from modules.Providers.OpenAI.OA_gen_response import set_OA_model, get_OA_model
 from modules.Providers.Mistral.Mistral_gen_response import set_Mistral_model, get_Mistral_model
 from modules.Providers.HuggingFace.HF_gen_response import set_hf_model, get_hf_model
 from modules.Providers.Google.GG_gen_response import set_GG_model, get_GG_model
@@ -16,8 +15,9 @@ from modules.Providers.Anthropic.Anthropic_gen_response import set_Anthropic_mod
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('sidebar.py')
+
 class Sidebar(QtWidgets.QFrame):
-    def __init__(self, parent=None, personas=None, sidebar_frame_bg=None, sidebar_font_color=None, sidebar_font_size=None, sidebar_font_family=None):
+    def __init__(self, parent=None, personas=None, sidebar_frame_bg=None, sidebar_font_color=None, sidebar_font_size=None, sidebar_font_family=None, model_manager=None, conversation_manager=None):
         super().__init__(parent)
         self.personas = personas
         self.sidebar_frame_bg = sidebar_frame_bg
@@ -30,6 +30,8 @@ class Sidebar(QtWidgets.QFrame):
         self.chat_component = parent  
         self.fetch_models_menu = None
         self.create_sidebar()
+        self.model_manager = model_manager
+        self.conversation_manager = conversation_manager
 
     def load_providers(self):
         with open('modules/Providers/providers.json') as f:
@@ -89,7 +91,7 @@ class Sidebar(QtWidgets.QFrame):
                 current_model = get_hf_model()
                 logger.info("Current provider: HuggingFace")
             elif self.current_llm_provider == 'OpenAI':
-                current_model = get_OA_model()
+                current_model = self.model_manager.get_model()  
                 logger.info("Current provider: OpenAI")
             elif self.current_llm_provider == 'Anthropic':
                 current_model = get_Anthropic_model()
@@ -100,7 +102,7 @@ class Sidebar(QtWidgets.QFrame):
             else:
                 logger.error("Failed to set model. Expected: %s, Found: %s", self.fetch_models_button.text(), current_model)
         except Exception as e:
-            logger.error("Error checking current model", exc_info=True)       
+            logger.error("Error checking current model", exc_info=True)    
 
     def set_model_and_update_button(self, model):
         logger.info(f"Setting model: {model}")
@@ -111,7 +113,7 @@ class Sidebar(QtWidgets.QFrame):
         elif self.current_llm_provider == 'HuggingFace':
             set_hf_model(model)
         elif self.current_llm_provider == 'OpenAI':
-            set_OA_model(model)
+            self.model_manager.set_model(model)  
         elif self.current_llm_provider == 'Anthropic':
             set_Anthropic_model(model)    
         logger.info(f"Model {model} set successfully for {self.current_llm_provider}")
@@ -344,7 +346,7 @@ class Sidebar(QtWidgets.QFrame):
         self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
 
     def handle_history_button(self):
-        cf.load_chat_history(self.chat_component, self.chat_component.provider_manager)
+        cf.load_chat_history(self.chat_component, self.chat_component.provider_manager, self.conversation_manager)
 
     def on_chat_button_hover(self, event):
         self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_bl.png"))

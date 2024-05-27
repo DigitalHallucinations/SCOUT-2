@@ -23,6 +23,7 @@ from modules.Personas.FeedManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeed
 from modules.Tools.Comms.Voip.voip_app import VoIPApp
 from modules.Tools.Internet_Tools.Browser.browser import Browser
 from modules.Tools.Planning.calendar import Calendar
+from modules.Providers.model_manager import ModelManager  # Import ModelManager
 
 logger = setup_logger('app.py')
 
@@ -138,6 +139,8 @@ class SCOUT(QtWidgets.QMainWindow):
             current_persona = self.persona_handler.current_persona
 
             self.provider_manager = ProviderManager(self)
+            
+            self.model_manager = ModelManager()  
 
             self.chat_history_database = ConversationManager(self.user, current_persona['name'], self.provider_manager)
             logger.info("Conversation History Database instantiated successfully.")
@@ -163,7 +166,8 @@ class SCOUT(QtWidgets.QMainWindow):
                 titlebar_color=self.titlebar_color,
                 provider_manager=self.provider_manager,
                 cognitive_services=self.cognitive_services,
-                conversation_manager=self.chat_history_database  
+                conversation_manager=self.chat_history_database,
+                model_manager=self.model_manager  
             )
 
             central_widget = QtWidgets.QWidget(self)

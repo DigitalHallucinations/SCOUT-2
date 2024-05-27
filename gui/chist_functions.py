@@ -3,12 +3,11 @@
 import asyncio
 from PySide6 import QtWidgets, QtGui
 from datetime import datetime
-from modules.chat_history.convo_manager import ConversationManager
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('chist_functions.py')
 
-def load_chat_history(chat_component, provider_manager):
+def load_chat_history(chat_component, provider_manager, conversation_manager):
     logger.info("Opening chat history")
     chat_component.popup = QtWidgets.QDialog(chat_component)
     chat_component.popup.setWindowTitle("Chat History")
@@ -21,7 +20,7 @@ def load_chat_history(chat_component, provider_manager):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = ConversationManager(user, persona_name, provider_manager)
+    conversation_manager = conversation_manager(user, persona_name, provider_manager)
 
     chat_logs = conversation_manager.get_conversations(user, persona=persona_name)
     logger.debug(f"Chat logs fetched for {persona_name}: {chat_logs}")
@@ -85,7 +84,7 @@ async def load_chat(chat_component, selected_chat_log=None, provider_manager=Non
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = ConversationManager(user, persona_name, provider_manager)
+    conversation_manager = conversation_manager(user, persona_name, provider_manager)
 
     actual_chat_log = conversation_manager.get_chat_log(user, conversation_id)
 
@@ -111,7 +110,7 @@ def delete_conversation(chat_component, provider_manager):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = ConversationManager(user, persona_name, provider_manager)
+    conversation_manager = conversation_manager(user, persona_name, provider_manager)
 
     conversation_manager.delete_conversation(user, conversation_id)
 
@@ -146,7 +145,7 @@ async def save_chat_log(chat_component, provider_manager, cognitive_services):
         persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
         logger.info(f"Current persona_name: {persona_name}")
 
-        conversation_manager = ConversationManager(user, persona_name, provider_manager)
+        conversation_manager = conversation_manager(user, persona_name, provider_manager)
 
         await conversation_manager.insert_conversation(user, conversation_id, current_chat_log, timestamp, chat_component.current_persona["name"])
 

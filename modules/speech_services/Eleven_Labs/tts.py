@@ -188,3 +188,10 @@ async def test_tts():
 if __name__ == "__main__":
     import asyncio
     asyncio.run(test_tts())
+
+"""
+async def text_to_speech(text):
+    logger.info("Skipping TTS as the text contains code.")  
+    text_without_code = re.sub(r"`[^`]*`", "", text)
+    await tts.text_to_speech(text_without_code)
+"""

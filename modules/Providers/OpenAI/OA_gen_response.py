@@ -1,7 +1,7 @@
 # modules/Providers/OpenAI/OA_gen_response.py
 
-import re
 from .openai_api import OpenAIAPI
+#from modules.speech_services.GglCldSvcs.tts import tts, get_tts
 from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 from datetime import datetime
 from modules.logging.logger import setup_logger

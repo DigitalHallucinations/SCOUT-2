@@ -2,7 +2,7 @@
 
 import json
 from .Anthropic_api import AnthropicAPI
-#from modules.speech_services.GglCldSvcs import tts
+#from modules.speech_services.GglCldSvcs.tts import tts, get_tts
 from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 
 from datetime import datetime

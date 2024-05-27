@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-#from modules.speech_services.GglCldSvcs import tts
+#from modules.speech_services.GglCldSvcs.tts import tts, get_tts
 from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 from modules.chat_history.convo_manager import ConversationManager
 from modules.Providers.Google.genai_api import GenAIAPI
@@ -128,32 +128,21 @@ async def generate_response(user, current_persona, message, session_id, conversa
     conversation_history.add_message(user, conversation_id, "assistant", ChatResponse, current_time)
 
     try:
-        if get_tts() and not contains_code(ChatResponse):
-            await text_to_speech(ChatResponse)
+        if get_tts():
+            if contains_code(ChatResponse):
+                logger.info("Skipping TTS as the text contains code.")
+            else:
+                await tts(ChatResponse)
     except Exception as e:
-        logger.exception("Error during TTS operation: %s", e)
+            logger.error("Error during TTS: %s", e)
 
     logger.info("Exiting generate_response function.")
     return ChatResponse
 
 def contains_code(text: str) -> bool:
-    """
-    Check if the given text contains code snippets.
 
-    :param text: The text to check.
-    :return: True if the text contains code snippets, False otherwise.
-    """
     return "<code>" in text
 
-async def text_to_speech(text):
-    """
-    Convert the given text to speech.
-
-    :param text: The text to convert.
-    """
-    text_without_code = re.sub(r"`[^`]*`", "", text)
-    logger.info("Processing text to speech")
-    await tts.text_to_speech(text_without_code)
 
 def format_message_history(messages, user_name, assistant_name):
     """

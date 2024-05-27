@@ -1,7 +1,7 @@
-# modules\GglCldSvcs\tts.py
-# Description: Text to speech module
+# modules/GglCldSvcs/tts.py
+# Description: Text to speech module using Google Cloud Text-to-Speech
 
-import pygame 
+import pygame
 import threading
 import os
 import re
@@ -16,17 +16,23 @@ VOICE = texttospeech.VoiceSelectionParams(
     name="en-US-Wavenet-A"
 )
 
+CHUNK_SIZE = 1024
+OUTPUT_PATH = "assets/SCOUT/tts_mp3/output.mp3"
+
 _use_tts = False
 
 def play_audio(filename):
+    logger.info(f"Playing audio file: {filename}")
     pygame.mixer.init()
     pygame.mixer.music.load(filename)
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)  
+        pygame.time.Clock().tick(10)
+    logger.info("Audio playback finished.")
 
 def contains_code(text: str) -> bool:
     """Check if the given text contains code"""
+    logger.debug(f"Checking if text contains code: {text}")
     return "<code>" in text
 
 async def text_to_speech(text):
@@ -47,11 +53,10 @@ async def text_to_speech(text):
             return
 
         synthesis_input = texttospeech.SynthesisInput(text=text)
-
         global VOICE
         voice = VOICE
 
-        logger.info(f"Using voice: {voice}")  
+        logger.info(f"Using voice: {voice}")
 
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.MP3
@@ -65,12 +70,12 @@ async def text_to_speech(text):
             logger.error(f"Error during TTS synthesis: {e}")
             return
 
-        base_dir = os.getcwd()  
-        filename = os.path.join(base_dir, "assets", "SCOUT", "tts_mp3", f"output_{datetime.now().strftime('%Y%m%d%H%M%S')}.mp3")
+        base_dir = os.getcwd()
+        filename = os.path.join(base_dir, OUTPUT_PATH)
         
         with open(filename, "wb") as out:
             out.write(response.audio_content)
-            print(f'Audio content written to file "{filename}"')
+            logger.info(f'Audio content written to file "{filename}"')
 
         threading.Thread(target=play_audio, args=(filename,)).start()
     except Exception as e:
@@ -83,14 +88,43 @@ def set_voice(voice_name):
         language_code=language_code,
         name=voice_name,
     )
+    logger.info(f"Voice set to: {voice_name}")
 
 def get_voice():
+    logger.info(f"Current voice: {VOICE}")
     return VOICE
 
 def set_tts(value):
     global _use_tts
     _use_tts = value
-    logger.info("TTS set to: %s", _use_tts)
+    logger.info(f"TTS set to: {_use_tts}")
 
 def get_tts():
+    logger.info(f"TTS status: {_use_tts}")
     return _use_tts
+
+async def tts(text):
+    await text_to_speech(text)
+
+async def test_tts():
+    test_text = "Hello World!"
+    
+    # Set the desired voice
+    set_voice("en-US-Wavenet-A")
+    
+    # Enable TTS
+    set_tts(True)
+    
+    # Call the text_to_speech function
+    await text_to_speech(test_text)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(test_tts())
+
+"""
+async def text_to_speech(text):
+    logger.info("Skipping TTS as the text contains code.")  
+    text_without_code = re.sub(r"`[^`]*`", "", text)
+    await tts.text_to_speech(text_without_code)
+"""

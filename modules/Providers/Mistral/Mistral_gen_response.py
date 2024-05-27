@@ -6,7 +6,8 @@ import inspect
 import importlib.util
 import sys
 from modules.Providers.Mistral.Mistral_api import MistralAPI
-from modules.speech_services.GglCldSvcs import tts
+#from modules.speech_services.GglCldSvcs.tts import tts, get_tts
+from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 from datetime import datetime
 from modules.chat_history.convo_manager import ConversationManager
 from modules.logging.logger import setup_logger
@@ -234,24 +235,24 @@ async def generate_response(user, current_persona, message, session_id, conversa
                     logger.info("Assistant message added to conversation history.")
 
                 try:
-                    if tts.get_tts():
+                    if get_tts():
                         if contains_code(new_text):
                             logger.info("Skipping TTS as the text contains code.")
-                    else:
-                        await tts.text_to_speech(new_text)
+                        else:
+                            await tts(new_text)
                 except Exception as e:
-                    logger.error("Error during TTS: %s", e)
+                        logger.error("Error during TTS: %s", e)
 
                 return new_text
 
         try:
-                if tts.get_tts():
-                    if contains_code(text):
-                        logger.info("Skipping TTS as the text contains code.")
-                    else:
-                        await text_to_speech(text)
+            if get_tts():
+                if contains_code(text):
+                    logger.info("Skipping TTS as the text contains code.")
+                else:
+                    await tts(text)
         except Exception as e:
-                logger.error("Error during TTS: %s", e)
+            logger.error("Error during TTS: %s", e)
 
         return text
     else:
@@ -273,15 +274,6 @@ def contains_code(text: str) -> bool:
     """Check if the given text contains code"""
     return "<code>" in text
 
-async def text_to_speech(text):
-    """
-    Convert the given text to speech.
-
-    :param text: The text to convert.
-    """
-    logger.info("Skipping TTS as the text contains code.")  
-    text_without_code = re.sub(r"`[^`]*`", "", text)
-    await tts.text_to_speech(text_without_code)
 
 def format_message_history(messages, user_name, assistant_name):
     """

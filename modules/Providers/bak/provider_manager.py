@@ -13,7 +13,7 @@ class ProviderManager:
         self.current_speech_provider = "Eleven Labs"
         self.switch_llm_provider(self.current_llm_provider)
         self.switch_speech_provider(self.current_speech_provider)
-        self.switch_background_provider(self.current_background_provider)
+        self.switch_background_provider(self.current_background_provider) 
 
     def switch_llm_provider(self, llm_provider):
         if llm_provider == "OpenAI":
@@ -60,15 +60,8 @@ class ProviderManager:
             from modules.speech_services.Eleven_Labs.tts import set_voice, set_tts, get_tts, get_voices, load_voices
         elif speech_provider == "Google":
             from modules.speech_services.GglCldSvcs.tts import set_voice, set_tts, get_tts, get_voices, load_voices
-        else:
-            raise ValueError(f"Unknown speech provider: {speech_provider}")
-
+        
         self.current_speech_provider = speech_provider
-        self.set_voice = set_voice
-        self.set_tts = set_tts
-        self.get_tts = get_tts
-        self.get_voices = get_voices
-        self.load_voices = load_voices
         logger.info(f"Switched to speech provider: {self.current_speech_provider}")
 
     def set_current_model(self, model):

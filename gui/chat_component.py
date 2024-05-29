@@ -71,7 +71,7 @@ class ChatComponent(QtWidgets.QWidget):
         logger.info(f"About to call send_message with user: %s", self.user)
 
         message = self.message_entry.toPlainText().strip()
-        asyncio.ensure_future(send_message_module.send_message(self, self.user, message, self.session_id, self.conversation_id, self.conversation_manager, self.model_manager))
+        asyncio.ensure_future(send_message_module.send_message(self, self.user, message, self.session_id, self.conversation_id, self.conversation_manager, self.model_manager, self.provider_manager))
         self.message_entry.clear()
 
     def show_message(self, role, message):

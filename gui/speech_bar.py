@@ -5,7 +5,7 @@ from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtWidgets import QMessageBox
 from gui.tooltip import ToolTip
 from modules.speech_services.GglCldSvcs.stt import SpeechToText
-from modules.speech_services.Eleven_Labs.tts import set_voice, set_tts, get_tts, get_voices, load_voices
+from modules.Providers.provider_manager import ProviderManager
 from google.cloud import texttospeech
 from modules.logging.logger import setup_logger
 
@@ -21,8 +21,9 @@ class SpeechBar(QtWidgets.QFrame):
         self.speechbar_font_size = speechbar_font_size
         self.speech_to_text = SpeechToText()
         self.is_listening = False
+        self.provider_manager = ProviderManager(self)
         self.create_speech_bar()
-        load_voices()
+        self.provider_manager.load_voices()
 
     def create_speech_bar(self):
         logger.info("Creating speech bar")
@@ -63,7 +64,7 @@ class SpeechBar(QtWidgets.QFrame):
         self.toggle_tts_button.clicked.connect(self.toggle_tts)
         self.toggle_tts_button.enterEvent = self.on_tts_button_hover
         self.toggle_tts_button.leaveEvent = self.on_tts_button_leave
-        if get_tts():
+        if self.provider_manager.get_tts():
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_gn.png"))
         else:
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_wt.png"))
@@ -83,25 +84,25 @@ class SpeechBar(QtWidgets.QFrame):
 
     def show_speech_provider_menu(self):
         self.speech_provider_menu.clear()
-        speech_providers = ["Google Cloud Text-to-Speech", "Eleven Labs"]
+        speech_providers = ["Google", "Eleven Labs"]
         for provider in speech_providers:
             action = self.speech_provider_menu.addAction(provider)
             action.triggered.connect(lambda checked, p=provider: self.on_speech_provider_selection(p))
         self.speech_provider_menu.exec(QtGui.QCursor.pos())
 
     def on_speech_provider_selection(self, speech_provider):
-        self.parent.provider_manager.switch_speech_provider(speech_provider)
+        self.provider_manager.switch_speech_provider(speech_provider)
         self.speech_provider_button.setText(speech_provider)
         self.populate_voice_menu()
 
     def toggle_tts(self):
         logger.info("Entering toggle_tts")
-        if get_tts():
-            set_tts(False)
+        if self.provider_manager.get_tts():
+            self.provider_manager.set_tts(False)
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_wt.png"))
             logger.info("TTS turned off")
         else:
-            set_tts(True)
+            self.provider_manager.set_tts(True)
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_gn.png"))
             logger.info("TTS turned on")
         logger.info("Exiting toggle_tts")
@@ -111,9 +112,9 @@ class SpeechBar(QtWidgets.QFrame):
         self.voice_menu = QtWidgets.QMenu(self.voice_button)
         self.voice_button.setMenu(self.voice_menu)
 
-        provider = self.parent.provider_manager.get_current_speech_provider()
+        provider = self.provider_manager.get_current_speech_provider()
 
-        if provider == "Google Cloud Text-to-Speech":
+        if provider == "Google":
             self.populate_google_voice_menu()
         elif provider == "Eleven Labs":
             self.populate_eleven_labs_voice_menu()
@@ -121,7 +122,7 @@ class SpeechBar(QtWidgets.QFrame):
             logger.warning(f"{datetime.now()}: Unsupported provider: {provider}")
 
     def populate_google_voice_menu(self):
-        logger.info(f"{datetime.now()}: Populating Google Cloud Text-to-Speech voice menu...")
+        logger.info(f"{datetime.now()}: Populating Google voice menu...")
         client = texttospeech.TextToSpeechClient()
         english_language_codes = ["en-GB", "en-US"]
 
@@ -141,43 +142,43 @@ class SpeechBar(QtWidgets.QFrame):
     def populate_eleven_labs_voice_menu(self):
         logger.info(f"{datetime.now()}: Populating Eleven Labs voice menu...")
         try:
-            voices = get_voices()
+            voices = self.provider_manager.get_voices()
             for voice in voices:
                 voice_name = voice['name']
                 action = self.voice_menu.addAction(voice_name)
                 action.triggered.connect(lambda checked, v=voice: self.on_voice_selection(v))
         except Exception as e:
             logger.error(f"{datetime.now()}: Error while getting voices from Eleven Labs: {e}")
-            
+
     def show_voice_menu(self):
         self.populate_voice_menu()
-        self.voice_menu.exec(QtGui.QCursor.pos())    
+        self.voice_menu.exec(QtGui.QCursor.pos())
 
     def on_voice_selection(self, voice):
         logger.info("Voice selection started: %s", voice)
         try:
-            provider = self.parent.provider_manager.get_current_speech_provider()
+            provider = self.provider_manager.get_current_speech_provider()
             if provider == "Eleven Labs":
                 if 'voice_id' in voice and 'name' in voice:
-                    set_voice(voice)
+                    self.provider_manager.set_voice(voice)
                     voice_name = voice['name']
                 else:
                     logger.error("Voice dictionary does not contain 'voice_id' or 'name' key: %s", voice)
                     return
             else:
-                set_voice(voice)
+                self.provider_manager.set_voice(voice)
                 voice_name = voice
-            
+
             self.voice_button.setText(voice_name)
             logger.info("Voice selected and applied: %s", voice_name)
         except Exception as e:
             logger.error("Failed to select voice: %s", e)
-                
+
     def toggle_listen(self):
         if self.is_listening:
             logger.info("Stopping speech-to-text listening")
             self.speech_to_text.stop_listening()
-            
+
             try:
                 transcript = self.speech_to_text.transcribe('output.wav')
                 existing_text = self.parent.message_entry.toPlainText()
@@ -187,7 +188,7 @@ class SpeechBar(QtWidgets.QFrame):
                 logger.error(f"Error transcribing audio: {str(e)}")
                 error_message = str(e)
                 QMessageBox.critical(self, "Transcription Error", f"An error occurred during transcription:\n\n{error_message}")
-            
+
             self.is_listening = False
             self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_wt.png"))
         else:
@@ -218,7 +219,7 @@ class SpeechBar(QtWidgets.QFrame):
             self.microphone_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/microphone_wt.png"))
 
     def on_tts_button_hover(self, event):
-        if get_tts():
+        if self.provider_manager.get_tts():
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_bl.png"))
         else:
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_bl.png"))
@@ -235,7 +236,7 @@ class SpeechBar(QtWidgets.QFrame):
         ToolTip.setToolTip(self.toggle_tts_button, "Text-to-Speech")
 
     def on_tts_button_leave(self, event):
-        if get_tts():
+        if self.provider_manager.get_tts():
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_gn.png"))
         else:
             self.toggle_tts_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/tts_wt.png"))

@@ -1,8 +1,6 @@
 # modules/Providers/OpenAI/OA_gen_response.py
 
 from .openai_api import OpenAIAPI
-#from modules.speech_services.GglCldSvcs.tts import tts, get_tts
-from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 from datetime import datetime
 from modules.logging.logger import setup_logger
 from modules.Providers.OpenAI.CreateRequest import create_request_body
@@ -12,8 +10,6 @@ logger = setup_logger('OA_gen_response.py')
 
 current_username = None
 api = OpenAIAPI()
-
-# RESPONSE MANAGER
 
 async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, conversation_manager, model_manager, provider_manager=None):
     logger.info(f"generate_response called with user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
@@ -60,6 +56,11 @@ async def generate_response(user, current_persona, message, session_id, conversa
                 text = "Gen_response says: Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
                 logger.info("Gen_response says: Sorry, I couldn't generate a meaningful response. Please try again or provide more context.")
         try:
+            if provider_manager.get_current_speech_provider() == "Eleven Labs":
+                from modules.speech_services.Eleven_Labs.tts import tts, get_tts
+            elif provider_manager.get_current_speech_provider() == "Google":
+                from modules.speech_services.GglCldSvcs.tts import tts, get_tts
+
             if get_tts():
                 if contains_code(text):
                     logger.info("Skipping TTS as the text contains code.")

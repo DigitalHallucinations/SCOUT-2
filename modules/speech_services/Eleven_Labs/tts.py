@@ -10,11 +10,11 @@ import re
 import os
 from dotenv import load_dotenv
 from modules.logging.logger import setup_logger
-#from logger import setup_logger
+from datetime import datetime  # Import datetime module
+
 logger = setup_logger('11_tts.py')
 
 CHUNK_SIZE = 1024 
-OUTPUT_PATH = "assets/SCOUT/tts_mp3/output.mp3"  
 
 _use_tts = False
 VOICE_IDS = []
@@ -65,7 +65,7 @@ def get_voices():
     else:
         logger.error("No voices found. Please check your Eleven Labs API key.")
         return [] 
-    
+
 async def text_to_speech(text):
     try:
         if not _use_tts:
@@ -114,16 +114,25 @@ async def text_to_speech(text):
 
         if response.ok:
             logger.info("TTS response received successfully.")
-            with open(OUTPUT_PATH, "wb") as f:
+            
+            # Ensure the directory exists
+            if not os.path.exists("assets/SCOUT/tts_mp3/"):
+                os.makedirs("assets/SCOUT/tts_mp3/")
+            
+            # Generate a unique filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            output_path = f"assets/SCOUT/tts_mp3/output_{timestamp}.mp3"
+            
+            with open(output_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                     f.write(chunk)
-            logger.info(f"Audio stream saved successfully to {OUTPUT_PATH}.")
-            threading.Thread(target=play_audio, args=(OUTPUT_PATH,)).start()
+            logger.info(f"Audio stream saved successfully to {output_path}.")
+            threading.Thread(target=play_audio, args=(output_path,)).start()
         else:
             logger.error(f"Error during TTS: {response.text}")
     except Exception as e:
-        logger.error(f"Error during TTS: {e}")
-        
+        logger.error(f"Error during TTS: {e}") 
+
 def set_voice(voice):
     global VOICE_IDS
     for i, v in enumerate(VOICE_IDS):
@@ -188,10 +197,3 @@ async def test_tts():
 if __name__ == "__main__":
     import asyncio
     asyncio.run(test_tts())
-
-"""
-async def text_to_speech(text):
-    logger.info("Skipping TTS as the text contains code.")  
-    text_without_code = re.sub(r"`[^`]*`", "", text)
-    await tts.text_to_speech(text_without_code)
-"""

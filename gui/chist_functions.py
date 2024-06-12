@@ -131,11 +131,11 @@ def delete_conversation(chat_component, provider_manager):
 async def clear_chat_log(chat_component, provider_manager, cognitive_services):
     logger.info("Clearing chat log in the chat component")
     
-    await save_chat_log(chat_component, provider_manager, cognitive_services)
+    await save_chat_log(chat_component, provider_manager, cognitive_services, chat_component.conversation_manager)
     
     chat_component.chat_log.clear()
 
-async def save_chat_log(chat_component, provider_manager, cognitive_services):
+async def save_chat_log(chat_component, provider_manager, cognitive_services, conversation_manager):
     current_chat_log = chat_component.chat_log.toPlainText().strip()
     if current_chat_log:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -144,8 +144,6 @@ async def save_chat_log(chat_component, provider_manager, cognitive_services):
 
         persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
         logger.info(f"Current persona_name: {persona_name}")
-
-        conversation_manager = conversation_manager(user, persona_name, provider_manager)
 
         await conversation_manager.insert_conversation(user, conversation_id, current_chat_log, timestamp, chat_component.current_persona["name"])
 

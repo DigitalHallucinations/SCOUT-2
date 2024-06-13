@@ -36,7 +36,63 @@ SCOUT is about something much bigger than just technology. It's about the future
 
 - **Cognitive Operations**: SCOUT's cognitive operations enhance user interaction by learning and storing user preferences and observations, creating a personalized profile that helps models adapt and improve.
 
-![SCOUT Architecture](assets/scout_architecture.png)
+## SCOUT Architecture
+
+### 1. **Main Application Entry Point (`main.py`)**
+- **Initialization**: Sets up logging, custom exception handling, and starts the application.
+- **Asynchronous Context Management**: Uses `asynccontextmanager` to manage background tasks.
+- **Dynamic Module Loading**: Loads different modules based on the current LLM (Large Language Model) and background provider.
+- **Application Shutdown**: Handles cleanup and shutdown tasks.
+
+### 2. **Graphical User Interface (GUI) (`gui/app.py`, `gui/chat_component.py`, `gui/sidebar.py`, `gui/tool_control.py`, `gui/status_bar.py`)**
+- **Main Window (`SCOUT`)**: Initializes the main application window, manages user sessions, and sets up the custom title bar.
+- **Chat Component (`ChatComponent`)**: Manages the chat interface, including message entry, chat log, and persona selection.
+- **Sidebar (`Sidebar`)**: Provides navigation and tool selection options.
+- **Tool Control Bar (`ToolControlBar`)**: Manages quick access to various tools like VoIP, RSS feed, browser, and calendar.
+- **Status Bar (`StatusBar`)**: Displays current provider, model, and user information.
+
+### 3. **Background Services (`modules/Background_Services/CognitiveBackgroundServices.py`)**
+- **Cognitive Background Services**: Manages background tasks related to conversation processing, such as generating conversation names and updating user profiles.
+
+### 4. **Conversation Management (`modules/chat_history/convo_manager.py`)**
+- **Conversation Manager**: Handles database operations related to conversations, messages, function calls, and responses. Uses SQLite for data storage.
+
+### 5. **Provider Management (`modules/Providers/provider_manager.py`)**
+- **Provider Manager**: Manages different LLM providers, background providers, and speech providers. Switches between providers based on the current configuration.
+
+### 6. **Model Management (`modules/Providers/OpenAI/model_manager.py`)**
+- **Model Manager**: Manages the current model and its configurations, such as allowed models and maximum tokens.
+
+### 7. **Tool Management (`modules/Providers/OpenAI/ToolManager.py`)**
+- **Tool Manager**: Loads functions from JSON and maps them to the current persona. Handles function calls and integrates them into the conversation flow.
+
+### 8. **User Data Management (`modules/user_accounts/user_data_manager.py`)**
+- **User Data Manager**: Manages user profiles, EMRs (Electronic Medical Records), and system information. Formats and retrieves user data for persona personalization.
+
+### 9. **OpenAI API Integration (`modules/Providers/OpenAI/openai_api.py`)**
+- **OpenAI API**: Handles communication with the OpenAI API for generating conversations and cognitive background services.
+
+### 10. **Logging (`modules/logging/logger.py`)**
+- **Logger Setup**: Configures logging for different modules to track application behavior and errors.
+
+### 11. **Personas (`gui/Personas/persona_manager.py`)**
+- **Persona Manager**: Manages different personas, personalizes them based on user data, and updates the current persona.
+
+### 12. **Function and Tool Definitions (`modules/Personas/{persona}/Toolbox/functions.json`, `modules/Personas/{persona}/Toolbox/maps.py`)**
+- **Function Definitions**: JSON files defining available functions for each persona.
+- **Function Maps**: Python files mapping function names to their implementations.
+
+### Key Interactions:
+- **Main Application**: Initializes and runs the application, managing the event loop and background tasks.
+- **GUI Components**: Interact with the user, display information, and handle user inputs.
+- **Background Services**: Perform asynchronous tasks like conversation processing and profile updates.
+- **Conversation Manager**: Stores and retrieves conversation data, ensuring persistence.
+- **Provider Manager**: Switches between different AI models and services based on the current configuration.
+- **Tool Manager**: Executes functions and integrates their results into the conversation flow.
+- **User Data Manager**: Provides personalized data to enhance user interactions.
+- **OpenAI API**: Facilitates communication with the OpenAI API for generating responses and background services.
+
+
 
 ## Roadmap
 

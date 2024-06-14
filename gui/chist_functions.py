@@ -7,7 +7,7 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('chist_functions.py')
 
-def load_chat_history(chat_component, provider_manager, conversation_manager):
+def load_chat_history(chat_component, provider_manager):
     logger.info("Opening chat history")
     chat_component.popup = QtWidgets.QDialog(chat_component)
     chat_component.popup.setWindowTitle("Chat History")
@@ -20,7 +20,8 @@ def load_chat_history(chat_component, provider_manager, conversation_manager):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = conversation_manager(user, persona_name, provider_manager)
+    # Use chat_component.conversation_manager directly
+    conversation_manager = chat_component.conversation_manager
 
     chat_logs = conversation_manager.get_conversations(user, persona=persona_name)
     logger.debug(f"Chat logs fetched for {persona_name}: {chat_logs}")
@@ -84,7 +85,8 @@ async def load_chat(chat_component, selected_chat_log=None, provider_manager=Non
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = conversation_manager(user, persona_name, provider_manager)
+    # Use chat_component.conversation_manager directly
+    conversation_manager = chat_component.conversation_manager
 
     actual_chat_log = conversation_manager.get_chat_log(user, conversation_id)
 
@@ -110,7 +112,8 @@ def delete_conversation(chat_component, provider_manager):
     persona_name = chat_component.current_persona.get('name') if chat_component.current_persona else 'Unknown'
     logger.info(f"Current persona_name: {persona_name}")
 
-    conversation_manager = conversation_manager(user, persona_name, provider_manager)
+    # Use chat_component.conversation_manager directly
+    conversation_manager = chat_component.conversation_manager
 
     conversation_manager.delete_conversation(user, conversation_id)
 
@@ -126,7 +129,6 @@ def delete_conversation(chat_component, provider_manager):
         formatted_timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S").strftime("%b %d, %Y")
         entry = f"{display_name}: {formatted_timestamp}@@{conversation_id}"
         chat_component.chat_log_listbox.addItem(entry)
-
 
 async def clear_chat_log(chat_component, provider_manager, cognitive_services):
     logger.info("Clearing chat log in the chat component")

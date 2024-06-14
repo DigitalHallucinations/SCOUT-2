@@ -346,7 +346,7 @@ class Sidebar(QtWidgets.QFrame):
         self.history_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/history_wt.png"))
 
     def handle_history_button(self):
-        cf.load_chat_history(self.chat_component, self.chat_component.provider_manager, self.conversation_manager)
+        cf.load_chat_history(self.chat_component, self.chat_component.provider_manager)
 
     def on_chat_button_hover(self, event):
         self.chat_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/chat_bl.png"))

@@ -1,4 +1,4 @@
-# modules/Providers/OpenAI/model_manager.py
+# modules/Providers/model_manager.py
 
 class ModelManager:
     def __init__(self):
@@ -7,17 +7,20 @@ class ModelManager:
         self.ALLOWED_MODELS = [
             "gpt-3.5-turbo-1106", "gpt-4-0613", "gpt-3.5-turbo-16k-0613", 
             "gpt-3.5-turbo-0613", "gpt-4-1106-preview", "gpt-4-turbo-preview", 
-            "gpt-4o", "gpt-4o-2024-05-13"
+            "gpt-4o", "gpt-4o-2024-05-13", "gemini-1.5-pro-latest"  # Added Google Gemini model
         ]
 
     def set_model(self, model_name):
-        self.MODEL = model_name
-        if self.MODEL in ["gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k"]:
-            self.MAX_TOKENS = 4000
-        elif self.MODEL in ["gpt-4-0613", "gpt-4", "gpt-4o", "gpt-4o-2024-05-13"]:
-            self.MAX_TOKENS = 4000
+        if model_name in self.ALLOWED_MODELS:
+            self.MODEL = model_name
+            if self.MODEL in ["gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k"]:
+                self.MAX_TOKENS = 4000
+            elif self.MODEL in ["gpt-4-0613", "gpt-4", "gpt-4o", "gpt-4o-2024-05-13", "gemini-1.5-pro-latest"]:  # Updated condition
+                self.MAX_TOKENS = 4000
+            else:
+                self.MAX_TOKENS = 2000
         else:
-            self.MAX_TOKENS = 2000
+            raise ValueError(f"Model {model_name} is not allowed.")
 
     def get_model(self):
         return self.MODEL

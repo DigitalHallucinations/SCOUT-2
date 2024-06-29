@@ -164,6 +164,7 @@ class ChatComponent(QtWidgets.QWidget):
 
     def create_widgets(self):
         logger.info("Creating widgets")
+
         self.setStyleSheet("background-color: #000000;")
         
         main_layout = QtWidgets.QVBoxLayout(self)
@@ -196,6 +197,7 @@ class ChatComponent(QtWidgets.QWidget):
 
         self.speech_bar = SpeechBar(
             parent=self,
+            model_manager=self.model_manager,
             speechbar_frame_bg=self.appearance_settings_instance.speechbar_frame_bg,
             speechbar_font_color=self.appearance_settings_instance.speechbar_font_color,
             speechbar_font_family=self.appearance_settings_instance.speechbar_font_family,

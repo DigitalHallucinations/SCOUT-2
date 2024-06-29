@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-# from modules.speech_services.GglCldSvcs.tts import tts, get_tts
+#from modules.speech_services.GglCldSvcs.tts import tts, get_tts
 from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 from modules.chat_history.convo_manager import ConversationManager
 from modules.Providers.Google.genai_api import GenAIAPI
@@ -11,7 +11,17 @@ from modules.logging.logger import setup_logger
 
 logger = setup_logger('GG_gen_response.py')
 
-def create_request_body(current_persona, messages, temperature_var, top_p_var, top_k_var, functions=None, safety_settings=None):
+GG_MODEL = 'gemini-1.5-pro-latest'
+
+def set_GG_model(model_name):
+    global GG_MODEL
+    logger.info(f"Changing GG model from {GG_MODEL} to {model_name}")
+    GG_MODEL = model_name
+
+def get_GG_model():
+    return GG_MODEL
+
+def create_request_body(current_persona, messages, temperature_var, top_p_var, top_k_var, functions = None, safety_settings = None):
     parts = []
     if current_persona.get("content"):
         parts.append({
@@ -73,9 +83,6 @@ async def generate_response(user, current_persona, message, session_id, conversa
     logger.info("Sending request to Google API.")
     logger.debug(f"Data: {data}")
 
-    # Get the model from the model manager
-    GG_MODEL = model_manager.get_model()
-
     genai_api = GenAIAPI(GG_MODEL)
 
     # Call the generate_content method asynchronously
@@ -127,13 +134,15 @@ async def generate_response(user, current_persona, message, session_id, conversa
             else:
                 await tts(ChatResponse)
     except Exception as e:
-        logger.error("Error during TTS: %s", e)
+            logger.error("Error during TTS: %s", e)
 
     logger.info("Exiting generate_response function.")
     return ChatResponse
 
 def contains_code(text: str) -> bool:
+
     return "<code>" in text
+
 
 def format_message_history(messages, user_name, assistant_name):
     """

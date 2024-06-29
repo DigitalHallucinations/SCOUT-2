@@ -1,5 +1,6 @@
-# gui/speech_bar.py
+# speech_bar.py
 
+# speech_bar.py
 from datetime import datetime
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtWidgets import QMessageBox
@@ -12,16 +13,17 @@ from modules.logging.logger import setup_logger
 logger = setup_logger('speech_bar.py')
 
 class SpeechBar(QtWidgets.QFrame):
-    def __init__(self, parent=None, speechbar_frame_bg=None, speechbar_font_color=None, speechbar_font_family=None, speechbar_font_size=None):
+    def __init__(self, parent=None, model_manager=None, speechbar_frame_bg=None, speechbar_font_color=None, speechbar_font_family=None, speechbar_font_size=None):
         super().__init__(parent)
         self.parent = parent
+        self.model_manager = model_manager
         self.speechbar_frame_bg = speechbar_frame_bg
         self.speechbar_font_color = speechbar_font_color
         self.speechbar_font_family = speechbar_font_family
         self.speechbar_font_size = speechbar_font_size
         self.speech_to_text = SpeechToText()
         self.is_listening = False
-        self.provider_manager = ProviderManager(self)
+        self.provider_manager = ProviderManager(self, model_manager)
         self.create_speech_bar()
         self.provider_manager.load_voices()
 
@@ -123,21 +125,14 @@ class SpeechBar(QtWidgets.QFrame):
 
     def populate_google_voice_menu(self):
         logger.info(f"{datetime.now()}: Populating Google voice menu...")
-        client = texttospeech.TextToSpeechClient()
-        english_language_codes = ["en-GB", "en-US"]
-
-        for language_code in english_language_codes:
-            try:
-                logger.info(f"{datetime.now()}: Getting voices for {language_code}...")
-                response = client.list_voices(language_code=language_code)
-                logger.info(f"{datetime.now()}: Received response for {language_code}.")
-
-                for voice in response.voices:
-                    voice_name = voice.name
-                    action = self.voice_menu.addAction(voice_name)
-                    action.triggered.connect(lambda checked, v=voice_name: self.on_voice_selection(v))
-            except Exception as e:
-                logger.error(f"{datetime.now()}: Error while getting voices for {language_code}: {e}")
+        try:
+            voices = self.provider_manager.get_voices()
+            for voice in voices:
+                voice_name = voice['name']
+                action = self.voice_menu.addAction(voice_name)
+                action.triggered.connect(lambda checked, v=voice: self.on_voice_selection(v))
+        except Exception as e:
+            logger.error(f"{datetime.now()}: Error while getting voices for Google: {e}")
 
     def populate_eleven_labs_voice_menu(self):
         logger.info(f"{datetime.now()}: Populating Eleven Labs voice menu...")

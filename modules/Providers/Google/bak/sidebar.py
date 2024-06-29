@@ -7,6 +7,11 @@ from gui.tooltip import ToolTip
 from gui import chist_functions as cf
 from gui.fetch_models.OA_fetch_models import fetch_models_openai
 from gui.fetch_models.GG_fetch_models import fetch_models_google, fetch_model_details    
+from modules.Providers.Mistral.Mistral_gen_response import set_Mistral_model, get_Mistral_model
+from modules.Providers.HuggingFace.HF_gen_response import set_hf_model, get_hf_model
+from modules.Providers.Google.GG_gen_response import set_GG_model, get_GG_model
+from modules.Providers.Anthropic.Anthropic_gen_response import set_Anthropic_model, get_Anthropic_model
+
 from modules.logging.logger import setup_logger
 
 logger = setup_logger('sidebar.py')
@@ -37,14 +42,7 @@ class Sidebar(QtWidgets.QFrame):
         logger.info(f"Selected provider: {self.current_llm_provider}")
         self.chat_component.provider_manager.switch_llm_provider(llm_provider)
         self.chat_component.provider_label.setText(f"Provider: {llm_provider}")
-        self.populate_models_menu()
-
-        # Update the model manager based on the provider
-        if llm_provider == "Google":
-            self.model_manager.set_model("gemini-1.5-pro-latest")
-        elif llm_provider == "OpenAI":
-            self.model_manager.set_model("gpt-4o")
-        # Add other providers and their default models as needed
+        self.populate_models_menu()     
 
     def populate_models_menu(self): 
         logger.info("Populating models menu for provider: %s", self.current_llm_provider)
@@ -82,25 +80,48 @@ class Sidebar(QtWidgets.QFrame):
     def check_current_model(self):
         logger.info("Checking current model against selected model")
         try:
-            current_model = self.model_manager.get_model()
-            logger.info(f"Current provider: {self.current_llm_provider}, Current model: {current_model}")
+            current_model = None
+            if self.current_llm_provider == 'Google':
+                current_model = get_GG_model()
+                logger.info("Current provider: Google")
+            elif self.current_llm_provider == 'Mistral':
+                current_model = get_Mistral_model()
+                logger.info("Current provider: Mistral")
+            elif self.current_llm_provider == 'HuggingFace':
+                current_model = get_hf_model()
+                logger.info("Current provider: HuggingFace")
+            elif self.current_llm_provider == 'OpenAI':
+                current_model = self.model_manager.get_model()  
+                logger.info("Current provider: OpenAI")
+            elif self.current_llm_provider == 'Anthropic':
+                current_model = get_Anthropic_model()
+                logger.info("Current provider: OpenAI")    
 
             if current_model and current_model == self.fetch_models_button.text():
                 logger.info("Model set successfully: %s", current_model)
             else:
                 logger.error("Failed to set model. Expected: %s, Found: %s", self.fetch_models_button.text(), current_model)
         except Exception as e:
-            logger.error("Error checking current model", exc_info=True)
+            logger.error("Error checking current model", exc_info=True)    
 
     def set_model_and_update_button(self, model):
         logger.info(f"Setting model: {model}")
-        self.model_manager.set_model(model)
+        if self.current_llm_provider == 'Google':
+            set_GG_model(model)
+        elif self.current_llm_provider == 'Mistral':
+            set_Mistral_model(model)
+        elif self.current_llm_provider == 'HuggingFace':
+            set_hf_model(model)
+        elif self.current_llm_provider == 'OpenAI':
+            self.model_manager.set_model(model)  
+        elif self.current_llm_provider == 'Anthropic':
+            set_Anthropic_model(model)    
         logger.info(f"Model {model} set successfully for {self.current_llm_provider}")
-
+        
         logger.info("Updating fetch_models_button text")
         self.chat_component.model_label.setText(f"Model: {model}") 
         logger.info(f"fetch_models_button text updated to: {model}")
-
+        
         self.check_current_model()
 
     def fetch_models_google_wrapper(self):
@@ -115,7 +136,7 @@ class Sidebar(QtWidgets.QFrame):
             logger.info("Asynchronous task to fetch OpenAI models started")
         except Exception as e:
             logger.error("Failed to start task for fetching OpenAI models", exc_info=True)
-
+ 
     def show_model_context_menu(self, pos):
         try:
             action = self.fetch_models_menu.actionAt(pos)
@@ -154,6 +175,7 @@ class Sidebar(QtWidgets.QFrame):
         self.fetch_models_button.setMenu(self.fetch_models_menu)
         self.populate_models_menu()
         self.fetch_models_menu.exec(QtGui.QCursor.pos())
+
 
     def apply_font_settings(self):
         font = QtGui.QFont(self.font_family, self.font_size, QtGui.QFont.Normal)

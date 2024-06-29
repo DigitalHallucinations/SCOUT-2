@@ -94,6 +94,24 @@ def get_voice():
     logger.info(f"Current voice: {VOICE}")
     return VOICE
 
+def get_voices():
+    client = texttospeech.TextToSpeechClient()
+    voices = []
+    try:
+        response = client.list_voices()
+        for voice in response.voices:
+            for language_code in voice.language_codes:
+                voices.append({
+                    'name': voice.name,
+                    'language': language_code,
+                    'ssml_gender': texttospeech.SsmlVoiceGender(voice.ssml_gender).name,
+                    'natural_sample_rate_hertz': voice.natural_sample_rate_hertz,
+                })
+        logger.info(f"Found {len(voices)} voices.")
+    except Exception as e:
+        logger.error(f"Error while getting voices: {e}")
+    return voices
+
 def set_tts(value):
     global _use_tts
     _use_tts = value
@@ -121,10 +139,3 @@ async def test_tts():
 if __name__ == "__main__":
     import asyncio
     asyncio.run(test_tts())
-
-"""
-async def text_to_speech(text):
-    logger.info("Skipping TTS as the text contains code.")  
-    text_without_code = re.sub(r"`[^`]*`", "", text)
-    await tts.text_to_speech(text_without_code)
-"""

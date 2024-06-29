@@ -55,6 +55,8 @@ async def generate_response(user, current_persona, message, session_id, conversa
             if text is None:
                 text = "Gen_response says: Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
                 logger.info("Gen_response says: Sorry, I couldn't generate a meaningful response. Please try again or provide more context.")
+        
+        # Log before calling TTS
         try:
             if provider_manager.get_current_speech_provider() == "Eleven Labs":
                 from modules.speech_services.Eleven_Labs.tts import tts, get_tts
@@ -62,10 +64,14 @@ async def generate_response(user, current_persona, message, session_id, conversa
                 from modules.speech_services.GglCldSvcs.tts import tts, get_tts
 
             if get_tts():
+                logger.info(f"Attempting to invoke TTS for the text: {text}")
                 if contains_code(text):
                     logger.info("Skipping TTS as the text contains code.")
                 else:
                     await tts(text)
+                    logger.info("TTS successfully invoked.")
+            else:
+                logger.info("TTS is turned off.")
         except Exception as e:
             logger.error("Error during TTS: %s", e)
 

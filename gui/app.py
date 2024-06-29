@@ -138,9 +138,9 @@ class SCOUT(QtWidgets.QMainWindow):
             self.persona_handler = PersonaManager(self, self.user)
             current_persona = self.persona_handler.current_persona
 
-            self.provider_manager = ProviderManager(self)
-            
-            self.model_manager = ModelManager()  
+            self.model_manager = ModelManager() 
+
+            self.provider_manager = ProviderManager(self, self.model_manager)
 
             self.chat_history_database = ConversationManager(self.user, current_persona['name'], self.provider_manager)
             logger.info("Conversation History Database instantiated successfully.")

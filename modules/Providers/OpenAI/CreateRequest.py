@@ -1,8 +1,8 @@
-# modules/Providers/OpenAI/request_body_creator.py
+# modules/Providers/OpenAI/create_request_body.py
 
 import logging
 
-logger = logging.getLogger('request_body_creator')
+logger = logging.getLogger('create_request_body.py')
 
 def create_request_body(model, current_persona, messages, temperature_var, top_p_var, max_tokens, functions=None):
     logger.info("Creating request body.")

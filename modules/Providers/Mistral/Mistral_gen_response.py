@@ -147,7 +147,7 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
     logger.error(f"Function {function_name} not found in function map.")
     return None, True
 
-async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, provider_manager=None):
+async def generate_response(user, current_persona, message, session_id, conversation_id, temperature_var, top_p_var, top_k_var, conversation_manager, model_manager, provider_manager=None):
     logger.info(f"generate_response called with user: {user}, session_id: {session_id}, conversation_id: {conversation_id}")
 
     functions = load_functions_from_json(current_persona)

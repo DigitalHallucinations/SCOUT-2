@@ -1,16 +1,13 @@
 # modules/speech_services/Eleven_Labs/tts.py
 
-# Description: Text to speech module using Eleven Labs
-
 import pygame
 import threading
 import os
 import requests
 import re
-import os
 from dotenv import load_dotenv
 from modules.logging.logger import setup_logger
-from datetime import datetime  # Import datetime module
+from datetime import datetime
 
 logger = setup_logger('11_tts.py')
 
@@ -18,8 +15,6 @@ CHUNK_SIZE = 1024
 
 _use_tts = False
 VOICE_IDS = []
-
-
 
 def play_audio(filename):
     logger.info(f"Playing audio file: {filename}")
@@ -31,7 +26,6 @@ def play_audio(filename):
     logger.info("Audio playback finished.")
 
 def contains_code(text: str) -> bool:
-    """Check if the given text contains code"""
     logger.debug(f"Checking if text contains code: {text}")
     return "<code>" in text
 
@@ -79,11 +73,7 @@ async def text_to_speech(text):
             text_without_code = re.sub(r"`[^`]*`", "", text)
             text = text_without_code
 
-        load_dotenv()
-        XI_API_KEY = os.getenv("XI_API_KEY")
-        if XI_API_KEY is None:
-            logger.error("API key not found. Please set the XI_API_KEY environment variable.")
-            raise ValueError("API key not found. Please set the XI_API_KEY environment variable.")
+        load_voices()  # Ensure voices are loaded
 
         if not VOICE_IDS:
             logger.error("No voice IDs found. Please make sure voices are loaded.")
@@ -94,7 +84,7 @@ async def text_to_speech(text):
        
         headers = {
             "Accept": "application/json",
-            "xi-api-key": XI_API_KEY
+            "xi-api-key": os.getenv("XI_API_KEY")
         }
 
         data = {
@@ -117,11 +107,9 @@ async def text_to_speech(text):
         if response.ok:
             logger.info("TTS response received successfully.")
             
-            # Ensure the directory exists
             if not os.path.exists("assets/SCOUT/tts_mp3/"):
                 os.makedirs("assets/SCOUT/tts_mp3/")
             
-            # Generate a unique filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
             output_path = f"assets/SCOUT/tts_mp3/output_{timestamp}.mp3"
             
@@ -150,11 +138,12 @@ def set_voice(voice):
 
 def load_voices():
     global VOICE_IDS
-    VOICE_IDS = get_voices()
-    if VOICE_IDS:
-        logger.info(f"Loaded {len(VOICE_IDS)} voices.")
-    else:
-        logger.warning("No voices loaded.")
+    if not VOICE_IDS:
+        VOICE_IDS = get_voices()
+        if VOICE_IDS:
+            logger.info(f"Loaded {len(VOICE_IDS)} voices.")
+        else:
+            logger.warning("No voices loaded.")
 
 def get_voice():
     logger.info(f"Current voice ID: {VOICE_IDS[0]}")
@@ -172,28 +161,16 @@ def get_tts():
 async def tts(text):
     await text_to_speech(text)
 
-def load_voices():
-    global VOICE_IDS
-    VOICE_IDS = get_voices()
-    if VOICE_IDS:
-        logger.info(f"Loaded {len(VOICE_IDS)} voices.")
-    else:
-        logger.warning("No voices loaded.")
-
 async def test_tts():
     test_text = "Hello World!"
     
-    # Load the voices
     load_voices()
     
-    # Set the desired voice
     test_voice = {'voice_id': 'iP95p4xoKVk53GoZ742B', 'name': 'Chris'}
     set_voice(test_voice)
     
-    # Enable TTS
     set_tts(True)
     
-    # Call the text_to_speech function
     await text_to_speech(test_text)
 
 if __name__ == "__main__":

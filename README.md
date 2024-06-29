@@ -44,55 +44,42 @@ SCOUT is about something much bigger than just technology. It's about the future
 - **Dynamic Module Loading**: Loads different modules based on the current LLM (Large Language Model) and background provider.
 - **Application Shutdown**: Handles cleanup and shutdown tasks.
 
-### 2. **Graphical User Interface (GUI) (`gui/app.py`, `gui/chat_component.py`, `gui/sidebar.py`, `gui/tool_control.py`, `gui/status_bar.py`)**
-- **Main Window (`SCOUT`)**: Initializes the main application window, manages user sessions, and sets up the custom title bar.
-- **Chat Component (`ChatComponent`)**: Manages the chat interface, including message entry, chat log, and persona selection.
-- **Sidebar (`Sidebar`)**: Provides navigation and tool selection options.
-- **Tool Control Bar (`ToolControlBar`)**: Manages quick access to various tools like VoIP, RSS feed, browser, and calendar.
-- **Status Bar (`StatusBar`)**: Displays current provider, model, and user information.
+### 2. **Graphical User Interface (GUI)**
+- **Main Window**: Initializes the main application window, manages user sessions, and sets up the custom title bar.
+- **Chat Component**: Manages the chat interface, including message entry, chat log, and persona selection.
+- **Sidebar**: Provides navigation and tool selection options.
+- **Tool Control Bar**: Manages quick access to various tools like VoIP, RSS feed, browser, and calendar.
+- **Status Bar**: Displays current provider, model, and user information.
+- **Appearance Settings**: Manages the visual settings of the application, including font styles, colors, and sizes.
 
-### 3. **Background Services (`modules/Background_Services/CognitiveBackgroundServices.py`)**
+### 3. **Background Services**
 - **Cognitive Background Services**: Manages background tasks related to conversation processing, such as generating conversation names and updating user profiles.
 
-### 4. **Conversation Management (`modules/chat_history/convo_manager.py`)**
+### 4. **Conversation Management**
 - **Conversation Manager**: Handles database operations related to conversations, messages, function calls, and responses. Uses SQLite for data storage.
 
-### 5. **Provider Management (`modules/Providers/provider_manager.py`)**
+### 5. **Provider Management**
 - **Provider Manager**: Manages different LLM providers, background providers, and speech providers. Switches between providers based on the current configuration.
-
-### 6. **Model Management (`modules/Providers/OpenAI/model_manager.py`)**
 - **Model Manager**: Manages the current model and its configurations, such as allowed models and maximum tokens.
 
-### 7. **Tool Management (`modules/Providers/OpenAI/ToolManager.py`)**
+### 6. **Tool Management**
 - **Tool Manager**: Loads functions from JSON and maps them to the current persona. Handles function calls and integrates them into the conversation flow.
 
-### 8. **User Data Management (`modules/user_accounts/user_data_manager.py`)**
+### 7. **User Data Management**
 - **User Data Manager**: Manages user profiles, EMRs (Electronic Medical Records), and system information. Formats and retrieves user data for persona personalization.
 
-### 9. **OpenAI API Integration (`modules/Providers/OpenAI/openai_api.py`)**
+### 8. **OpenAI API Integration**
 - **OpenAI API**: Handles communication with the OpenAI API for generating conversations and cognitive background services.
 
-### 10. **Logging (`modules/logging/logger.py`)**
+### 9. **Logging**
 - **Logger Setup**: Configures logging for different modules to track application behavior and errors.
 
-### 11. **Personas (`gui/Personas/persona_manager.py`)**
+### 10. **Personas**
 - **Persona Manager**: Manages different personas, personalizes them based on user data, and updates the current persona.
 
-### 12. **Function and Tool Definitions (`modules/Personas/{persona}/Toolbox/functions.json`, `modules/Personas/{persona}/Toolbox/maps.py`)**
+### 11. **Function and Tool Definitions**
 - **Function Definitions**: JSON files defining available functions for each persona.
 - **Function Maps**: Python files mapping function names to their implementations.
-
-### Key Interactions:
-- **Main Application**: Initializes and runs the application, managing the event loop and background tasks.
-- **GUI Components**: Interact with the user, display information, and handle user inputs.
-- **Background Services**: Perform asynchronous tasks like conversation processing and profile updates.
-- **Conversation Manager**: Stores and retrieves conversation data, ensuring persistence.
-- **Provider Manager**: Switches between different AI models and services based on the current configuration.
-- **Tool Manager**: Executes functions and integrates their results into the conversation flow.
-- **User Data Manager**: Provides personalized data to enhance user interactions.
-- **OpenAI API**: Facilitates communication with the OpenAI API for generating responses and background services.
-
-
 
 ## Roadmap
 
@@ -143,11 +130,12 @@ To use SCOUT, you will need to obtain several API keys and configure them in the
 
 1. **OpenAI API Key**:
    - Sign up for an OpenAI account at [openai.com](https://openai.com/).
-   - Generate an API key by going to the [API Keys](https://platform.openai.com/account/api-keys) section in your OpenAI account.
+   - Generate an API key by going to the [API Keys](https://platform.openai.com/account/api-
+
+keys) section in your OpenAI account.
    - Copy the API key and paste it in the `OPENAI_API_KEY` field in the `.env` file.
 
 2. **Google Cloud Credentials**:
-   _ This is not the same as the Google AI Studio.
    - Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
    - Enable the necessary APIs, such as:
      - Cloud Speech-to-Text

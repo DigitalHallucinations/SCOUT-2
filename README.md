@@ -10,8 +10,6 @@ SCOUT is an AI-powered personal assistant that aims to empower people through in
 
 SCOUT is an innovative AI-powered personal assistant that offers intelligent, scalable, and responsive support for a diverse array of tasks. Utilizing state-of-the-art technologies like transformers, multi-agent systems, and cognitive operations, SCOUT aims to deliver a user experience that is both seamless and highly personalized.
 
-![SCOUT Demo](assets/scout_demo.gif)
-
 ## Vision
 
 At its heart, SCOUT is about empowering people through artificial intelligence. It's an AI-powered personal assistant that goes beyond just answering questions or performing simple tasks. SCOUT is designed to be a true partner in every sense of the word - an intelligent, adaptive, and personalized system that can help users navigate the complexities of the modern world.
@@ -122,7 +120,7 @@ To begin using SCOUT, follow these steps:
 
 ## Documentation
 
-For comprehensive usage details, refer to the [documentation](https://github.com/DigitalHallucinations/SCOUT-2/wiki) (coming soon).
+For comprehensive usage details, refer to the [documentation](DOCS/SCOUT_overview.md).
 
 ## API Keys Configuration
 
@@ -130,12 +128,11 @@ To use SCOUT, you will need to obtain several API keys and configure them in the
 
 1. **OpenAI API Key**:
    - Sign up for an OpenAI account at [openai.com](https://openai.com/).
-   - Generate an API key by going to the [API Keys](https://platform.openai.com/account/api-
-
-keys) section in your OpenAI account.
+   - Generate an API key by going to the [API Keys](https://platform.openai.com/account/api-keys) section in your OpenAI account.
    - Copy the API key and paste it in the `OPENAI_API_KEY` field in the `.env` file.
 
 2. **Google Cloud Credentials**:
+   _ This is not the same as the Google AI Studio.
    - Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
    - Enable the necessary APIs, such as:
      - Cloud Speech-to-Text

@@ -14,12 +14,6 @@ Last Updated: 2023-06-29
 
 ---
 
-## ChatComponent Module
-
-
-
----
-
 ## ProviderManager Module
 
 The ProviderManager module handles the integration and switching between different AI providers.

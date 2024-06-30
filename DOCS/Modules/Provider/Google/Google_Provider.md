@@ -1,76 +1,108 @@
-# Google_Provider_Documentation.md
+## Module: GG_gen_response.py
 
-## Overview
-The Google provider in this project utilizes Google's Generative AI API to generate responses. It consists of two main components: `genai_api.py` and `GG_gen_response.py`.
+The `GG_gen_response.py` module is responsible for generating responses using Google's GenAI API based on user inputs, conversation history, and specific persona configurations. It manages the entire flow of generating a response, including handling user messages, formatting the conversation history, creating request bodies, and processing the API response. Additionally, it integrates with text-to-speech services to provide audio feedback when appropriate.
 
-## genai_api.py
+---
 
-This file sets up the connection to Google's Generative AI API and provides a class for generating content.
+# Imports:
 
-### Key Components:
+- `re`: Standard Python library for regular expression operations.
+- `datetime`: Standard Python library for date and time manipulation.
+- `tts, get_tts` from `modules.speech_services.Eleven_Labs.tts`: Internal module for text-to-speech services.
+- `ConversationManager` from `modules.chat_history.convo_manager`: Manages conversation history.
+- `GenAIAPI` from `modules.Providers.Google.genai_api`: Interface for Google's GenAI API.
+- `ToolManager` from `modules.Tools.GG_Tool_Manager`: Manages tools and functions for AI responses.
+- `setup_logger` from `modules.logging.logger`: Sets up logging for the module.
 
-1. **Environment Setup**:
-   - Uses `dotenv` to load environment variables.
-   - Retrieves the `GOOGLE_API_KEY` from environment variables.
+---
 
-2. **GenAIAPI Class**:
-   - Initializes with a specified model (default is 'gemini-pro').
-   - Provides an asynchronous `generate_content` method to interact with the API.
+## Function: create_request_body
 
-3. **Error Handling**:
-   - Logs critical errors if the API key is not set.
-   - Handles and logs exceptions during content generation.
+Creates the request body for the GenAI API call, including conversation history, persona settings, and generation configurations.
 
-## GG_gen_response.py
+- **Parameters:**
+  - `current_persona` (dict, required): Contains the persona configuration.
+  - `messages` (list, required): The conversation history formatted as a list of messages.
+  - `temperature_var` (float, required): Controls the randomness of the generated response.
+  - `top_p_var` (float, required): Controls the diversity of the generated response.
+  - `top_k_var` (int, required): Limits the number of possible next tokens.
+  - `functions` (list, optional): List of functions to include in the request.
+  - `safety_settings` (dict, optional): Settings for safety controls in the generation process.
 
-This file contains the main logic for generating responses using the Google GenAI API.
+- **Returns:** 
+  - `data` (dict): The formatted data for the API request.
 
-### Key Components:
+**Example usage:**
 
-1. **create_request_body Function**:
-   - Prepares the request body for the API call.
-   - Incorporates persona content, chat history, and generation parameters.
 
-2. **generate_response Function**:
-   - Main asynchronous function for generating responses.
-   - Manages conversation history, message formatting, and API interactions.
-   - Handles function calls and tool management.
-   - Processes the API response and formats it for output.
+data = create_request_body(current_persona, messages, 0.7, 0.9, 40)
 
-3. **Helper Functions**:
-   - `contains_code`: Checks if the response contains code snippets.
-   - `format_message_history`: Formats the conversation history for the model.
 
-4. **Integration with Other Modules**:
-   - Uses `ConversationManager` for managing chat history.
-   - Integrates with `ToolManager` for handling function calls and loading tools.
-   - Utilizes text-to-speech functionality (currently commented out).
+---
 
-5. **Logging**:
-   - Extensive logging throughout the process for debugging and monitoring.
+## Function: generate_response
 
-## Usage
+Asynchronously generates a response using the GenAI API, processes the response, and manages the conversation history.
 
-To use the Google provider:
+- **Parameters:**
+  - `user` (str, required): The user ID.
+  - `current_persona` (dict, required): Contains the persona configuration.
+  - `message` (str, required): The latest message from the user.
+  - `session_id` (str, required): The session ID for the conversation.
+  - `conversation_id` (str, required): The conversation ID.
+  - `temperature_var` (float, required): Controls the randomness of the generated response.
+  - `top_p_var` (float, required): Controls the diversity of the generated response.
+  - `top_k_var` (int, required): Limits the number of possible next tokens.
+  - `conversation_manager` (ConversationManager, required): Manages the conversation history.
+  - `model_manager` (object, required): Manages the model configuration.
+  - `provider_manager` (object, optional): Manages external service providers.
 
-1. Ensure the `GOOGLE_API_KEY` is set in your environment variables.
-2. Initialize the `GenAIAPI` class with the desired model.
-3. Call the `generate_response` function with appropriate parameters to generate responses.
+- **Returns:** 
+  - `ChatResponse` (str): The generated chat response.
 
-## Error Handling
+**Example usage:**
 
-- The system logs critical errors if the API key is missing.
-- Exceptions during API calls and response processing are caught and logged.
-- The system provides fallback responses in case of errors.
 
-## Configuration
+response = await generate_response(user, current_persona, message, session_id, conversation_id, 0.7, 0.9, 40, conversation_manager, model_manager)
 
-- The model can be configured when initializing the `GenAIAPI` class.
-- Generation parameters (temperature, top_p, top_k) can be adjusted in the `create_request_body` function.
 
-## Limitations
+---
 
-- Depends on an active internet connection and valid Google API key.
-- The maximum output tokens are currently set to 2048.
+## Function: contains_code
 
-This documentation provides an overview of the Google provider implementation in the project. For more detailed information on specific functions or classes, refer to the inline comments in the respective files.
+Checks if the provided text contains any code snippets.
+
+- **Parameters:**
+  - `text` (str, required): The text to be checked.
+
+- **Returns:** 
+  - `bool`: True if the text contains code, otherwise False.
+
+**Example usage:**
+
+
+if contains_code(ChatResponse):
+    print("The response contains code.")
+
+
+---
+
+## Function: format_message_history
+
+Formats the message history to reduce token count and improve readability for the model.
+
+- **Parameters:**
+  - `messages` (list, required): The list of message dictionaries.
+  - `user_name` (str, required): The name of the user.
+  - `assistant_name` (str, required): The name of the assistant.
+
+- **Returns:** 
+  - `str`: The formatted message history as a string.
+
+**Example usage:**
+
+
+formatted_history = format_message_history(messages, user_name, assistant_name)
+
+
+---

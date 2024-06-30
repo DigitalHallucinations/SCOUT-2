@@ -68,7 +68,7 @@ You will act as the Documentator. Please follow the template and ensure the outp
 After creating the updated documentation using the above schema template, provide a commit message summarizing the changes. The commit message should be detailed and follow this template:
 
 ```
-Updated documentation for the project modules and classes
+Update: documentation for the project modules and classes
 
 - Added comprehensive descriptions for each module, detailing purpose, functionalities, and system interactions.
 - Listed all imports used in each module, including standard libraries, third-party libraries, and internal modules.

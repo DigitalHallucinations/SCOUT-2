@@ -32,7 +32,7 @@ class ProviderManager:
             self.model_manager.set_model("gemini-1.5-pro-latest")
         elif llm_provider == "HuggingFace":
             from modules.Providers.HuggingFace.HF_gen_response import generate_response  
-            self.model_manager.set_model("huggingface-model-name")  # Replace with actual model name
+            self.model_manager.set_model("microsoft/DialoGPT-large")  # Updated with actual model name
         elif llm_provider in ["Anthropic"]:
             from modules.Providers.Anthropic.Anthropic_gen_response import generate_response    
             self.model_manager.set_model("anthropic-model-name")  # Replace with actual model name

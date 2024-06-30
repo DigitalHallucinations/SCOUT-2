@@ -45,7 +45,7 @@ Creates and configures the speech bar's GUI components, including buttons for se
 
 **Example usage:**
 
-```python
+
 speech_bar = SpeechBar(parent, model_manager, "#fff", "#000", "Arial", 12)
 speech_bar.create_speech_bar()
 ```
@@ -61,7 +61,7 @@ Displays a menu for selecting the speech provider.
 
 **Example usage:**
 
-```python
+
 speech_bar.show_speech_provider_menu()
 ```
 
@@ -77,7 +77,7 @@ Handles the selection of a speech provider and updates the speech provider butto
 
 **Example usage:**
 
-```python
+
 speech_bar.on_speech_provider_selection("Google")
 ```
 
@@ -92,7 +92,7 @@ Toggles the text-to-speech functionality on or off.
 
 **Example usage:**
 
-```python
+
 speech_bar.toggle_tts()
 ```
 
@@ -107,7 +107,7 @@ Populates the voice menu based on the selected speech provider.
 
 **Example usage:**
 
-```python
+
 speech_bar.populate_voice_menu()
 ```
 
@@ -122,7 +122,7 @@ Populates the voice menu with Google voices.
 
 **Example usage:**
 
-```python
+
 speech_bar.populate_google_voice_menu()
 ```
 
@@ -137,7 +137,7 @@ Populates the voice menu with Eleven Labs voices.
 
 **Example usage:**
 
-```python
+
 speech_bar.populate_eleven_labs_voice_menu()
 ```
 
@@ -152,7 +152,7 @@ Displays the voice menu.
 
 **Example usage:**
 
-```python
+
 speech_bar.show_voice_menu()
 ```
 
@@ -168,7 +168,7 @@ Handles the selection of a voice and updates the voice button.
 
 **Example usage:**
 
-```python
+
 speech_bar.on_voice_selection(voice)
 ```
 
@@ -183,7 +183,7 @@ Toggles the speech-to-text listening functionality on or off.
 
 **Example usage:**
 
-```python
+
 speech_bar.toggle_listen()
 ```
 
@@ -199,7 +199,7 @@ Handles the hover event for the microphone button.
 
 **Example usage:**
 
-```python
+
 speech_bar.on_microphone_button_hover(event)
 ```
 
@@ -215,7 +215,7 @@ Handles the leave event for the microphone button.
 
 **Example usage:**
 
-```python
+
 speech_bar.on_microphone_button_leave(event)
 ```
 
@@ -231,7 +231,7 @@ Handles the hover event for the text-to-speech button.
 
 **Example usage:**
 
-```python
+
 speech_bar.on_tts_button_hover(event)
 ```
 
@@ -247,21 +247,5 @@ Handles the leave event for the text-to-speech button.
 
 **Example usage:**
 
-```python
+
 speech_bar.on_tts_button_leave(event)
-```
-
----
-
-### Commit Message Instructions
-
-```
-Update: Documentation 
-
-- Added comprehensive descriptions for each module, detailing purpose, functionalities, and system interactions.
-- Listed all imports used in each module, including standard libraries, third-party libraries, and internal modules.
-- Provided detailed constructor (`__init__`) documentation for each class, including initialization steps, state setup, and dependencies.
-- Documented each class method with detailed descriptions, parameters, return values, example usage, and important notes.
-- Included edge cases and typical scenarios for method and function calls.
-- Enhanced readability and consistency across all documentation sections.
-```

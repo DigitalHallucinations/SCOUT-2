@@ -1,94 +1,267 @@
-# DOCS/speech_bar_Documentation.md
+## Module: `speech_bar.py`
+The `speech_bar.py` module is responsible for managing the speech bar component of the GUI, enabling functionalities related to speech-to-text and text-to-speech. It provides the interface for users to select speech providers, voices, and toggle between different speech functionalities. The module integrates various services, including Google's text-to-speech and speech-to-text services, and manages these interactions through a unified user interface.
 
-## Overview
+---
 
-The `speech_bar.py` file defines the `SpeechBar` class, which is responsible for handling speech-to-text (STT) and text-to-speech (TTS) functionalities within the SCOUT application. This class provides a user interface component that allows users to toggle these features, select speech providers, and choose voices for TTS.
+# Imports:
 
-## Table of Contents
+- `datetime` (standard library): For logging timestamps.
+- `PySide6.QtWidgets` (third-party library): Provides the necessary GUI components for creating the speech bar.
+- `PySide6.QtGui` (third-party library): Provides the graphical components and utilities.
+- `PySide6.QtCore` (third-party library): Core functionalities for PySide6.
+- `QMessageBox` (third-party library): For displaying message boxes.
+- `ToolTip` (internal module): Manages tooltip display.
+- `SpeechToText` (internal module): Manages speech-to-text functionality.
+- `ProviderManager` (internal module): Manages different speech providers and their settings.
+- `texttospeech` (Google Cloud library): Provides Google's text-to-speech capabilities.
+- `setup_logger` (internal module): Sets up logging for the module.
 
-1. [Imports](#imports)
-2. [SpeechBar Class](#speechbar-class)
-    - [Initialization](#initialization)
-    - [create_speech_bar](#create_speech_bar)
-    - [show_speech_provider_menu](#show_speech_provider_menu)
-    - [on_speech_provider_selection](#on_speech_provider_selection)
-    - [toggle_tts](#toggle_tts)
-    - [populate_voice_menu](#populate_voice_menu)
-    - [populate_google_voice_menu](#populate_google_voice_menu)
-    - [populate_eleven_labs_voice_menu](#populate_eleven_labs_voice_menu)
-    - [show_voice_menu](#show_voice_menu)
-    - [on_voice_selection](#on_voice_selection)
-    - [toggle_listen](#toggle_listen)
-    - [Button Hover Effects](#button-hover-effects)
+---
 
-## Imports
+## Class: `SpeechBar`
 
-The script imports necessary modules for date and time operations, PySide6 components for creating the graphical user interface (GUI), and custom modules for tooltips, speech services, provider management, and logging.
+### Constructor  
+**Method: `__init__`**
 
-## SpeechBar Class
+The constructor initializes the `SpeechBar` class, setting up the necessary components and configurations for the speech bar. It configures the appearance, initializes speech services, and sets up the provider manager to handle different speech providers.
 
-### Initialization
+- **Parameters:**
+  - `parent` (optional): The parent widget of the speech bar.
+  - `model_manager` (optional): Manages the model associated with the speech bar.
+  - `speechbar_frame_bg` (optional): Background color for the speech bar frame.
+  - `speechbar_font_color` (optional): Font color for the speech bar.
+  - `speechbar_font_family` (optional): Font family for the speech bar.
+  - `speechbar_font_size` (optional): Font size for the speech bar.
+- **Returns:** None.
 
-The `SpeechBar` class constructor initializes the speech bar with various parameters such as parent, model manager, and appearance settings. It sets up the speech-to-text functionality, provider manager, and calls `create_speech_bar` to configure the UI elements.
+### Methods
 
-1. **Attributes**: Initializes attributes like the model manager, appearance settings, and speech-to-text service.
-2. **Provider Manager**: Initializes the provider manager and loads available TTS voices.
-3. **UI Setup**: Calls the `create_speech_bar` method to set up the speech bar layout and buttons.
+## Method: `create_speech_bar`
 
-### create_speech_bar
+Creates and configures the speech bar's GUI components, including buttons for selecting speech providers and voices, and toggling text-to-speech and speech-to-text functionalities.
 
-The `create_speech_bar` method sets up the main UI elements of the speech bar, including buttons for selecting speech providers, choosing voices, toggling TTS, and starting/stopping speech-to-text.
+- **Parameters:** None.
+- **Returns:** None.
 
-1. **Speech Provider Button**: Creates a button for selecting the speech provider and sets up its menu.
-2. **Voice Button**: Creates a button for selecting a voice for TTS and sets up its menu.
-3. **TTS Toggle Button**: Creates a button for toggling TTS on or off.
-4. **Microphone Button**: Creates a button for starting and stopping speech-to-text.
+**Example usage:**
 
-### show_speech_provider_menu
+```python
+speech_bar = SpeechBar(parent, model_manager, "#fff", "#000", "Arial", 12)
+speech_bar.create_speech_bar()
+```
 
-The `show_speech_provider_menu` method creates and displays a menu with available speech providers. Users can select a provider from this menu.
+---
 
-### on_speech_provider_selection
+## Method: `show_speech_provider_menu`
 
-The `on_speech_provider_selection` method handles the selection of a speech provider. It updates the provider manager with the selected provider and refreshes the voice menu to display voices available for the new provider.
+Displays a menu for selecting the speech provider.
 
-### toggle_tts
+- **Parameters:** None.
+- **Returns:** None.
 
-The `toggle_tts` method toggles the TTS functionality on or off. It updates the provider manager and changes the icon on the TTS toggle button to reflect the current state.
+**Example usage:**
 
-### populate_voice_menu
+```python
+speech_bar.show_speech_provider_menu()
+```
 
-The `populate_voice_menu` method populates the voice menu with available voices for the current speech provider. It calls specific methods to handle different providers like Google and Eleven Labs.
+---
 
-### populate_google_voice_menu
+## Method: `on_speech_provider_selection`
 
-The `populate_google_voice_menu` method retrieves and adds available voices from Google to the voice menu.
+Handles the selection of a speech provider and updates the speech provider button.
 
-### populate_eleven_labs_voice_menu
+- **Parameters:**
+  - `speech_provider` (str, required): The selected speech provider.
+- **Returns:** None.
 
-The `populate_eleven_labs_voice_menu` method retrieves and adds available voices from Eleven Labs to the voice menu.
+**Example usage:**
 
-### show_voice_menu
+```python
+speech_bar.on_speech_provider_selection("Google")
+```
 
-The `show_voice_menu` method displays the voice menu, allowing users to select a voice for TTS.
+---
 
-### on_voice_selection
+## Method: `toggle_tts`
 
-The `on_voice_selection` method handles the selection of a voice for TTS. It updates the provider manager with the selected voice and updates the voice button text to reflect the chosen voice.
+Toggles the text-to-speech functionality on or off.
 
-### toggle_listen
+- **Parameters:** None.
+- **Returns:** None.
 
-The `toggle_listen` method starts or stops the speech-to-text functionality. When started, it begins listening and transcribing audio input. When stopped, it transcribes the recorded audio and updates the message entry in the parent component with the transcribed text.
+**Example usage:**
 
-### Button Hover Effects
+```python
+speech_bar.toggle_tts()
+```
 
-Methods for handling hover events on the speech bar buttons, changing their icons and displaying tooltips to provide feedback to the user.
+---
 
-- **on_microphone_button_hover**: Changes the microphone button icon and displays a tooltip when the user hovers over the button.
-- **on_microphone_button_leave**: Restores the microphone button icon when the user stops hovering over the button.
-- **on_tts_button_hover**: Changes the TTS button icon and displays a tooltip when the user hovers over the button.
-- **on_tts_button_leave**: Restores the TTS button icon when the user stops hovering over the button.
+## Method: `populate_voice_menu`
 
-## Summary
+Populates the voice menu based on the selected speech provider.
 
-The `speech_bar.py` file defines the `SpeechBar` class, which provides a user interface for managing speech-to-text and text-to-speech functionalities in the SCOUT application. The class includes methods for creating and managing UI elements, handling speech provider and voice selection, toggling TTS, and starting/stopping speech-to-text. The class ensures seamless integration of speech services with the application's chat interface, enhancing user interaction through voice input and output.
+- **Parameters:** None.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.populate_voice_menu()
+```
+
+---
+
+## Method: `populate_google_voice_menu`
+
+Populates the voice menu with Google voices.
+
+- **Parameters:** None.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.populate_google_voice_menu()
+```
+
+---
+
+## Method: `populate_eleven_labs_voice_menu`
+
+Populates the voice menu with Eleven Labs voices.
+
+- **Parameters:** None.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.populate_eleven_labs_voice_menu()
+```
+
+---
+
+## Method: `show_voice_menu`
+
+Displays the voice menu.
+
+- **Parameters:** None.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.show_voice_menu()
+```
+
+---
+
+## Method: `on_voice_selection`
+
+Handles the selection of a voice and updates the voice button.
+
+- **Parameters:**
+  - `voice` (dict, required): The selected voice.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.on_voice_selection(voice)
+```
+
+---
+
+## Method: `toggle_listen`
+
+Toggles the speech-to-text listening functionality on or off.
+
+- **Parameters:** None.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.toggle_listen()
+```
+
+---
+
+## Method: `on_microphone_button_hover`
+
+Handles the hover event for the microphone button.
+
+- **Parameters:**
+  - `event` (QEvent, required): The hover event.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.on_microphone_button_hover(event)
+```
+
+---
+
+## Method: `on_microphone_button_leave`
+
+Handles the leave event for the microphone button.
+
+- **Parameters:**
+  - `event` (QEvent, required): The leave event.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.on_microphone_button_leave(event)
+```
+
+---
+
+## Method: `on_tts_button_hover`
+
+Handles the hover event for the text-to-speech button.
+
+- **Parameters:**
+  - `event` (QEvent, required): The hover event.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.on_tts_button_hover(event)
+```
+
+---
+
+## Method: `on_tts_button_leave`
+
+Handles the leave event for the text-to-speech button.
+
+- **Parameters:**
+  - `event` (QEvent, required): The leave event.
+- **Returns:** None.
+
+**Example usage:**
+
+```python
+speech_bar.on_tts_button_leave(event)
+```
+
+---
+
+### Commit Message Instructions
+
+```
+Update: Documentation 
+
+- Added comprehensive descriptions for each module, detailing purpose, functionalities, and system interactions.
+- Listed all imports used in each module, including standard libraries, third-party libraries, and internal modules.
+- Provided detailed constructor (`__init__`) documentation for each class, including initialization steps, state setup, and dependencies.
+- Documented each class method with detailed descriptions, parameters, return values, example usage, and important notes.
+- Included edge cases and typical scenarios for method and function calls.
+- Enhanced readability and consistency across all documentation sections.
+```

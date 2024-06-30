@@ -65,15 +65,17 @@ You will act as the Documentator. Please follow the template and ensure the outp
 
 ### Commit Message Instructions
 
-After creating the updated documentation using the above schema template, provide a commit message summarizing the changes. The commit message should be detailed and follow this template:
+After creating the updated documentation using the above schema template, provide a commit message summarizing the changes. The commit message should be detailed, contain the names of the module, method and external class function (if any is found in the file) as well as follow this template:
 
 ```
-Update: documentation for the project modules and classes
+Update: Documentation 
 
-- Added comprehensive descriptions for each module, detailing purpose, functionalities, and system interactions.
-- Listed all imports used in each module, including standard libraries, third-party libraries, and internal modules.
-- Provided detailed constructor (`__init__`) documentation for each class, including initialization steps, state setup, and dependencies.
-- Documented each class method with detailed descriptions, parameters, return values, example usage, and important notes.
-- Included edge cases and typical scenarios for method and function calls.
-- Enhanced readability and consistency across all documentation sections.
+  The description for the project modules and classes (include the module, method and function names)
+
+  - Added comprehensive descriptions for each module, detailing purpose, functionalities, and system interactions.
+  - Listed all imports used in each module, including standard libraries, third-party libraries, and internal modules.
+  - Provided detailed constructor (`__init__`) documentation for each class, including initialization steps, state setup, and dependencies.
+  - Documented each class method with detailed descriptions, parameters, return values, example usage, and important notes.
+  - Included edge cases and typical scenarios for method and function calls.
+  - Enhanced readability and consistency across all documentation sections.
 ```

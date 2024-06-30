@@ -60,3 +60,20 @@ You will act as the Documentator. Please follow the template and ensure the outp
   **Example usage:**
 
   [Provide an example of how to use the function, including any necessary setup or context.]
+
+---
+
+### Commit Message Instructions
+
+After creating the updated documentation using the above schema template, provide a commit message summarizing the changes. The commit message should be detailed and follow this template:
+
+```
+Updated documentation for the project modules and classes
+
+- Added comprehensive descriptions for each module, detailing purpose, functionalities, and system interactions.
+- Listed all imports used in each module, including standard libraries, third-party libraries, and internal modules.
+- Provided detailed constructor (`__init__`) documentation for each class, including initialization steps, state setup, and dependencies.
+- Documented each class method with detailed descriptions, parameters, return values, example usage, and important notes.
+- Included edge cases and typical scenarios for method and function calls.
+- Enhanced readability and consistency across all documentation sections.
+```

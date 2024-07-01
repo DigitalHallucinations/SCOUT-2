@@ -131,7 +131,8 @@ def set_voice(voice):
                 'voice_id': voice['voice_id'],
                 'name': voice['name']
             }
-            VOICE_IDS[i] = new_voice
+            VOICE_IDS.pop(i)
+            VOICE_IDS.insert(0, new_voice)
             logger.info(f"Voice set to: {voice['name']} with voice ID: {voice['voice_id']}")
             return
     logger.error(f"Voice name {voice['name']} not found in the list of available voices.")
@@ -139,6 +140,7 @@ def set_voice(voice):
 def load_voices():
     global VOICE_IDS
     if not VOICE_IDS:
+        logger.info("Loading voices because VOICE_IDS is empty...")
         VOICE_IDS = get_voices()
         if VOICE_IDS:
             logger.info(f"Loaded {len(VOICE_IDS)} voices.")
@@ -172,6 +174,18 @@ async def test_tts():
     set_tts(True)
     
     await text_to_speech(test_text)
+
+def initialize_voices():
+    global VOICE_IDS
+    if not VOICE_IDS:
+        VOICE_IDS = get_voices()
+        if VOICE_IDS:
+            logger.info(f"Initialized {len(VOICE_IDS)} voices.")
+        else:
+            logger.warning("No voices initialized.")
+
+# Call this function at the end of the file
+initialize_voices()
 
 if __name__ == "__main__":
     import asyncio

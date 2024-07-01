@@ -29,5 +29,6 @@ chardet
 twilio
 pyaudio
 flask
+keyring
 
 

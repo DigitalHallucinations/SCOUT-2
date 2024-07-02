@@ -1,5 +1,6 @@
 #gui/chat_history/convo_manager.py
 
+import json
 import sqlite3
 import uuid
 import time
@@ -247,10 +248,12 @@ class ConversationManager:
         function_call_id_placeholder = "[function_call_id]"
         with DatabaseContextManager(self.db_file) as cursor:
             try:
+                serialized_response_data = json.dumps(response_data)
+                
                 cursor.execute('''
                     INSERT INTO responses (user, conversation_id, function_call_id, response_data, timestamp)
                     VALUES (?, ?, ?, ?, ?);
-                ''', (user, conversation_id, function_call_id_placeholder, response_data, timestamp))
+                ''', (user, conversation_id, function_call_id_placeholder, serialized_response_data, timestamp))
                 response_id = cursor.lastrowid
 
                 if self.function_call_id is not None:
@@ -262,7 +265,7 @@ class ConversationManager:
                 return response_id
             except sqlite3.Error as e:
                 logger.error(f"Error inserting response: {e}")
-                raise  
+                raise
         
     def add_function_call(self, user, conversation_id, function_name, arguments, timestamp):
         """

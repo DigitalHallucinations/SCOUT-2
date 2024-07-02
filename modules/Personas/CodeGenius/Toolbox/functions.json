@@ -34,6 +34,20 @@
         }
     },
     {
+        "name": "execute_python",
+        "description": "Execute Python code and return the result",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "The Python code to execute"
+            }
+          },
+          "required": ["command"]
+        }
+    },
+    {
         "name": "terminal_command",
         "description": "Execute a terminal command and return the output, error, and status code.",
         "parameters": {

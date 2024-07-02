@@ -46,3 +46,36 @@ The agent uses this file when it needs to interact with the system's terminal or
 - Performing system maintenance tasks
 
 The agent can call the `TerminalCommand()` function with specific commands and options, allowing it to interact with the system in a controlled and safe manner. The function's ability to handle timeouts, retries, and indefinitely running applications makes it versatile for various system interaction needs.
+
+#### Future improvements
+
+
+1. Command Suggestions:
+   - Implement an AI-driven system to suggest relevant commands based on user intent.
+
+2. Interactive Mode:
+   - Add an interactive shell mode for running multiple commands in a session.
+
+3. Command History:
+   - Implement a command history feature with the ability to repeat or modify previous commands.
+
+4. Output Formatting:
+   - Enhance output formatting options (e.g., JSON, table, tree view) for better readability.
+
+5. Command Explanations:
+   - Provide detailed explanations of complex commands and their parameters.
+
+6. Cross-platform Support:
+   - Improve compatibility and consistent behavior across different operating systems.
+
+7. Alias Management:
+   - Allow users to create and manage command aliases for frequently used operations.
+
+8. Environment Variables:
+   - Implement secure handling and management of environment variables.
+
+9. Pipe and Redirection:
+   - Support command piping and I/O redirection within the tool's environment.
+
+10. Asynchronous Command Execution:
+    - Allow long-running commands to be executed asynchronously with progress updates.

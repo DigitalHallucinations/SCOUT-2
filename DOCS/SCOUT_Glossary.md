@@ -2,6 +2,10 @@
 
 ## A
 
+### Action
+
+ An action is anything that system does using the LLM. ie: cognitive background services, tool use, answer a query, query the db or kb or call an agent.
+
 ### AI Provider
 A service or platform that offers artificial intelligence capabilities, such as natural language processing or machine learning models. SCOUT supports multiple AI providers for flexible integration.
 

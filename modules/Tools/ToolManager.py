@@ -1,5 +1,6 @@
 # modules/Providers/OpenAI/ToolManager.py
 
+import asyncio
 import json
 import inspect
 import importlib.util
@@ -56,10 +57,15 @@ def load_functions_from_json(current_persona):
     return {}
 
 async def use_tool(user, conversation_id, message, conversation_history, function_map, functions, current_persona, temperature_var, top_p_var, conversation_manager, model_manager):
-    conversation_history = conversation_manager
+    logger.info(f"use_tool called for user: {user}, conversation_id: {conversation_id}")
+    logger.debug(f"Full message: {message}")
     
     if message.get("function_call"):
+        logger.info(f"Function call detected: {message['function_call']['name']}")
         function_response, error_occurred = await handle_function_call(user, conversation_id, message, conversation_history, function_map)
+
+        logger.info(f"Function call response: {function_response}")
+        logger.info(f"Error occurred: {error_occurred}")
 
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conversation_history.add_response(user, conversation_id, function_response, current_time)
@@ -67,74 +73,48 @@ async def use_tool(user, conversation_id, message, conversation_history, functio
 
         formatted_function_response = f"System Message: The function call was executed successfully with the following results: {message['function_call']['name']}: {function_response} If needed, you can make another tool call for further processing or multi-step requests. Provide the answer to the user's question, a summary or ask for further details."
 
+        logger.debug(f"Formatted function response: {formatted_function_response}")
+
         messages = conversation_history.get_history(user, conversation_id)
-        for msg in messages:
-            if 'timestamp' in msg:
-                del msg['timestamp']
+        logger.debug(f"Conversation history: {messages}")
 
-        data = create_request_body(model_manager.get_model(), current_persona, 
-                           messages + [{"role": "user", "content": formatted_function_response}], 
-                           temperature_var, 
-                           top_p_var, model_manager.get_max_tokens(), functions 
-                           if model_manager.is_model_allowed() else None)
+        new_text = await call_model_with_new_prompt(formatted_function_response, current_persona, messages, temperature_var, top_p_var, functions, model_manager)
+        
+        logger.info(f"Model response: {new_text}")
 
-        response_data = await api.generate_conversation(data)
+        if new_text is None:
+            logger.warning("Model returned None response")
+            new_text = "Tool Manager says: Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
 
-        if response_data:
-            new_message = response_data["choices"][0]["message"]
-            new_text = new_message["content"]
+        logger.info("Assistant: %s", new_text)
 
-            if new_text is None:
-                new_prompt = f"System Message: The function call was executed successfully with the following results: {function_response} If needed, you can make another tool call for further processing or multi-step requests. Provide the answer to the user's question, a summary or ask for further details."
-                new_text = await call_model_with_new_prompt(new_prompt, current_persona, messages, temperature_var, top_p_var, functions, model_manager)
-                if not new_text:
-                    new_text = "Tool Manager says: Sorry, I couldn't generate a meaningful response. Please try again or provide more context."
+        if new_text:
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            conversation_history.add_message(user, conversation_id, "assistant", new_text, current_time)
+            logger.info("Assistant message added to conversation history.")
 
-            logger.info("Assistant: %s", new_text)
-
-            if new_text:
-                current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                conversation_history.add_message(user, conversation_id, "assistant", new_text, current_time)
-                logger.info("Assistant message added to conversation history.")
-            try:
-                if get_tts():
-                    if contains_code(new_text):
-                        logger.info("Skipping TTS as the text contains code.")
-                    else:
-                        await tts(new_text)
-            except Exception as e:
-                logger.error("Error during TTS: %s", e)
-
-            return new_text
+        return new_text
     return None
 
-def get_required_args(function):
-    logger.info("getting required args")
-    sig = inspect.signature(function)
-    return [param.name for param in sig.parameters.values() 
-            if param.default == param.empty and param.name != 'self']
-
 async def handle_function_call(user, conversation_id, message, conversation_history, function_map):
-    entry_time = datetime.now()
-    logger.info(f"Entering handle_function_call at {entry_time.isoformat()}")
+    logger.info(f"handle_function_call for user: {user}, conversation_id: {conversation_id}")
+    logger.debug(f"Full message: {message}")
     
-    logger.info(f"Raw function call: {message}")    
     function_name = message["function_call"]["name"]
     function_args_json = message["function_call"].get("arguments", "{}")
 
     try:
         function_args = json.loads(function_args_json)
-        logger.info(f"Decoded args: {function_args}")  
+        logger.info(f"Function name: {function_name}")
+        logger.debug(f"Function args: {function_args}")
     except json.JSONDecodeError as e:
         logger.error(f"Error decoding JSON: {e}")
-        function_args = {}  
-
-    logger.info(f"Function name: {function_name}")
-    logger.info(f"Function args: {function_args}")
+        return f"Error: Invalid JSON in function arguments: {e}", True
 
     if function_name in function_map:
-        required_args = get_required_args(function_map[function_name])  
-        logger.info(f"Required args for {function_name}: {required_args}")  
+        required_args = get_required_args(function_map[function_name])
+        logger.info(f"Required args for {function_name}: {required_args}")
+        logger.info(f"Provided args: {list(function_args.keys())}")
         missing_args = set(required_args) - set(function_args.keys())
 
         if missing_args:
@@ -143,36 +123,39 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
 
         try:
             logger.info(f"Calling function {function_name} with arguments {function_args}")
-            function_response = await function_map[function_name](**function_args)
+            if asyncio.iscoroutinefunction(function_map[function_name]):
+                function_response = await function_map[function_name](**function_args)
+            else:
+                function_response = function_map[function_name](**function_args)
             logger.info(f"Function response: {function_response}")
+            return function_response, False
         except Exception as e:
             logger.error(f"Exception during function call {function_name}: {e}", exc_info=True)
             return f"Error: Exception during function call {function_name}: {e}", True
 
-        exit_time = datetime.now()
-        logger.info(f"Exiting handle_function_call at {exit_time.isoformat()}, duration: {(exit_time-entry_time).total_seconds()} seconds")
-        
-        if not isinstance(function_response, str):
-            function_response = str(function_response)
-
-        return function_response, False
-
     logger.error(f"Function {function_name} not found in function map.")
     return None, True
 
+
 async def call_model_with_new_prompt(prompt, current_persona, messages, temperature_var, top_p_var, functions, model_manager):
-    global api
+    logger.info("call_model_with_new_prompt called")
+    logger.info(f"Prompt: {prompt}")
+    logger.debug(f"Messages: {messages}")
+    
     data = create_request_body(model_manager.get_model(), current_persona, 
-                           messages, temperature_var, 
+                           messages + [{"role": "user", "content": prompt}], 
+                           temperature_var, 
                            top_p_var, model_manager.get_max_tokens(), functions 
                            if model_manager.is_model_allowed() else None)
     
+    logger.debug(f"Request data: {data}")
+    
     response_data = await api.generate_conversation(data)
+    
+    logger.debug(f"Response data: {response_data}")
 
     if response_data and response_data.get("choices"):
         return response_data["choices"][0]["message"]["content"]
     else:
+        logger.error(f"Failed to get valid response from model. Response data: {response_data}")
         return None
-
-def contains_code(text: str) -> bool:
-    return "<code>" in text

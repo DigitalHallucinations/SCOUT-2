@@ -23,7 +23,8 @@ from modules.Personas.FeedManager.Toolbox.Feed_Portal.Feed_Portal import RSSFeed
 from modules.Tools.Comms.Voip.voip_app import VoIPApp
 from modules.Tools.Internet_Tools.Browser.browser import Browser
 from modules.Tools.Planning.calendar import Calendar
-from modules.Providers.model_manager import ModelManager  # Import ModelManager
+from modules.Providers.model_manager import ModelManager
+from modules.Tools.Code_Execution.code_genius_ui import CodeGeniusUI
 
 logger = setup_logger('app.py')
 
@@ -42,6 +43,11 @@ class SCOUT(QtWidgets.QMainWindow):
         self.session_id = None
         self.conversation_id = None
         self.titlebar_color = "#2d2d2d"  
+
+        # Initialize CodeGeniusUI
+        self.code_genius_ui = CodeGeniusUI()
+        self.code_genius_ui.hide()
+
         self.feed_portal = RSSFeedReaderUI()
         self.voip_app = VoIPApp()
         self.voip_app.hide()
@@ -123,11 +129,7 @@ class SCOUT(QtWidgets.QMainWindow):
         self.current_username = username
 
     def session_manager(self, user):
-        """Manage the user session.
-        
-        Parameters:
-        - user: The user object.
-        """
+        """Manage the user session."""
         logger.info(f"Session manager called with user: {user}")
         self.user = user
         if self.user:
@@ -195,13 +197,17 @@ class SCOUT(QtWidgets.QMainWindow):
             tool_ui_layout.setContentsMargins(0, 0, 0, 0)
             tool_ui_layout.setSpacing(0)
 
-            tool_control_bar = ToolControlBar(tool_ui_frame, self.voip_app, self.feed_portal, self.browser, self.calendar)
+            tool_control_bar = ToolControlBar(tool_ui_frame, self.voip_app, self.feed_portal, self.browser, self.calendar, self.code_genius_ui)
             tool_ui_layout.addWidget(tool_control_bar)
 
             tool_ui_layout.addWidget(self.feed_portal)
             tool_ui_layout.addWidget(self.voip_app)
             tool_ui_layout.addWidget(self.browser)
             tool_ui_layout.addWidget(self.calendar)
+            tool_ui_layout.addWidget(self.code_genius_ui)
+
+            # Ensure CodeGeniusUI is in front when shown
+            self.code_genius_ui.raise_()
 
             splitter.addWidget(chat_frame)
             splitter.addWidget(tool_ui_frame)
@@ -238,13 +244,7 @@ class SCOUT(QtWidgets.QMainWindow):
             logger.debug(f"Caught PasswordDeleteError while deleting password (password still cleared): {str(e)}")        
 
     def safe_update(self, command, *args, **kwargs):
-        """Safely update the application.
-        
-        Parameters:
-        - command: The command to execute.
-        - *args: Additional arguments for the command.
-        - **kwargs: Additional keyword arguments for the command.
-        """
+        """Safely update the application."""
         if not self.quit_loop:  
             QtWidgets.QApplication.postEvent(self, qtc.QEvent(qtc.QEvent.User), command)
     

@@ -1,8 +1,11 @@
+# modules/Tools/Code_Execution/python_interpreter.py
+
 import copy
 import io
 import logging
 from contextlib import redirect_stdout
 from typing import Any, Optional
+from PySide6.QtCore import QObject, Signal
 
 logger = logging.getLogger('python_interpreter.py')
 
@@ -27,8 +30,11 @@ class GenericRuntime:
         logger.debug(f"Evaluated expression: {expr}")
         return result
 
-class PythonInterpreter:
+class PythonInterpreter(QObject):
+    code_executed = Signal(str, dict)
+
     def __init__(self, description: str = "", answer_symbol: Optional[str] = None, answer_expr: Optional[str] = None, answer_from_stdout: bool = True, name: Optional[str] = None, enable: bool = True, disable_description: Optional[str] = None, timeout: int = 20) -> None:
+        super().__init__()
         self.description = description
         self.answer_symbol = answer_symbol
         self.answer_expr = answer_expr
@@ -46,14 +52,17 @@ class PythonInterpreter:
         try:
             result = self._run(command)
             logger.info(f"Command execution result: {result}")
+            self.code_executed.emit(command, result)
             return result
         except Exception as e:
             logger.error(f"Error executing command: {repr(e)}")
-            return {
+            error_result = {
                 "success": False,
                 "error": repr(e),
                 "result": None
             }
+            self.code_executed.emit(command, error_result)
+            return error_result
 
     def _run(self, command: str) -> dict:
         try:

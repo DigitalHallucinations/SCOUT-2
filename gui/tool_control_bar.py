@@ -1,9 +1,10 @@
-# gui/tool_control.py
+# gui/tool_control_bar.py
 
-from PySide6 import QtWidgets, QtGui, QtCore as qtc
+from PySide6 import QtWidgets, QtGui
+from PySide6 import QtCore as qtc
 
 class ToolControlBar(QtWidgets.QFrame):
-    def __init__(self, parent=None, voip_app=None, feed_portal=None, browser=None, calendar=None):
+    def __init__(self, parent=None, voip_app=None, feed_portal=None, browser=None, calendar=None, code_genius_ui=None):
         super().__init__(parent)
         self.setFixedHeight(30)
         self.setStyleSheet("""
@@ -21,6 +22,7 @@ class ToolControlBar(QtWidgets.QFrame):
         self.feed_portal = feed_portal
         self.browser = browser
         self.calendar = calendar
+        self.code_genius_ui = code_genius_ui
 
         icon_size = 20
 
@@ -112,28 +114,61 @@ class ToolControlBar(QtWidgets.QFrame):
         calendar_button.enterEvent = lambda event: on_calendar_button_hover(event)
         calendar_button.leaveEvent = lambda event: on_calendar_button_leave(event)
 
-        layout.addStretch(1) 
+        # CodeGenius Icon
+        code_genius_img = QtGui.QPixmap("assets/SCOUT/Icons/code_genius_wt.png")
+        code_genius_img = code_genius_img.scaled(icon_size, icon_size)
+
+        code_genius_button = QtWidgets.QPushButton(self)
+        code_genius_button.setIcon(QtGui.QIcon(code_genius_img))
+        code_genius_button.setIconSize(qtc.QSize(icon_size, icon_size))
+        code_genius_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
+        code_genius_button.clicked.connect(self.show_code_genius_ui)
+        layout.addWidget(code_genius_button)
+
+        def on_code_genius_button_hover(event):
+            hover_img = QtGui.QPixmap("assets/SCOUT/Icons/code_genius_bl.png")
+            hover_img = hover_img.scaled(icon_size, icon_size)
+            code_genius_button.setIcon(QtGui.QIcon(hover_img))
+
+        def on_code_genius_button_leave(event):
+            code_genius_button.setIcon(QtGui.QIcon(code_genius_img))
+
+        code_genius_button.enterEvent = lambda event: on_code_genius_button_hover(event)
+        code_genius_button.leaveEvent = lambda event: on_code_genius_button_leave(event)
+
+        layout.addStretch(1)
 
     def show_feed_portal(self):
         self.feed_portal.show()
         self.voip_app.hide()
         self.browser.hide()
         self.calendar.hide()
+        self.code_genius_ui.hide()
 
     def show_voip_app(self):
         self.voip_app.show()
         self.feed_portal.hide()
         self.browser.hide()
         self.calendar.hide()
+        self.code_genius_ui.hide()
 
     def show_browser(self):
         self.browser.show()
         self.voip_app.hide()
         self.feed_portal.hide()
         self.calendar.hide()
+        self.code_genius_ui.hide()
 
     def show_calendar(self):
         self.calendar.show()
+        self.browser.hide()
+        self.voip_app.hide()
+        self.feed_portal.hide()
+        self.code_genius_ui.hide()
+
+    def show_code_genius_ui(self):
+        self.code_genius_ui.show()
+        self.calendar.hide()
         self.browser.hide()
         self.voip_app.hide()
         self.feed_portal.hide()

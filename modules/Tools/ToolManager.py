@@ -12,6 +12,7 @@ from modules.Providers.OpenAI.openai_api import OpenAIAPI
 #from modules.speech_services.GglCldSvcs import tts
 from modules.speech_services.Eleven_Labs.tts import tts, get_tts
 from modules.logging.logger import setup_logger
+from modules.event_system import event_system
 
 logger = setup_logger('ToolManager.py')
 
@@ -128,6 +129,12 @@ async def handle_function_call(user, conversation_id, message, conversation_hist
             else:
                 function_response = function_map[function_name](**function_args)
             logger.info(f"Function response: {function_response}")
+            
+            # Publish event for code execution
+            if function_name == "execute_python":
+                event_system.publish("code_executed", function_args['command'], function_response)
+                logger.info("Published code_executed event")
+            
             return function_response, False
         except Exception as e:
             logger.error(f"Exception during function call {function_name}: {e}", exc_info=True)

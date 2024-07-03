@@ -1,8 +1,11 @@
 # modules/Tools/Code_Execution/python_interpreter.py
 
+import asyncio
 import copy
 import io
 import logging
+import textwrap
+import inspect
 from contextlib import redirect_stdout
 from typing import Any, Optional
 from PySide6.QtCore import QObject, Signal
@@ -50,7 +53,10 @@ class PythonInterpreter(QObject):
         logger.debug(f"Full command: {command}")
         self.runtime = GenericRuntime()
         try:
-            result = self._run(command)
+            if self._is_async_code(command):
+                result = self._run_async(command)
+            else:
+                result = self._run_sync(command)
             logger.info(f"Command execution result: {result}")
             self.code_executed.emit(command, result)
             return result
@@ -64,9 +70,12 @@ class PythonInterpreter(QObject):
             self.code_executed.emit(command, error_result)
             return error_result
 
-    def _run(self, command: str) -> dict:
+    def _is_async_code(self, command: str) -> bool:
+        return 'async def' in command or 'await ' in command
+
+    def _run_sync(self, command: str) -> dict:
         try:
-            logger.info("Processing command")
+            logger.info("Processing synchronous command")
             
             # Replace asterisk with underscore in the range() function
             command = command.replace("for * in range", "for _ in range")
@@ -87,6 +96,67 @@ class PythonInterpreter(QObject):
             }
         except Exception as e:
             logger.error(f"Error executing command: {repr(e)}")
+            return {
+                "success": False,
+                "result": None,
+                "error": repr(e)
+            }
+
+    def _run_async(self, command: str) -> dict:
+        try:
+            logger.info("Processing asynchronous command")
+            
+            # Replace asterisk with underscore in the range() function
+            command = command.replace("for * in range", "for _ in range")
+            
+            # Capture stdout
+            captured_output = io.StringIO()
+            
+            # Prepare the global namespace with asyncio and inspect
+            global_vars = {**self.runtime._global_vars, 'asyncio': asyncio, 'inspect': inspect}
+            
+            # Wrap the command in an async function, preserving indentation
+            wrapped_command = f"""
+async def __temp_async_func():
+{textwrap.indent(command, '    ')}
+
+async def run_async_code():
+    result = await __temp_async_func()
+    if inspect.iscoroutine(result):
+        result = await result
+    return result
+
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+try:
+    __temp_result = loop.run_until_complete(run_async_code())
+finally:
+    loop.close()
+"""
+            
+            # Execute the async code
+            with redirect_stdout(captured_output):
+                exec(wrapped_command, global_vars)
+            
+            output = captured_output.getvalue().strip()
+            result = global_vars.get('__temp_result', None)
+            
+            logger.info("Asynchronous command executed successfully")
+            logger.debug(f"Execution result: {output}")
+            logger.debug(f"Returned result: {result}")
+            
+            # Format the result for display
+            formatted_result = output + "\n" if output else ""
+            if result is not None:
+                formatted_result += f"Result: {result}\n"
+            
+            return {
+                "success": True,
+                "result": formatted_result.strip(),
+                "error": None
+            }
+        except Exception as e:
+            logger.error(f"Error executing asynchronous command: {repr(e)}")
             return {
                 "success": False,
                 "result": None,

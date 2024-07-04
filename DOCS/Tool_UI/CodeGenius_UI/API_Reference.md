@@ -1,22 +1,81 @@
 # CodeGenius UI API Reference
 
+## CodeEditor
+
+### Class: CodeEditor(QPlainTextEdit)
+
+#### Methods
+
+`__init__(self, parent=None)`
+- Initializes the CodeEditor widget
+- Sets up line numbering and syntax highlighting
+
+`lineNumberAreaWidth(self) -> int`
+- Calculates and returns the width of the line number area
+
+`updateLineNumberAreaWidth(self, _)`
+- Updates the viewport margins to accommodate the line number area
+
+`updateLineNumberArea(self, rect: QRect, dy: int)`
+- Updates the line number area when the editor's viewport has changed
+
+`resizeEvent(self, event: QResizeEvent)`
+- Handles resize events to adjust the line number area
+
+`lineNumberAreaPaintEvent(self, event: QPaintEvent)`
+- Paints the line numbers in the line number area
+
+`highlightCurrentLine(self)`
+- Highlights the current line in the editor
+
+## CodeExecutionWidget
+
+### Class: CodeExecutionWidget(QFrame)
+
+#### Methods
+
+`__init__(self, python_interpreter: PythonInterpreter, parent=None)`
+- Initializes the CodeExecutionWidget
+- Sets up the UI components including CodeEditor and toolbar
+
+`setup_ui(self)`
+- Sets up the user interface components
+
+`add_toolbar_buttons(self)`
+- Adds and configures the Run and Stop buttons
+
+`execute_code(self)`
+- Initiates code execution in a separate thread
+
+`stop_execution(self)`
+- Stops the currently running code execution
+
+`on_execution_finished(self, result: dict)`
+- Handles the completion of code execution
+- Publishes the `code_executed` event with the result
+
 ## CodeGeniusUI
 
-### Class: CodeGeniusUI
+### Class: CodeGeniusUI(QWidget)
 
 #### Methods
 
 `__init__(self)`
 - Initializes the CodeGeniusUI widget
-- Subscribes to the `code_executed` event
+- Sets up the UI and subscribes to relevant events
 
 `setup_ui(self)`
-- Sets up the user interface components
-- Creates code input and output display areas
+- Sets up the overall user interface layout
 
 `on_code_executed(self, code: str, result: dict)`
 - Handles the `code_executed` event
 - Updates the UI with execution results
+
+`update_async_indicator(self, is_async: bool)`
+- Updates the async status indicator in the UI
+
+`update_execution_status(self, status: str)`
+- Updates the execution status indicator in the UI
 
 `show(self)`
 - Shows the CodeGeniusUI widget
@@ -26,90 +85,20 @@
 - Hides the CodeGeniusUI widget
 - Overrides QWidget.hide() to include logging
 
-## PythonInterpreter
+## Event System
 
-### Class: PythonInterpreter
+### Events
 
-#### Methods
+`code_executed`
+- Published when code execution is complete
+- Parameters: `code` (str), `result` (dict)
 
-`__init__(self, ...)`
-- Initializes the PythonInterpreter
-- Sets up the execution environment
+`async_status_changed`
+- Published when the async status of the code changes
+- Parameters: `is_async` (bool)
 
-`run(self, command: str) -> dict`
-- Executes the given Python code
-- Returns a dictionary with execution results
-- Publishes `code_executed` event
-
-## EventSystem
-
-### Class: EventSystem
-
-#### Methods
-
-`__init__(self)`
-- Initializes the event system
-
-`subscribe(self, event_name: str, callback: Callable)`
-- Subscribes a callback to an event
-
-`publish(self, event_name: str, *args, **kwargs)`
-- Publishes an event, calling all subscribed callbacks
-
-## ToolControlBar
-
-### Class: ToolControlBar
-
-#### Methods
-
-`__init__(self, parent=None, ...)`
-- Initializes the ToolControlBar
-- Sets up buttons for different tools, including CodeGenius
-
-`show_code_genius_ui(self)`
-- Shows the CodeGeniusUI and hides other tools
-
-## SCOUT
-
-### Class: SCOUT
-
-#### Methods
-
-`__init__(self, shutdown_event=None)`
-- Initializes the SCOUT application
-- Creates instances of CodeGeniusUI and other components
-
-`session_manager(self, user)`
-- Manages user sessions
-- Integrates CodeGeniusUI into the application layout
-
-## CodeExecutionWidget
-
-### Class: CodeExecutionWidget
-
-#### Methods
-
-`__init__(self, python_interpreter: PythonInterpreter, parent=None)`
-- Initializes the CodeExecutionWidget
-- Sets up the UI components, including the toolbar with Run and Stop buttons
-
-`setup_ui(self)`
-- Sets up the user interface components
-- Creates the code input area and toolbar
-
-`add_toolbar_buttons(self)`
-- Adds the Run and Stop buttons to the toolbar
-- Configures button icons and hover effects
-
-`execute_code(self)`
-- Executes the code in the code input area
-- Starts a new thread for execution
-
-`stop_execution(self)`
-- Stops the code execution thread if running
-
-`on_execution_finished(self, result: dict)`
-- Handles the completion of code execution
-- Publishes the `code_executed` event with the result
+`execution_status_changed`
+- Published when the execution status changes
+- Parameters: `status` (str)
 
 For more detailed information on usage and implementation, please refer to the User Guide and Technical Documentation.

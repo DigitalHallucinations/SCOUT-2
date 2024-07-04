@@ -4,73 +4,66 @@
 
 CodeGenius UI is built using the PySide6 framework, providing a rich set of tools for creating desktop applications with a modern look and feel. The architecture is designed to be modular and extensible, allowing for easy integration of new features.
 
-## Components
+## Key Components
+
+### CodeEditor
+
+A custom widget extending `QPlainTextEdit` that provides line numbering and syntax highlighting capabilities.
+
+#### Key Methods:
+- `lineNumberAreaWidth()`: Calculates the width of the line number area.
+- `updateLineNumberAreaWidth(int)`: Updates the viewport margins to accommodate the line number area.
+- `updateLineNumberArea(QRect, int)`: Updates the line number area when the editor's viewport has changed.
+- `lineNumberAreaPaintEvent(QPaintEvent)`: Handles the painting of line numbers.
+- `highlightCurrentLine()`: Highlights the current line in the editor.
+
+### CodeExecutionWidget
+
+Combines the CodeEditor with execution controls (Run and Stop buttons).
+
+#### Key Methods:
+- `setup_ui()`: Sets up the user interface components.
+- `add_toolbar_buttons()`: Adds and configures the Run and Stop buttons.
+- `execute_code()`: Initiates code execution in a separate thread.
+- `stop_execution()`: Stops the currently running code execution.
+
+### CodeExecutionThread
+
+Manages the actual execution of code in a separate thread to prevent UI freezing.
+
+#### Key Methods:
+- `run_code()`: Executes the code using the Python interpreter and emits the result.
 
 ### CodeGeniusUI
 
 The main user interface component that integrates various features of the CodeGenius environment.
 
-#### Methods
+#### Key Methods:
+- `setup_ui()`: Sets up the overall user interface layout.
+- `on_code_executed(str, dict)`: Handles the code execution result and updates the UI.
+- `update_async_indicator(bool)`: Updates the async status in the UI.
+- `update_execution_status(str)`: Updates the execution status in the UI.
 
-- `__init__(self)`
-  - Initializes the CodeGeniusUI widget and subscribes to the `code_executed` event.
-- `setup_ui(self)`
-  - Sets up the user interface components, including the code input and output display areas.
-- `on_code_executed(self, code: str, result: dict)`
-  - Handles the `code_executed` event and updates the UI with execution results.
-- `show(self)`
-  - Shows the CodeGeniusUI widget and includes logging.
-- `hide(self)`
-  - Hides the CodeGeniusUI widget and includes logging.
+## Event System
 
-### PythonInterpreter
+CodeGenius UI uses a custom event system to handle communication between components:
 
-Handles the execution of Python code and returns the results.
+- `code_executed`: Emitted when code execution is complete, with the code and result.
+- `async_status_changed`: Emitted when the async status of the code changes.
+- `execution_status_changed`: Emitted when the execution status changes.
 
-#### Methods
+## Styling
 
-- `__init__(self, ...)`
-  - Initializes the PythonInterpreter and sets up the execution environment.
-- `run(self, command: str) -> dict`
-  - Executes the given Python code and returns a dictionary with execution results.
-  - Publishes `code_executed` event upon completion.
+The UI uses a dark theme with custom styles for each component, enhancing readability and providing a modern look. Styles are applied using Qt StyleSheets.
 
-### EventSystem
+## Python Interpreter Integration
 
-Manages custom events and allows for callback subscriptions.
+CodeGenius UI integrates with a custom Python interpreter that supports both synchronous and asynchronous code execution. The interpreter runs in a separate thread to prevent UI freezing during code execution.
 
-#### Methods
+## Future Considerations
 
-- `__init__(self)`
-  - Initializes the event system.
-- `subscribe(self, event_name: str, callback: Callable)`
-  - Subscribes a callback to an event.
-- `publish(self, event_name: str, *args, **kwargs)`
-  - Publishes an event, calling all subscribed callbacks.
-
-### CodeExecutionWidget
-
-A widget that provides the code input area and toolbar with Run and Stop buttons.
-
-#### Methods
-
-- `__init__(self, python_interpreter: PythonInterpreter, parent=None)`
-  - Initializes the CodeExecutionWidget and sets up the UI components, including the toolbar.
-- `setup_ui(self)`
-  - Sets up the user interface components, including the code input area and toolbar.
-- `add_toolbar_buttons(self)`
-  - Adds the Run and Stop buttons to the toolbar, configures button icons and hover effects.
-- `execute_code(self)`
-  - Executes the code in the code input area by starting a new thread for execution.
-- `stop_execution(self)`
-  - Stops the code execution thread if running.
-- `on_execution_finished(self, result: dict)`
-  - Handles the completion of code execution and publishes the `code_executed` event with the result.
-
-## Usage
-
-Refer to the User Guide for detailed instructions on how to use the various features of CodeGenius UI.
-
-## Contributing
-
-For information on contributing to the development of CodeGenius UI, please refer to the CONTRIBUTING.md file.
+1. **Code Completion**: Implement an intelligent code completion system.
+2. **Debugging Tools**: Integrate step-by-step debugging capabilities.
+3. **Multiple File Support**: Allow working with multiple files or projects simultaneously.
+4. **Performance Optimization**: Implement caching mechanisms for frequently executed code snippets.
+5. **Extended Library Support**: Pre-load additional common Python libraries.

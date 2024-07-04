@@ -1,19 +1,22 @@
-# modules/Tools/Code_Execution/code_genius_ui.py
+# modules/Tools/Code_execution/code_genius_ui.py
 
 import sys
 import threading
 import asyncio
 from PySide6 import QtGui, QtWidgets
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QPushButton, QSplitter, QApplication, QLabel, QHBoxLayout, QFrame
-from PySide6.QtCore import Qt, Slot, QSize, Signal, QObject
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QPushButton, QSplitter, QApplication, QLabel, QHBoxLayout, QFrame, QPlainTextEdit
+from PySide6.QtCore import Qt, Slot, QSize, Signal, QObject, QRect
+from PySide6.QtGui import QColor, QPainter, QTextFormat
 from modules.Tools.Code_Execution.python_interpreter import PythonInterpreter
 from modules.Tools.Code_Execution.python_highlighter import PythonHighlighter
+from modules.Tools.Code_Execution.code_editor import CodeEditor
 from modules.logging.logger import setup_logger
 from modules.event_system import event_system
 
 logger = setup_logger('code_genius_ui.py')
 
 icon_size = 24  # Define the icon size
+
 
 class CodeExecutionThread(QObject):
     execution_finished = Signal(dict)
@@ -55,11 +58,9 @@ class CodeExecutionWidget(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self.code_input = QTextEdit()
-        self.code_input.setPlaceholderText("Enter Python code here...")
-        self.highlighter = PythonHighlighter(self.code_input.document())
+        self.code_input = CodeEditor()
         self.code_input.setStyleSheet("""
-            QTextEdit {
+            CodeEditor {
                 background-color: #1e1e1e;
                 color: #d4d4d4;
                 border: none;
@@ -67,6 +68,7 @@ class CodeExecutionWidget(QFrame):
                 font-size: 14px;
             }
         """)
+        self.highlighter = PythonHighlighter(self.code_input.document())
         layout.addWidget(self.code_input)
 
         # Add the toolbar
@@ -192,13 +194,13 @@ class CodeGeniusUI(QWidget):
         splitter = QSplitter(Qt.Vertical)
 
         # Create the code input area with highlighting and toolbar
-        self.code_input_widget = CodeExecutionWidget(PythonInterpreter())
-        splitter.addWidget(self.code_input_widget)
+        self.code_execution_widget = CodeExecutionWidget(PythonInterpreter())
+        splitter.addWidget(self.code_execution_widget)
 
-        # Create the code display area
-        self.code_display = QTextEdit(self)
-        self.code_display.setReadOnly(True)
-        self.code_display.setStyleSheet("""
+        # Create the output display area
+        self.output_display = QTextEdit(self)
+        self.output_display.setReadOnly(True)
+        self.output_display.setStyleSheet("""
             QTextEdit {
                 background-color: #2d2d2d;
                 color: white;
@@ -207,7 +209,7 @@ class CodeGeniusUI(QWidget):
                 font-size: 14px;
             }
         """)
-        splitter.addWidget(self.code_display)
+        splitter.addWidget(self.output_display)
 
         content_layout.addWidget(splitter)
 
@@ -252,13 +254,12 @@ class CodeGeniusUI(QWidget):
         logger.debug(f"CodeGeniusUI received code execution result: {result}")
         self.show()
         
-        # Display the executed code with line numbers
-        code_lines = code.split('\n')
-        numbered_code = '\n'.join(f"{i+1}: {line}" for i, line in enumerate(code_lines))
-        self.code_display.setPlainText(f"Executed Code:\n{numbered_code}\n")
+        # Display the executed code in the input widget
+        self.code_execution_widget.code_input.setPlainText(code)
         
+        # Display only the output in the output display
         output = result['result'] if result['success'] else result['error']
-        self.code_display.append(f"Output:\n{output}")
+        self.output_display.setPlainText(f"Output:\n{output}")
         logger.info("CodeGeniusUI updated with execution result")
 
     def update_async_indicator(self, is_async: bool):

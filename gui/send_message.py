@@ -10,8 +10,6 @@ async def send_message(chat_component, user, message, session_id, conversation_i
     if not message:
         logger.warning("No message provided in send_message")
         return
-    
-    chat_component.show_message("user", message)
         
     await process_message(chat_component, user, message, session_id, conversation_id, conversation_manager, model_manager, provider_manager)
 

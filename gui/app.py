@@ -25,6 +25,7 @@ from modules.Tools.Internet_Tools.Browser.browser import Browser
 from modules.Tools.Planning.calendar import Calendar
 from modules.Providers.model_manager import ModelManager
 from modules.Tools.Code_Execution.code_genius_ui import CodeGeniusUI
+from modules.TaskManager.task_manager import TaskManager  
 
 logger = setup_logger('app.py')
 
@@ -159,6 +160,9 @@ class SCOUT(QtWidgets.QMainWindow):
             user_db = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
             self.cognitive_services = CognitiveBackgroundServices(user_db, self.user, self.provider_manager)
 
+            # Initialize TaskManager
+            self.task_manager = TaskManager(self.persona_handler.personas)
+
             logger.info("Creating ChatComponent")
             self.chat_component = ChatComponent(
                 parent=self, persona=current_persona,
@@ -169,7 +173,8 @@ class SCOUT(QtWidgets.QMainWindow):
                 provider_manager=self.provider_manager,
                 cognitive_services=self.cognitive_services,
                 conversation_manager=self.chat_history_database,
-                model_manager=self.model_manager  
+                model_manager=self.model_manager,
+                task_manager=self.task_manager  # Pass TaskManager to ChatComponent
             )
 
             central_widget = QtWidgets.QWidget(self)
@@ -206,8 +211,7 @@ class SCOUT(QtWidgets.QMainWindow):
             tool_ui_layout.addWidget(self.calendar)
             tool_ui_layout.addWidget(self.code_genius_ui)
 
-            # Ensure CodeGeniusUI is in front when shown
-            self.code_genius_ui.raise_()
+            self.code_genius_ui.raise_() # ON TOP
 
             splitter.addWidget(chat_frame)
             splitter.addWidget(tool_ui_frame)

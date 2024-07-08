@@ -28,7 +28,7 @@ class SendMessageTask(QRunnable):
         asyncio.run(send_message_module.send_message(self.chat_component, self.user, self.message, self.session_id, self.conversation_id))
 
 class ChatComponent(QtWidgets.QWidget):
-    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None, cognitive_services=None, conversation_manager=None, model_manager=None):
+    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None, cognitive_services=None, conversation_manager=None, model_manager=None, task_manager=None):
         super().__init__(parent)
         logger.info("Initializing ChatComponent")
         self.persona = persona
@@ -46,6 +46,8 @@ class ChatComponent(QtWidgets.QWidget):
         self.personas = self.persona_manager.personas
         self.conversation_manager = conversation_manager
         self.model_manager = model_manager  
+        self.task_manager = task_manager
+        
         
         self.system_name = "SCOUT"
         self.system_name_color = "#00BFFF"
@@ -60,7 +62,8 @@ class ChatComponent(QtWidgets.QWidget):
         self.create_widgets()
         logger.info("ChatComponent initialized")
 
-    def sync_send_message(self):
+
+    async def send_message(self):
         logger.info("Sending message")
         if self.session_id is None:
             self.session_id = self.retrieve_session_id()
@@ -71,7 +74,8 @@ class ChatComponent(QtWidgets.QWidget):
         logger.info(f"About to call send_message with user: %s", self.user)
 
         message = self.message_entry.toPlainText().strip()
-        asyncio.ensure_future(send_message_module.send_message(self, self.user, message, self.session_id, self.conversation_id, self.conversation_manager, self.model_manager, self.provider_manager))
+        self.show_message("user", message)
+        await self.process_user_input(message)
         self.message_entry.clear()
 
     def show_message(self, role, message):
@@ -344,13 +348,45 @@ class ChatComponent(QtWidgets.QWidget):
         self.send_button.setIconSize(QtCore.QSize(32, 32))
         self.send_button.setFixedSize(QtCore.QSize(32, 32))
         self.send_button.setStyleSheet(f"QPushButton {{ background-color: transparent; border: none; color: {self.appearance_settings_instance.entry_sidebar_font_color}; font-family: {self.appearance_settings_instance.entry_sidebar_font_family}; font-size: {self.appearance_settings_instance.entry_sidebar_font_size}px; }}")
-        self.send_button.clicked.connect(self.sync_send_message)
+        self.send_button.clicked.connect(self.send_message_wrapper)
         self.send_button.enterEvent = self.send_button_hover
         self.send_button.leaveEvent = self.send_button_leave
         entry_sidebar_layout.addWidget(self.send_button, alignment=QtCore.Qt.AlignBottom)
 
-        main_layout.addWidget(entry_sidebar) 
+        main_layout.addWidget(entry_sidebar)
 
+    def send_message_wrapper(self):
+        asyncio.create_task(self.process_and_send_message())
+
+    async def process_and_send_message(self):
+        logger.info("Processing and sending message")
+        if self.session_id is None:
+            self.session_id = self.conversation_manager.init_conversation_id()
+
+        if self.conversation_id is None:
+            self.conversation_id = self.conversation_manager.init_conversation_id()
+
+        message = self.message_entry.toPlainText().strip()
+        if message:
+            self.show_message("user", message)
+            await self.process_user_input(message)
+            self.message_entry.clear()
+
+    async def process_user_input(self, user_input):
+        logger.info(f"Processing user input: {user_input}")
+        results = await self.task_manager.process_user_input(
+            self,
+            self.user,
+            user_input,
+            self.session_id,
+            self.conversation_id,
+            self.conversation_manager,
+            self.model_manager,
+            self.provider_manager
+        )
+        for result in results:
+            self.show_message("system", result)
+        
     def create_chat_log(self, main_layout):
         logger.info("Creating chat log")
         chat_log_container = QtWidgets.QFrame(self)

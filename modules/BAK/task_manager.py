@@ -41,30 +41,17 @@ class TaskExecutor:
             logger.error(f"Error executing task: {e}")
             return f"Error: {str(e)}"
 
-class Task:
-    def __init__(self, task_id, user_id, content):
-        self.task_id = task_id
-        self.user_id = user_id
-        self.content = content
-        self.status = "created"
-
 class TaskManager:
     def __init__(self, personas):
         self.task_planner = TaskPlanner(personas)
         self.task_queue = TaskQueue()
         self.task_executor = TaskExecutor()
-        self.personas = personas
-        self.task_id_counter = 0
 
     def plan_tasks(self, user_request):
         return self.task_planner.plan_tasks(user_request)
 
     def add_task(self, task, priority=0):
         self.task_queue.add_task(task, priority)
-
-    def create_task(self, user_id, content):
-        self.task_id_counter += 1
-        return Task(self.task_id_counter, user_id, content)    
 
     async def execute_next_task(self, chat_component, user, session_id, conversation_id, conversation_manager, model_manager, provider_manager):
         task = self.task_queue.get_next_task()

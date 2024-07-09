@@ -28,7 +28,7 @@ class SendMessageTask(QRunnable):
         asyncio.run(send_message_module.send_message(self.chat_component, self.user, self.message, self.session_id, self.conversation_id))
 
 class ChatComponent(QtWidgets.QWidget):
-    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None, cognitive_services=None, conversation_manager=None, model_manager=None, task_manager=None):
+    def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None, cognitive_services=None, conversation_manager=None, model_manager=None, task_manager=None, agent_manager=None):
         super().__init__(parent)
         logger.info("Initializing ChatComponent")
         self.persona = persona
@@ -42,11 +42,12 @@ class ChatComponent(QtWidgets.QWidget):
         self.cognitive_services = cognitive_services  
         self.send_message = send_message_module.send_message
         self.persona_manager = persona_manager
-        self.current_persona = self.persona_manager.current_persona
+        self.current_persona = self.persona_manager.default_persona
         self.personas = self.persona_manager.personas
         self.conversation_manager = conversation_manager
         self.model_manager = model_manager  
         self.task_manager = task_manager
+        self.agent_manager = agent_manager
         
         
         self.system_name = "SCOUT"
@@ -374,18 +375,64 @@ class ChatComponent(QtWidgets.QWidget):
 
     async def process_user_input(self, user_input):
         logger.info(f"Processing user input: {user_input}")
-        results = await self.task_manager.process_user_input(
-            self,
-            self.user,
-            user_input,
-            self.session_id,
+        
+        # First, let the current persona process the input
+        persona_response = await self.provider_manager.generate_response(
+            self.user, 
+            self.current_persona, 
+            user_input, 
+            self.session_id, 
             self.conversation_id,
+            self.temperature,
+            self.top_p,
+            self.top_k,
             self.conversation_manager,
             self.model_manager,
             self.provider_manager
         )
-        for result in results:
-            self.show_message("system", result)
+
+        # Check if the persona decides to use an agent
+        if "USE_AGENT" in persona_response:
+            # Extract the task from the persona's response
+            task_description = persona_response.split("USE_AGENT:")[1].strip()
+            task = self.task_manager.create_task(self.user, task_description)
+            
+            try:
+                agent_result = await self.agent_manager.process_task(task)
+                
+                # Let the persona interpret the agent's result
+                final_response = await self.provider_manager.generate_response(
+                    self.user,
+                    self.current_persona,
+                    f"The agent performed the task and returned: {agent_result}. Please interpret this result and respond to the user.",
+                    self.session_id,
+                    self.conversation_id,
+                    self.temperature,
+                    self.top_p,
+                    self.top_k,
+                    self.conversation_manager,
+                    self.model_manager,
+                    self.provider_manager
+                )
+            except Exception as e:
+                logger.error(f"Error processing task with agent: {e}")
+                final_response = await self.provider_manager.generate_response(
+                    self.user,
+                    self.current_persona,
+                    f"I tried to use an agent to help with your request, but encountered an error: {str(e)}. How else can I assist you?",
+                    self.session_id,
+                    self.conversation_id,
+                    self.temperature,
+                    self.top_p,
+                    self.top_k,
+                    self.conversation_manager,
+                    self.model_manager,
+                    self.provider_manager
+                )
+        else:
+            final_response = persona_response
+
+        self.show_message("system", final_response)
         
     def create_chat_log(self, main_layout):
         logger.info("Creating chat log")

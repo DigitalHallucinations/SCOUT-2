@@ -4,6 +4,9 @@
 # ignore
 env/
 
+# Ignore venv folder
+.venv/
+
 # Ignore all .log files
 *.log
 

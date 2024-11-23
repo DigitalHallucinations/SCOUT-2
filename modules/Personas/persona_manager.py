@@ -28,11 +28,9 @@ class PersonaManager:
         try:
             self.load_personas(self.PERSONAS_FILE_NAME, self.user)
             self.default_persona = next((persona for persona in self.personas if persona["name"] == self.default_persona_name), None)
-            if self.default_persona:
-                self.default_persona = self.personalize_persona(self.default_persona, self.user)
+            self.current_persona = self.personalize_persona(self.default_persona, self.user) if self.default_persona else None
         except Exception as e:
             logger.error(f"Error initializing PersonaManager: {e}")
-            self.default_persona = None
                             
     def updater(self, selected_persona_name, user):
         logger.info(f"Attempting to update persona to {selected_persona_name}.")

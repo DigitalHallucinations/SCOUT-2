@@ -25,13 +25,11 @@ from modules.Tools.Internet_Tools.Browser.browser import Browser
 from modules.Tools.Planning.calendar import Calendar
 from modules.Providers.model_manager import ModelManager
 from modules.Tools.Code_Execution.code_genius_ui import CodeGeniusUI
-from modules.TaskManager.task_manager import TaskManager 
-from modules.Agent_Manager.agent_manager import AgentManager, create_default_agents
-
 
 logger = setup_logger('app.py')
 
 class SCOUT(QtWidgets.QMainWindow):
+    """Initialize the SCOUT application."""
     def __init__(self, shutdown_event=None):
         super().__init__()
         self.setStyleSheet("background-color: #000000;")
@@ -57,30 +55,6 @@ class SCOUT(QtWidgets.QMainWindow):
         self.browser.hide()
         self.calendar = Calendar()
         self.calendar.hide()
-
-        # Initialize model_manager
-        self.model_manager = ModelManager()
-
-        # Initialize provider_manager
-        self.provider_manager = ProviderManager(self, self.model_manager)
-
-        # Initialize persona_handler
-        self.persona_handler = PersonaManager(self, self.user)
-
-        # Get the default persona
-        default_persona = self.persona_handler.default_persona
-
-        # Initialize cognitive_services
-        persona_name = default_persona['name'] if default_persona else 'Unknown'
-        user_db = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
-        self.cognitive_services = CognitiveBackgroundServices(user_db, self.user, self.provider_manager)
-
-        # Initialize agent_manager
-        self.agent_manager = AgentManager(self.cognitive_services, self.provider_manager)
-        create_default_agents(self.agent_manager)
-        
-        # Initialize TaskManager
-        self.task_manager = TaskManager(self.persona_handler.personas)
 
         logger.info("Creating LoginComponent")
         self.login_component = LoginComponent(parent=self, 
@@ -164,42 +138,38 @@ class SCOUT(QtWidgets.QMainWindow):
             self.set_current_user_username(self.user)
 
             self.persona_handler = PersonaManager(self, self.user)
-            self.default_persona = self.persona_handler.default_persona
+            current_persona = self.persona_handler.current_persona
 
             self.model_manager = ModelManager() 
 
             self.provider_manager = ProviderManager(self, self.model_manager)
 
-            self.chat_history_database = ConversationManager(self.user, self.default_persona['name'], self.provider_manager)
+            self.chat_history_database = ConversationManager(self.user, current_persona['name'], self.provider_manager)
             logger.info("Conversation History Database instantiated successfully.")
 
             self.conversation_id = self.chat_history_database.init_conversation_id()
-            logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Default Persona: {self.default_persona['name'] if self.default_persona else 'None'}")
+            logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Current Persona: {current_persona['name'] if current_persona else 'None'}")
 
             self.database = self.chat_history_database
             
             if hasattr(self, 'login_component'):
                 self.login_component.close()
 
-            persona_name = self.default_persona['name']
+            persona_name = current_persona['name']
             user_db = f"modules/Personas/{persona_name}/Memory/{persona_name}.db"
             self.cognitive_services = CognitiveBackgroundServices(user_db, self.user, self.provider_manager)
 
             logger.info("Creating ChatComponent")
             self.chat_component = ChatComponent(
-                parent=self, 
-                persona=self.default_persona,
-                user=self.user, 
-                session_id=self.session_id, 
+                parent=self, persona=current_persona,
+                user=self.user, session_id=self.session_id, 
                 conversation_id=self.conversation_id,
                 persona_manager=self.persona_handler,
                 titlebar_color=self.titlebar_color,
                 provider_manager=self.provider_manager,
                 cognitive_services=self.cognitive_services,
                 conversation_manager=self.chat_history_database,
-                model_manager=self.model_manager,
-                task_manager=self.task_manager,
-                agent_manager=self.agent_manager
+                model_manager=self.model_manager  
             )
 
             central_widget = QtWidgets.QWidget(self)
@@ -236,7 +206,8 @@ class SCOUT(QtWidgets.QMainWindow):
             tool_ui_layout.addWidget(self.calendar)
             tool_ui_layout.addWidget(self.code_genius_ui)
 
-            self.code_genius_ui.raise_() # ON TOP
+            # Ensure CodeGeniusUI is in front when shown
+            self.code_genius_ui.raise_()
 
             splitter.addWidget(chat_frame)
             splitter.addWidget(tool_ui_frame)
@@ -292,14 +263,6 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.accepted.connect(self.cleanup_on_exit(event))  
 
         message_box.exec()  
-
-    async def process_user_input(self, user_input):
-        task = self.task_manager.create_task(self.user, user_input)
-        result = await self.agent_manager.process_task(task)
-        return result
-
-    async def handle_task_result(self, user_id, result):
-        self.chat_component.show_message("system", result)
 
     def cleanup_on_exit(self, event):
         self.log_out(event)

@@ -1,7 +1,7 @@
 # modules/Background_Services/CognitiveBackgroundServices.py
 
 import os
-import json 
+import json
 import sqlite3
 import re
 from modules.chat_history.DatabaseContextManager import DatabaseContextManager
@@ -14,16 +14,6 @@ class CognitiveBackgroundServices:
         self.user = user
         self.db_file = db_file
         self.provider_manager = provider_manager
-
-    async def process_task(self, task, agent, provider):
-        # Use the background provider to process the task
-        result = await provider.generate_response(
-            task.user_id,
-            agent,
-            task.content,
-            # ... other necessary parameters ...
-        )
-        return result    
 
     async def process_conversation(self, user, conversation_id, chat_log, name=None):
         """

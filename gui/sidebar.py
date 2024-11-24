@@ -104,13 +104,15 @@ class Sidebar(QtWidgets.QFrame):
         self.check_current_model()
 
     def fetch_models_google_wrapper(self):
-        chat_log = self.parent.chat_log  
+        # Access the chat_log through the chat_component attribute
+        chat_log = self.chat_component.chat_log
         asyncio.create_task(fetch_models_google(chat_log))
+
 
     def fetch_models_openai_wrapper(self):
         logger.info("Fetching OpenAI models...")
         try:
-            chat_log = self.parent.chat_log
+            chat_log = self.chat_component.chat_log
             asyncio.create_task(fetch_models_openai(chat_log))
             logger.info("Asynchronous task to fetch OpenAI models started")
         except Exception as e:

@@ -1,34 +1,117 @@
+# =====================================
+# Required Packages
+# =====================================
+
+# GUI
 PySide6
-python-dotenv 
-requests
-cachetools
-pillow
-aiohttp
-google-cloud-texttospeech 
-google-cloud-speech  
+
+# Providers
+openai
+mistralai
+anthropic
+huggingface_hub
+xai_sdk
+google-cloud-texttospeech
+google-cloud-speech
 google.generativeai
-Anthropic
-langdetect 
-keyring 
-sounddevice 
-soundfile 
-pygame 
-textblob
-pytz 
-func_timeout
-pyspellchecker
+
+# PyTorch for model computations
+torch
+
+# For data manipulation
 numpy
+
+# For environment variables
+python-dotenv
+
+# Transformers for model architectures and pipelines
+transformers>=4.31.0
+
+# Hugging Face Hub for model downloads and management
+huggingface-hub>=0.16.4
+
+# Datasets for data handling and preprocessing
+datasets>=2.14.5
+
+# Accelerate for optimized training and inference
+accelerate>=0.21.0
+
+# psutil for system monitoring and resource management
+psutil>=5.9.5
+
+# Tenacity for implementing retries and robust error handling
+tenacity>=8.2.3
+
+# Asynchronous HTTP client/server framework
+aiohttp
+
+# CPU information for DeepSpeed
+py-cpuinfo
+
+# DeepSpeed for efficient large-scale model training and inference
+deepspeed>=0.10.2
+
+# Low-Rank Adaptation (LoRA) for efficient fine-tuning
+git+https://github.com/microsoft/LoRA.git@main#egg=loralib
+peft
+
+# FlashAttention optimization for faster attention mechanisms
+# Ensure compatibility with the installed torch version.
+flash-attn>=1.0.3.post0
+
+# ONNX Runtime for deploying models in ONNX format
+onnxruntime>=1.15.1
+
+# Language detection
+langdetect
+
+# Keyring for secure credential storage
+keyring
+
+# Sound processing
+sounddevice
+soundfile
+pyaudio
+
+# Game development and multimedia
+pygame
+
+# Natural language processing
+textblob
+pyspellchecker
+
+# Time zone calculations
+pytz
+
+# Function timeout handling
+func_timeout
+
+# Web scraping and parsing
 feedparser
 bs4
 selenium
+
+# Plotting and visualization
 matplotlib
+
+# PDF processing
 pypdf2
-psutil
-feedparser
+
+# Character encoding detection
 chardet
+
+# Communication with Twilio API
 twilio
-pyaudio
+
+# Web framework
 flask
-keyring
 
+# HTTP requests
+requests
+aiohttp
 
+# Caching utilities
+cachetools
+
+# Image processing
+pillow

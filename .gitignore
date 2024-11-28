@@ -8,6 +8,7 @@ env/
 .venv/
 venv/
 SCOUT
+.vscode/
 
 # Ignore all .log files
 *.log

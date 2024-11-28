@@ -25,6 +25,7 @@ from modules.Tools.Internet_Tools.Browser.browser import Browser
 from modules.Tools.Planning.calendar import Calendar
 from modules.Providers.model_manager import ModelManager
 from modules.Tools.Code_Execution.code_genius_ui import CodeGeniusUI
+#from modules.config import ConfigManager
 
 logger = setup_logger('app.py')
 
@@ -43,6 +44,8 @@ class SCOUT(QtWidgets.QMainWindow):
         self.session_id = None
         self.conversation_id = None
         self.titlebar_color = "#2d2d2d"  
+
+        # self.config_manager = ConfigManager() for use with new persona and provider manager.
 
         # Initialize CodeGeniusUI
         self.code_genius_ui = CodeGeniusUI()

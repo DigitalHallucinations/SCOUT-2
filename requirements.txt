@@ -2,6 +2,16 @@
 # Required Packages
 # =====================================
 
+# ========================================================================================
+
+# Pre-requisites
+
+# Python 3.11.9
+# NVIDIA CUDA Toolkit version 11.8
+# torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# ========================================================================================
+
 # GUI
 PySide6
 
@@ -14,9 +24,6 @@ xai_sdk
 google-cloud-texttospeech
 google-cloud-speech
 google.generativeai
-
-# PyTorch for model computations
-torch
 
 # For data manipulation
 numpy
@@ -46,10 +53,10 @@ tenacity>=8.2.3
 aiohttp
 
 # CPU information for DeepSpeed
-py-cpuinfo
+# py-cpuinfo
 
 # DeepSpeed for efficient large-scale model training and inference
-deepspeed>=0.10.2
+# deepspeed>=0.10.2
 
 # Low-Rank Adaptation (LoRA) for efficient fine-tuning
 git+https://github.com/microsoft/LoRA.git@main#egg=loralib
@@ -57,7 +64,7 @@ peft
 
 # FlashAttention optimization for faster attention mechanisms
 # Ensure compatibility with the installed torch version.
-flash-attn>=1.0.3.post0
+# flash-attn>=1.0.3.post0
 
 # ONNX Runtime for deploying models in ONNX format
 onnxruntime>=1.15.1

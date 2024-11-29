@@ -1,5 +1,7 @@
 # gui/app.py
 
+# gui/app.py
+
 import os
 import time
 import asyncio
@@ -291,7 +293,7 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.exec()
 
     def handle_quit_response(self, button):
-        if button.text() == '&Yes':
+        if button.text() in ['&Yes', 'Yes']:
             # Show the logout confirmation dialog
             self.show_logout_confirmation()
         else:
@@ -329,12 +331,13 @@ class SCOUT(QtWidgets.QMainWindow):
             }
         """)
 
+        # Connect the signal to the slot
         message_box.buttonClicked.connect(self.handle_logout_response)
 
         message_box.exec()
 
     def handle_logout_response(self, button):
-        if button.text() == '&Yes':
+        if button.text() in ['&Yes', 'Yes']:
             self.logout_requested = True
         else:
             self.logout_requested = False
@@ -347,10 +350,22 @@ class SCOUT(QtWidgets.QMainWindow):
             logger.info("User chose to log out.")
         else:
             logger.info("User chose not to log out.")
-        logger.info("Application closed by the user.")
+        
+        logger.info("Cleaning up remaining resources...")
+
         if self.shutdown_event:
             self.shutdown_event.set()
+
+        logger.info("Application closed by the user.")
         self.close()
+
+    async def wait_for_task_completion(self, tasks):
+        """Wait for all tasks to complete."""
+        for task in tasks:
+            try:
+                await task
+            except asyncio.CancelledError:
+                logger.info(f"Task {task} was cancelled.")
 
     def closeEvent(self, event):
         if self.is_closing:
@@ -363,6 +378,9 @@ class SCOUT(QtWidgets.QMainWindow):
             self.on_closing(event)
 
     async def async_main(self):
-        while True:
-            await asyncio.sleep(0.01)
-            QtWidgets.QApplication.processEvents()
+        try:
+            while True:
+                await asyncio.sleep(0.01)
+                QtWidgets.QApplication.processEvents()
+        except asyncio.CancelledError:
+            logger.info("async_main task cancelled gracefully.")

@@ -1,5 +1,9 @@
 # modules/config.py
 
+# Added pre-emptively for the new persona and provider modules. 
+# This file is not used in the current version. 
+# I have commented out the imports in the app.py file to prevent errors. ###
+
 import os
 from typing import Dict, Any
 from modules.logging.logger import setup_logger

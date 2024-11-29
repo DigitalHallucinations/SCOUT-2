@@ -1,5 +1,7 @@
 # main.py
 
+# main.py
+
 import sys
 import traceback
 import asyncio
@@ -41,9 +43,12 @@ async def background_tasks():
     logger.debug("Entering background_tasks context manager")
 
     async def async_main():
-        while not should_exit:
-            await asyncio.sleep(0.01)
-            app.processEvents()
+        try:
+            while not should_exit:
+                await asyncio.sleep(0.01)
+                app.processEvents()
+        except asyncio.CancelledError:
+            logger.debug("background_tasks async_main task cancelled gracefully.")
 
     task = asyncio.create_task(async_main())
     with task_lock:
@@ -58,7 +63,10 @@ async def background_tasks():
         with task_lock:
             global_tasks.remove(task)
             logger.debug(f"Removed task {task} from global_tasks")
-        await task
+        try:
+            await task
+        except asyncio.CancelledError:
+            logger.debug(f"Task {task} cancelled")
         logger.debug("Exiting background_tasks context manager")
 
 async def run_app():
@@ -66,7 +74,21 @@ async def run_app():
     dynamically_loaded_modules = []
     logger.debug("Starting main application loop")
     async with background_tasks():
-        await SCOUT_app.async_main()
+        # Create a task for SCOUT_app.async_main()
+        sc_task = asyncio.create_task(SCOUT_app.async_main())
+        with task_lock:
+            global_tasks.add(sc_task)
+            logger.debug(f"Added task {sc_task} to global_tasks")
+        try:
+            await sc_task
+        except asyncio.CancelledError:
+            logger.info("SCOUT_app.async_main() task cancelled")
+        finally:
+            with task_lock:
+                global_tasks.remove(sc_task)
+                logger.debug(f"Removed task {sc_task} from global_tasks")
+
+        # Load providers after async_main is cancelled
         current_llm_provider = SCOUT_app.provider_manager.get_current_llm_provider()
         current_background_provider = SCOUT_app.provider_manager.get_current_background_provider()
 
@@ -101,9 +123,10 @@ async def run_app():
 
         for module in dynamically_loaded_modules:
             try:
-                importlib.unload(module)
+                importlib.reload(module)  # Changed from unload to reload for safety
+                logger.debug(f"Reloaded module {module.__name__}")
             except Exception as e:
-                logger.error(f"Error unloading module {module.__name__}: {e}")  
+                logger.error(f"Error reloading module {module.__name__}: {e}")  
 
         await asyncio.gather(*global_tasks, return_exceptions=True)
         logger.debug("All tasks completed. Exiting application loop")  
@@ -112,11 +135,23 @@ async def shutdown():
     """Handles all cleanup and shutdown tasks."""
     global should_exit
     should_exit = True
+    logger.info("Initiating shutdown...")
+
     # Signal the GUI to close
     if SCOUT_app:
         SCOUT_app.close()  # Close the GUI window
-    # Cancel and await asyncio tasks
-    await asyncio.gather(*global_tasks, return_exceptions=True)
+
+    # Quit the QApplication event loop
+    app.quit()
+
+    # Cancel all tasks except the current one
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    logger.info(f"Cancelling {len(tasks)} pending tasks.")
+    for task in tasks:
+        task.cancel()
+    await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Close databases
     if SCOUT_app:
         SCOUT_app.user_database.close_connection()
         SCOUT_app.chat_history_database.close_connection()
@@ -132,8 +167,12 @@ async def main():
 
     await shutdown_event.wait()
 
-    loop = asyncio.get_running_loop()
-    await loop.run_until_complete(shutdown())
+    await shutdown()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        logger.error(f"RuntimeError during asyncio.run: {e}")
+    except Exception as e:
+        logger.error(f"Unhandled exception: {e}")

@@ -25,7 +25,7 @@ from modules.Tools.Internet_Tools.Browser.browser import Browser
 from modules.Tools.Planning.calendar import Calendar
 from modules.Providers.model_manager import ModelManager
 from modules.Tools.Code_Execution.code_genius_ui import CodeGeniusUI
-#from modules.config import ConfigManager
+# from modules.config import ConfigManager
 
 logger = setup_logger('app.py')
 
@@ -34,7 +34,7 @@ class SCOUT(QtWidgets.QMainWindow):
     def __init__(self, shutdown_event=None):
         super().__init__()
         self.setStyleSheet("background-color: #000000;")
-        self.setWindowFlags(qtc.Qt.FramelessWindowHint) 
+        self.setWindowFlags(qtc.Qt.FramelessWindowHint)
         width, height = 1200, 800
         self.resize(width, height)
         icon_path = os.path.join("assets", "SCOUT", "SCOUT_icon.ico")
@@ -43,9 +43,9 @@ class SCOUT(QtWidgets.QMainWindow):
         self.user = None
         self.session_id = None
         self.conversation_id = None
-        self.titlebar_color = "#2d2d2d"  
-
-        # self.config_manager = ConfigManager() for use with new persona and provider manager.
+        self.titlebar_color = "#2d2d2d"
+        self.is_closing = False  # Flag to control the close process
+        self.logout_requested = False  # Flag to indicate if logout is requested
 
         # Initialize CodeGeniusUI
         self.code_genius_ui = CodeGeniusUI()
@@ -60,14 +60,15 @@ class SCOUT(QtWidgets.QMainWindow):
         self.calendar.hide()
 
         logger.info("Creating LoginComponent")
-        self.login_component = LoginComponent(parent=self, 
-                                            callback=self.session_manager, 
-                                            database=self.user_database, 
-                                            signup_callback=self.show_signup_component)
+        self.login_component = LoginComponent(
+            parent=self,
+            callback=self.session_manager,
+            database=self.user_database,
+            signup_callback=self.show_signup_component
+        )
         self.login_component.setModal(True)
         self.login_component.show()
-        
-        self.closeEvent = self.on_closing
+
         self.shutdown_event = shutdown_event
 
     def create_custom_title_bar(self):
@@ -81,8 +82,8 @@ class SCOUT(QtWidgets.QMainWindow):
 
         title_label = QtWidgets.QLabel("SCOUT", title_bar)
         title_label.setAlignment(qtc.Qt.AlignCenter)
-        title_label.setStyleSheet("color: white; font-size: 18pt; font-weight: bold; font-family: Consolas;") 
-        
+        title_label.setStyleSheet("color: white; font-size: 18pt; font-weight: bold; font-family: Consolas;")
+
         title_layout.addStretch(1)
         title_layout.addWidget(title_label)
         title_layout.addStretch(1)
@@ -136,14 +137,14 @@ class SCOUT(QtWidgets.QMainWindow):
         logger.info(f"Session manager called with user: {user}")
         self.user = user
         if self.user:
-            self.create_custom_title_bar()  
+            self.create_custom_title_bar()
             self.session_id = f"{self.user}_{int(time.time())}"
             self.set_current_user_username(self.user)
 
             self.persona_handler = PersonaManager(self, self.user)
             current_persona = self.persona_handler.current_persona
 
-            self.model_manager = ModelManager() 
+            self.model_manager = ModelManager()
 
             self.provider_manager = ProviderManager(self, self.model_manager)
 
@@ -154,7 +155,7 @@ class SCOUT(QtWidgets.QMainWindow):
             logger.info(f"User is set: {self.user}, Session ID: {self.session_id}, Conversation ID: {self.conversation_id}, Current Persona: {current_persona['name'] if current_persona else 'None'}")
 
             self.database = self.chat_history_database
-            
+
             if hasattr(self, 'login_component'):
                 self.login_component.close()
 
@@ -164,15 +165,17 @@ class SCOUT(QtWidgets.QMainWindow):
 
             logger.info("Creating ChatComponent")
             self.chat_component = ChatComponent(
-                parent=self, persona=current_persona,
-                user=self.user, session_id=self.session_id, 
+                parent=self,
+                persona=current_persona,
+                user=self.user,
+                session_id=self.session_id,
                 conversation_id=self.conversation_id,
                 persona_manager=self.persona_handler,
                 titlebar_color=self.titlebar_color,
                 provider_manager=self.provider_manager,
                 cognitive_services=self.cognitive_services,
                 conversation_manager=self.chat_history_database,
-                model_manager=self.model_manager  
+                model_manager=self.model_manager
             )
 
             central_widget = QtWidgets.QWidget(self)
@@ -219,7 +222,7 @@ class SCOUT(QtWidgets.QMainWindow):
             central_layout.addWidget(splitter)
             self.setCentralWidget(central_widget)
 
-            self.show()    
+            self.show()
         else:
             QtWidgets.QMessageBox.critical(self, "Login Error", "Invalid username or password.")
             self.session_id = None
@@ -228,30 +231,27 @@ class SCOUT(QtWidgets.QMainWindow):
     def show_signup_component(self):
         """Show the sign-up component."""
         logger.info("Showing SignUpComponent")
-        self.signup_component = SignUpComponent(parent=self, 
-                                                callback=self.session_manager, 
-                                                database=self.user_database)
+        self.signup_component = SignUpComponent(
+            parent=self,
+            callback=self.session_manager,
+            database=self.user_database
+        )
         self.signup_component.setModal(True)
         self.signup_component.show()
 
-    def log_out(self, event):
+    def log_out(self):
         logger.info("Logging out user")
         current_user = self.user
-        self.user = None 
+        self.user = None
         self.session_id = None
         self.conversation_id = None
-        
+
         try:
             keyring.delete_password("SCOUT", current_user)
         except PasswordDeleteError as e:
-            logger.debug(f"Caught PasswordDeleteError while deleting password (password still cleared): {str(e)}")        
+            logger.debug(f"Caught PasswordDeleteError while deleting password (password still cleared): {str(e)}")
 
-    def safe_update(self, command, *args, **kwargs):
-        """Safely update the application."""
-        if not self.quit_loop:  
-            QtWidgets.QApplication.postEvent(self, qtc.QEvent(qtc.QEvent.User), command)
-    
-    def on_closing(self, event):
+    def on_closing(self, event=None):
         logger.info("Application closing")
 
         message_box = QtWidgets.QMessageBox(self)
@@ -261,17 +261,106 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.setDefaultButton(QtWidgets.QMessageBox.No)
         message_box.setModal(True)
 
+        # Apply the corrected styles
         self.chat_component.appearance_settings_instance.apply_message_box_style(message_box)
 
-        message_box.accepted.connect(self.cleanup_on_exit(event))  
+        # Ensure text is visible
+        message_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2d2d2d;
+                color: white;
+                font-size: 14px;
+            }
+            QLabel {
+                color: white;
+            }
+            QPushButton {
+                background-color: #4d4d4d;
+                color: white;
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+            QPushButton:hover {
+                background-color: #6d6d6d;
+            }
+        """)
 
-        message_box.exec()  
+        # Connect the signal to the slot
+        message_box.buttonClicked.connect(self.handle_quit_response)
 
-    def cleanup_on_exit(self, event):
-        self.log_out(event)
+        message_box.exec()
+
+    def handle_quit_response(self, button):
+        if button.text() == '&Yes':
+            # Show the logout confirmation dialog
+            self.show_logout_confirmation()
+        else:
+            pass  # Do nothing
+
+    def show_logout_confirmation(self):
+        message_box = QtWidgets.QMessageBox(self)
+        message_box.setWindowTitle('Log Out')
+        message_box.setText('Do you want to log out?')
+        message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        message_box.setDefaultButton(QtWidgets.QMessageBox.No)
+        message_box.setModal(True)
+
+        # Apply the corrected styles
+        self.chat_component.appearance_settings_instance.apply_message_box_style(message_box)
+
+        # Ensure text is visible
+        message_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2d2d2d;
+                color: white;
+                font-size: 14px;
+            }
+            QLabel {
+                color: white;
+            }
+            QPushButton {
+                background-color: #4d4d4d;
+                color: white;
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+            QPushButton:hover {
+                background-color: #6d6d6d;
+            }
+        """)
+
+        message_box.buttonClicked.connect(self.handle_logout_response)
+
+        message_box.exec()
+
+    def handle_logout_response(self, button):
+        if button.text() == '&Yes':
+            self.logout_requested = True
+        else:
+            self.logout_requested = False
+        self.cleanup_on_exit()
+
+    def cleanup_on_exit(self):
+        self.is_closing = True  # Set the flag to indicate we're closing
+        if self.logout_requested:
+            self.log_out()
+            logger.info("User chose to log out.")
+        else:
+            logger.info("User chose not to log out.")
         logger.info("Application closed by the user.")
         if self.shutdown_event:
             self.shutdown_event.set()
+        self.close()
+
+    def closeEvent(self, event):
+        if self.is_closing:
+            # If we're already in the process of closing, accept the event
+            event.accept()
+            super().closeEvent(event)
+        else:
+            # If not, prompt the user
+            event.ignore()
+            self.on_closing(event)
 
     async def async_main(self):
         while True:

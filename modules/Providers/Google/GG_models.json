@@ -1,6 +1,8 @@
 {
     "models": [
-      "gemini-1.5-pro-latest"
+      "gemini-1.5-pro-latest",
+      "models/gemini-exp-1121",
+      "models/gemini-exp-1114"
     ]
   }
   

@@ -29,7 +29,10 @@ class ModelManager:
         "gpt-4o-audio-preview",
         "gpt-4o-audio-preview-2024-10-01",
         "gpt-4-0125-preview",
-        "gpt-4o-2024-05-13"
+        "gpt-4o-2024-05-13",
+        "models/gemini-exp-1121",
+        "models/gemini-exp-1114",
+        "gemini-1.5-pro-latest"
 
         ]
 
@@ -38,7 +41,7 @@ class ModelManager:
             self.MODEL = model_name
             if self.MODEL in ["gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-16k"]:
                 self.MAX_TOKENS = 4000
-            elif self.MODEL in ["gpt-4-0613", "gpt-4", "gpt-4o", "gpt-4o-2024-05-13", "gemini-1.5-pro-latest"]:  # Updated condition
+            elif self.MODEL in ["gpt-4-0613", "gpt-4", "gpt-4o", "gpt-4o-2024-05-13", "gemini-1.5-pro-latest"]:  
                 self.MAX_TOKENS = 4000
             else:
                 self.MAX_TOKENS = 2000

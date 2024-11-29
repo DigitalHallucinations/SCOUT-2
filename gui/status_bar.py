@@ -1,6 +1,6 @@
 # gui/status_bar.py
 
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets
 
 class StatusBar(QtWidgets.QFrame):
     def __init__(self, parent=None, appearance_settings_instance=None, provider_manager=None, user=None):

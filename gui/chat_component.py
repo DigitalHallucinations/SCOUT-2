@@ -1,10 +1,8 @@
 # gui/chat_component.py
 
-
-import asyncio 
+import asyncio
 import time
 from PySide6 import QtWidgets, QtGui, QtCore
-from PySide6.QtCore import QRunnable
 from gui import chist_functions as cf
 from gui.Settings.appearance_settings import AppearanceSettings
 from gui.sidebar import Sidebar
@@ -14,18 +12,6 @@ from modules.logging.logger import setup_logger
 from gui.speech_bar import SpeechBar
 
 logger = setup_logger('chat_component.py') 
-
-class SendMessageTask(QRunnable):
-    def __init__(self, chat_component, user, message, session_id, conversation_id):
-        super().__init__()
-        self.chat_component = chat_component
-        self.user = user
-        self.message = message
-        self.session_id = session_id
-        self.conversation_id = conversation_id
-
-    def run(self):
-        asyncio.run(send_message_module.send_message(self.chat_component, self.user, self.message, self.session_id, self.conversation_id))
 
 class ChatComponent(QtWidgets.QWidget):
     def __init__(self, parent=None, persona=None, user=None, session_id=None, conversation_id=None, logout_callback=None, schedule_async_task=None, persona_manager=None, titlebar_color=None, provider_manager=None, cognitive_services=None, conversation_manager=None, model_manager=None):
@@ -68,11 +54,23 @@ class ChatComponent(QtWidgets.QWidget):
         if self.conversation_id is None:
             self.conversation_id = self.retrieve_conversation_id()
 
-        logger.info(f"About to call send_message with user: %s", self.user)
+        logger.info(f"About to call send_message with user: {self.user}")
 
         message = self.message_entry.toPlainText().strip()
-        asyncio.ensure_future(send_message_module.send_message(self, self.user, message, self.session_id, self.conversation_id, self.conversation_manager, self.model_manager, self.provider_manager))
-        self.message_entry.clear()
+        if message:
+            asyncio.ensure_future(send_message_module.send_message(
+                self, 
+                self.user, 
+                message, 
+                self.session_id, 
+                self.conversation_id, 
+                self.conversation_manager, 
+                self.model_manager, 
+                self.provider_manager
+            ))
+            self.message_entry.clear()
+        else:
+            logger.warning("Attempted to send an empty message.")
 
     def show_message(self, role, message):
         QtCore.QMetaObject.invokeMethod(self, "_show_message", QtCore.Qt.QueuedConnection, QtCore.Q_ARG(str, role), QtCore.Q_ARG(str, message))
@@ -375,7 +373,8 @@ class ChatComponent(QtWidgets.QWidget):
                 padding: 10px;
             }
         """)
-        self.show_message("system", self.current_persona["message"])
+        if self.current_persona and "message" in self.current_persona:
+            self.show_message("system", self.current_persona["message"])
         layout.addWidget(self.chat_log)
 
         main_layout.addWidget(chat_log_container)
@@ -451,5 +450,3 @@ class ChatComponent(QtWidgets.QWidget):
         self.appearance_settings_instance = AppearanceSettings(parent=self, user=self.user)
         self.appearance_settings_instance.hide()  
         self.appearance_settings_instance.show()  
- 
-    

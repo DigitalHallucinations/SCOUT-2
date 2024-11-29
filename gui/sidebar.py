@@ -108,7 +108,6 @@ class Sidebar(QtWidgets.QFrame):
         chat_log = self.chat_component.chat_log
         asyncio.create_task(fetch_models_google(chat_log))
 
-
     def fetch_models_openai_wrapper(self):
         logger.info("Fetching OpenAI models...")
         try:
@@ -177,7 +176,7 @@ class Sidebar(QtWidgets.QFrame):
         
         self.settings_button.setFont(font)
         self.settings_button.setStyleSheet(f"QPushButton {{ background-color: transparent; border: none; color: {self.font_color}; font-size: {self.font_size}px; }}")
-        
+
     def create_sidebar(self):
         self.setStyleSheet(f"background-color: {self.sidebar_frame_bg}; border: none;")
         self.setFixedWidth(40)

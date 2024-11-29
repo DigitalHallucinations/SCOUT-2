@@ -1,7 +1,5 @@
 # gui/app.py
 
-# gui/app.py
-
 import os
 import time
 import asyncio
@@ -359,14 +357,6 @@ class SCOUT(QtWidgets.QMainWindow):
         logger.info("Application closed by the user.")
         self.close()
 
-    async def wait_for_task_completion(self, tasks):
-        """Wait for all tasks to complete."""
-        for task in tasks:
-            try:
-                await task
-            except asyncio.CancelledError:
-                logger.info(f"Task {task} was cancelled.")
-
     def closeEvent(self, event):
         if self.is_closing:
             # If we're already in the process of closing, accept the event
@@ -384,3 +374,5 @@ class SCOUT(QtWidgets.QMainWindow):
                 QtWidgets.QApplication.processEvents()
         except asyncio.CancelledError:
             logger.info("async_main task cancelled gracefully.")
+
+

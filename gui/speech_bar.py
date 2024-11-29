@@ -1,6 +1,5 @@
-# speech_bar.py
+# gui/speech_bar.py
 
-# speech_bar.py
 from datetime import datetime
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtWidgets import QMessageBox

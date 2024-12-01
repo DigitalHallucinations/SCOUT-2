@@ -44,8 +44,9 @@ class SCOUT(QtWidgets.QMainWindow):
         self.session_id = None
         self.conversation_id = None
         self.titlebar_color = "#2d2d2d"
-        self.is_closing = False  # Flag to control the close process
-        self.logout_requested = False  # Flag to indicate if logout is requested
+        self.is_closing = False 
+        self.logout_requested = False 
+        self.is_maximized = False 
 
         # Initialize CodeGeniusUI
         self.code_genius_ui = CodeGeniusUI()
@@ -88,6 +89,17 @@ class SCOUT(QtWidgets.QMainWindow):
         title_layout.addWidget(title_label)
         title_layout.addStretch(1)
 
+        # Maximize/Minimize Button
+        self.maximize_button = QtWidgets.QPushButton(title_bar)
+        self.maximize_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/maximize.png"))
+        self.maximize_button.setIconSize(qtc.QSize(24, 24))
+        self.maximize_button.setStyleSheet("QPushButton { background-color: transparent; border: none; }")
+        self.maximize_button.clicked.connect(self.toggle_maximize_restore)
+        title_layout.addWidget(self.maximize_button)
+
+        title_layout.addSpacing(5)
+
+        # Power Button
         self.power_button = QtWidgets.QPushButton(title_bar)
         self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_wt.png"))
         self.power_button.setIconSize(qtc.QSize(24, 24))
@@ -121,6 +133,17 @@ class SCOUT(QtWidgets.QMainWindow):
         title_bar.mousePressEvent = mousePressEvent
         title_bar.mouseMoveEvent = mouseMoveEvent
         title_bar.mouseReleaseEvent = mouseReleaseEvent
+
+    def toggle_maximize_restore(self):
+        if not self.is_maximized:
+            # Maximize the window
+            self.normal_geometry = self.geometry()
+            self.showFullScreen()
+            self.is_maximized = True
+        else:
+            self.showNormal()
+            self.setGeometry(self.normal_geometry)
+            self.is_maximized = False
 
     def on_power_button_hover(self, event):
         self.power_button.setIcon(QtGui.QIcon("assets/SCOUT/Icons/power_button_rd.png"))
@@ -212,7 +235,7 @@ class SCOUT(QtWidgets.QMainWindow):
             tool_ui_layout.addWidget(self.calendar)
             tool_ui_layout.addWidget(self.code_genius_ui)
 
-            # Ensure CodeGeniusUI is in front when shown
+            # Default main page in the tool UI
             self.code_genius_ui.raise_()
 
             splitter.addWidget(chat_frame)
@@ -261,10 +284,8 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.setDefaultButton(QtWidgets.QMessageBox.No)
         message_box.setModal(True)
 
-        # Apply the corrected styles
         self.chat_component.appearance_settings_instance.apply_message_box_style(message_box)
 
-        # Ensure text is visible
         message_box.setStyleSheet("""
             QMessageBox {
                 background-color: #2d2d2d;
@@ -284,18 +305,15 @@ class SCOUT(QtWidgets.QMainWindow):
                 background-color: #6d6d6d;
             }
         """)
-
-        # Connect the signal to the slot
         message_box.buttonClicked.connect(self.handle_quit_response)
 
         message_box.exec()
 
     def handle_quit_response(self, button):
         if button.text() in ['&Yes', 'Yes']:
-            # Show the logout confirmation dialog
             self.show_logout_confirmation()
         else:
-            pass  # Do nothing
+            pass
 
     def show_logout_confirmation(self):
         message_box = QtWidgets.QMessageBox(self)
@@ -305,7 +323,6 @@ class SCOUT(QtWidgets.QMainWindow):
         message_box.setDefaultButton(QtWidgets.QMessageBox.No)
         message_box.setModal(True)
 
-        # Apply the corrected styles
         self.chat_component.appearance_settings_instance.apply_message_box_style(message_box)
 
         # Ensure text is visible
@@ -328,8 +345,6 @@ class SCOUT(QtWidgets.QMainWindow):
                 background-color: #6d6d6d;
             }
         """)
-
-        # Connect the signal to the slot
         message_box.buttonClicked.connect(self.handle_logout_response)
 
         message_box.exec()
@@ -342,7 +357,7 @@ class SCOUT(QtWidgets.QMainWindow):
         self.cleanup_on_exit()
 
     def cleanup_on_exit(self):
-        self.is_closing = True  # Set the flag to indicate we're closing
+        self.is_closing = True  
         if self.logout_requested:
             self.log_out()
             logger.info("User chose to log out.")
@@ -359,11 +374,9 @@ class SCOUT(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         if self.is_closing:
-            # If we're already in the process of closing, accept the event
             event.accept()
             super().closeEvent(event)
         else:
-            # If not, prompt the user
             event.ignore()
             self.on_closing(event)
 
@@ -374,5 +387,3 @@ class SCOUT(QtWidgets.QMainWindow):
                 QtWidgets.QApplication.processEvents()
         except asyncio.CancelledError:
             logger.info("async_main task cancelled gracefully.")
-
-
